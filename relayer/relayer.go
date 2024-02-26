@@ -15,6 +15,7 @@ import (
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
 	beaconNodeEndpoint string
+	lightNodeEndpoint string
 	taraxaContract     common.Address
 	taraxaClient       *ethclient.Client
 	beaconLightClient  *BeaconLightClient.BeaconLightClient

@@ -34,6 +34,18 @@ func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
 	return beaconBlockHeader, nil
 }
 
+func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, error) {
+	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/finality_update", r.lightNodeEndpoint)
+	var finalityUpdate *LightClientFinalityUpdate
+	finalityUpdate, err := FetchAndParseData[LightClientFinalityUpdate](url)
+	if err != nil {
+		log.Fatalf("Error fetching and parsing finality header: %v", err)
+		return nil, err
+	}
+
+	return finalityUpdate, nil
+}
+
 // FetchAndParseData fetches data from a given URL and parses the JSON response into the provided type.
 // T is a placeholder type that will be inferred from the caller, allowing for any struct type to be used.
 func FetchAndParseData[T any](url string) (*T, error) {

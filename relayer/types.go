@@ -17,3 +17,24 @@ type BeaconBlock struct {
 		Signature string `json:"signature"`
 	} `json:"data"`
 }
+
+type BeaconBlockHeader struct {
+	Slot          uint64
+	ProposerIndex uint64
+	ParentRoot    [32]byte
+	Root          [32]byte
+	BodyRoot      [32]byte
+}
+
+type SyncAggregate struct {
+	SyncCommiteeBits      [64]byte
+	SyncCommiteeSignature [96]byte
+}
+
+type LightClientFinalityUpdate struct {
+	AttestedHeader  *BeaconBlockHeader
+	FinalizedHeader *BeaconBlockHeader
+	FinalityBranch  [][32]byte
+	SyncAggregate   *SyncAggregate
+	SignatureSlot   uint64
+}
