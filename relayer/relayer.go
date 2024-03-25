@@ -15,7 +15,7 @@ import (
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
 	beaconNodeEndpoint string
-	lightNodeEndpoint string
+	lightNodeEndpoint  string
 	taraxaContract     common.Address
 	taraxaClient       *ethclient.Client
 	beaconLightClient  *BeaconLightClient.BeaconLightClient
@@ -54,6 +54,7 @@ func NewRelayer(beaconNodeEndpoint, taraxaNodeURL string, taraxaContractAddr com
 		taraxaClient:       taraxaClient,
 		beaconLightClient:  beaconLightClient,
 		auth:               auth,
+		lightNodeEndpoint:  "https://www.lightclientdata.org",
 	}, nil
 }
 

@@ -16,7 +16,7 @@ import (
 const (
 	ethereumAPIEndpoint   = "https://restless-spring-uranium.quiknode.pro/31384766eed9e4977424797ae8b020ee6dd6b9eb"
 	taraxaContractAddress = "0x0DC0d841F962759DA25547c686fa440cF6C28C61"
-	taraxaNodeURL         = "http://127.0.0.1:7777"
+	taraxaNodeURL         = "https://rpc.devnet.taraxa.io"
 	key                   = "fc6c309495809b69ce77b3250cacfef94d28698d8fb425501a59836fe30fab1d"
 )
 

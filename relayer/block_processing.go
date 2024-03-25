@@ -2,41 +2,26 @@ package relayer
 
 import (
 	"log"
-	"math/big"
 
 	"relayer/BeaconLightClient"
-
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
 func (r *Relayer) GetBeaconBlockData(slot int64) (*BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate, error) {
-
 	finalityUpdate, err := r.GetLightClientFinalityUpdate()
 	if err != nil {
 		return nil, err
 	}
-
-	finalizedBlock, err := r.GetBlock("finalized")
-	if err != nil {
-		return nil, err
-	}
-
-	attestedBlock, err := r.GetBlock("head")
-	if err != nil {
-		return nil, err
-	}
-
 	// Fetch data from a Beacon Node API (you need to implement this based on your data source)
 	// This is a placeholder for the actual implementation
 	return &BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
-		AttestedHeader: convertToBeaconChainLightClientHeader(*finalityUpdate.AttestedHeader, *attestedBlock),
+		AttestedHeader: convertToBeaconChainLightClientHeader(finalityUpdate.Data.AttestedHeader),
 		// SignatureSyncCommittee: BeaconChainSyncCommittee,
-		FinalizedHeader: convertToBeaconChainLightClientHeader(*finalityUpdate.FinalizedHeader, *finalizedBlock),
-		FinalityBranch:  finalityUpdate.FinalityBranch,
-		// SyncAggregate:          BeaconLightClientUpdateSyncAggregate,
+		FinalizedHeader: convertToBeaconChainLightClientHeader(finalityUpdate.Data.FinalizedHeader),
+		FinalityBranch:  finalityUpdate.Data.FinalityBranch,
+		SyncAggregate:   ConvertSyncAggregateToBeaconLightClientUpdate(finalityUpdate.Data.SyncAggregate),
 		// ForkVersion:            [4]byte,
-		SignatureSlot: finalityUpdate.SignatureSlot,
+		SignatureSlot: finalityUpdate.Data.SignatureSlot,
 	}, nil
 }
 
@@ -61,39 +46,50 @@ func (r *Relayer) updateNewHeader(slot int64) {
 }
 
 // Conversion function
-func convertToBeaconChainLightClientHeader(blockHeader BeaconBlockHeader, block BeaconBlock) BeaconLightClient.BeaconChainLightClientHeader {
+func convertToBeaconChainLightClientHeader(blockHeader BeaconBlockHeader) BeaconLightClient.BeaconChainLightClientHeader {
 	beaconBlockHeader := BeaconLightClient.BeaconChainBeaconBlockHeader{
-		Slot:          blockHeader.Slot,
-		ProposerIndex: blockHeader.ProposerIndex,
-		ParentRoot:    blockHeader.ParentRoot,
-		StateRoot:     blockHeader.Root,
-		BodyRoot:      blockHeader.BodyRoot,
+		Slot:          blockHeader.Beacon.Slot,
+		ProposerIndex: blockHeader.Beacon.ProposerIndex,
+		ParentRoot:    blockHeader.Beacon.ParentRoot,
+		StateRoot:     blockHeader.Beacon.StateRoot,
+		BodyRoot:      blockHeader.Beacon.BodyRoot,
 	}
 
 	// Assuming these values for demonstration; you'd extract or map these from your actual data
-	exeData := block.Data.Message.Body.ExecutionPayload
 	executionPayloadHeader := BeaconLightClient.BeaconChainExecutionPayloadHeader{
-		ParentHash:    exeData.ParentHash,
-		FeeRecipient:  common.BytesToAddress(exeData.FeeRecipient[:]),
-		StateRoot:     exeData.StateRoot,
-		ReceiptsRoot:  exeData.ReceiptsRoot,
-		PrevRandao:    exeData.PrevRandao,
-		BlockNumber:   exeData.BlockNumber,
-		GasLimit:      exeData.GasLimit,
-		GasUsed:       exeData.GasUsed,
-		Timestamp:     exeData.Timestamp,
-		BaseFeePerGas: new(big.Int).SetBytes(exeData.BaseFeePerGas[:]),
-		BlockHash:     exeData.BlockHash,
-		// TransactionsRoot:  TODO
-		// WithdrawalsRoot : TODO
+		ParentHash:       blockHeader.Execution.ParentHash,
+		FeeRecipient:     blockHeader.Execution.FeeRecipient,
+		StateRoot:        blockHeader.Execution.StateRoot,
+		ReceiptsRoot:     blockHeader.Execution.ReceiptsRoot,
+		PrevRandao:       blockHeader.Execution.PrevRandao,
+		BlockNumber:      blockHeader.Execution.BlockNumber,
+		GasLimit:         blockHeader.Execution.GasLimit,
+		GasUsed:          blockHeader.Execution.GasUsed,
+		Timestamp:        blockHeader.Execution.Timestamp,
+		BaseFeePerGas:    blockHeader.Execution.BaseFeePerGas,
+		BlockHash:        blockHeader.Execution.BlockHash,
+		TransactionsRoot: blockHeader.Execution.TransactionsRoot,
+		WithdrawalsRoot:  blockHeader.Execution.WithdrawalsRoot,
+		ExtraData:        blockHeader.Execution.ExtraData,
 	}
 
-	copy(executionPayloadHeader.ExtraData[:], exeData.ExtraData)
-	copy(executionPayloadHeader.LogsBloom[:], exeData.LogsBloom[:32]) //??? correct `ssz-size:"256"`
+	copy(executionPayloadHeader.LogsBloom[:], blockHeader.Execution.LogsBloom[:32]) //??? correct `ssz-size:"256"`
 
 	return BeaconLightClient.BeaconChainLightClientHeader{
-		Beacon:    beaconBlockHeader,
-		Execution: executionPayloadHeader,
-		// ExecutionBranch [][32]byte
+		Beacon:          beaconBlockHeader,
+		Execution:       executionPayloadHeader,
+		ExecutionBranch: blockHeader.ExecutionBranch,
+	}
+}
+
+func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate SyncAggregate) BeaconLightClient.BeaconLightClientUpdateSyncAggregate {
+	var newSyncCommitteeBits [2][32]byte
+	for i := 0; i < 64; i++ {
+		newSyncCommitteeBits[i/32][i%32] = syncAggregate.SyncCommitteeBits[i]
+	}
+
+	return BeaconLightClient.BeaconLightClientUpdateSyncAggregate{
+		SyncCommitteeBits:      newSyncCommitteeBits,
+		SyncCommitteeSignature: syncAggregate.SyncCommitteeSignature[:],
 	}
 }
