@@ -34,6 +34,18 @@ func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
 	return beaconBlockHeader, nil
 }
 
+func (r *Relayer) GetForkVersion(state string) (*ForkVersion, error) {
+	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.beaconNodeEndpoint, state)
+	var forkVersion *ForkVersion
+	forkVersion, err := FetchAndParseData[ForkVersion](url)
+	if err != nil {
+		log.Fatalf("Error fetching and parsing fork version: %v", err)
+		return nil, err
+	}
+
+	return forkVersion, nil
+}
+
 func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, error) {
 	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/finality_update", r.lightNodeEndpoint)
 	var finalityUpdate *LightClientFinalityUpdate
@@ -44,6 +56,18 @@ func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, er
 	}
 
 	return finalityUpdate, nil
+}
+
+func (r *Relayer) GetSyncCommitteeUpdate(startPeriod, count int64) (*SyncCommitteeUpdate, error) {
+	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/updates?start_period=%dcount=%d", r.lightNodeEndpoint, startPeriod, count)
+	var syncUpdate *SyncCommitteeUpdate
+	syncUpdate, err := FetchAndParseData[SyncCommitteeUpdate](url)
+	if err != nil {
+		log.Fatalf("Error fetching and parsing finality header: %v", err)
+		return nil, err
+	}
+
+	return syncUpdate, nil
 }
 
 // FetchAndParseData fetches data from a given URL and parses the JSON response into the provided type.

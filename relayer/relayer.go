@@ -12,6 +12,14 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+type RelayerConfig struct {
+	BeaconNodeEndpoint string
+	TaraxaNodeURL      string
+	TaraxaContractAddr common.Address
+	Key                *ecdsa.PrivateKey
+	LightNodeEndpoint  string
+}
+
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
 	beaconNodeEndpoint string
@@ -21,11 +29,12 @@ type Relayer struct {
 	beaconLightClient  *BeaconLightClient.BeaconLightClient
 	auth               *bind.TransactOpts
 	onFinalizedEpoch   chan int64
+	currentPeriod      int64
 }
 
 // NewRelayer creates a new Relayer instance
-func NewRelayer(beaconNodeEndpoint, taraxaNodeURL string, taraxaContractAddr common.Address, key *ecdsa.PrivateKey) (*Relayer, error) {
-	taraxaClient, err := ethclient.Dial(taraxaNodeURL)
+func NewRelayer(cfg *RelayerConfig) (*Relayer, error) {
+	taraxaClient, err := ethclient.Dial(cfg.TaraxaNodeURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Taraxa node: %v", err)
 	}
@@ -35,26 +44,26 @@ func NewRelayer(beaconNodeEndpoint, taraxaNodeURL string, taraxaContractAddr com
 		return nil, fmt.Errorf("failed to retrieve chain ID: %v", err)
 	}
 
-	log.Printf("Connected to chain id: %d, on %s", chainID, taraxaNodeURL)
+	log.Printf("Connected to chain id: %d, on %s", chainID, cfg.TaraxaNodeURL)
 
 	// Prepare transact options
-	auth, err := bind.NewKeyedTransactorWithChainID(key, chainID)
+	auth, err := bind.NewKeyedTransactorWithChainID(cfg.Key, chainID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create authorized transactor: %v", err)
 	}
 
-	beaconLightClient, err := BeaconLightClient.NewBeaconLightClient(taraxaContractAddr, taraxaClient)
+	beaconLightClient, err := BeaconLightClient.NewBeaconLightClient(cfg.TaraxaContractAddr, taraxaClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
 
 	return &Relayer{
-		beaconNodeEndpoint: beaconNodeEndpoint,
-		taraxaContract:     taraxaContractAddr,
+		beaconNodeEndpoint: cfg.BeaconNodeEndpoint,
+		taraxaContract:     cfg.TaraxaContractAddr,
 		taraxaClient:       taraxaClient,
 		beaconLightClient:  beaconLightClient,
 		auth:               auth,
-		lightNodeEndpoint:  "https://www.lightclientdata.org",
+		lightNodeEndpoint:  cfg.LightNodeEndpoint,
 	}, nil
 }
 
@@ -74,20 +83,14 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		case epoch := <-r.onFinalizedEpoch:
 			log.Printf("Processing new block for epoch: %d", epoch)
 
-			slot := GetSlotFromEpoch(epoch)
-			r.updateNewHeader(slot)
-			// r.updateCommittee(slot)
-			// Add logic to process the block here
+			r.UpdateNewHeader(epoch)
+			if r.currentPeriod != GetPeriodFromEpoch(epoch) {
+				r.currentPeriod = GetPeriodFromEpoch(epoch)
+				r.UpdateSyncCommittee(epoch)
+			}
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return
 		}
-	}
-}
-
-func (r *Relayer) updateCommittee(slot int64) {
-	if slot%16384 == 0 {
-		log.Println("Updating sync committee")
-		//TODO implement
 	}
 }

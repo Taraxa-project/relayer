@@ -28,6 +28,42 @@ type BeaconBlock struct {
 	} `json:"data"`
 }
 
+type ForkVersion struct {
+	ExecutionOptimistic bool `json:"execution_optimistic"`
+	Finalized           bool `json:"finalized"`
+	Data                struct {
+		PreviousVersion string `json:"previous_version"`
+		CurrentVersion  string `json:"current_version"`
+		Epoch           string `json:"epoch"`
+	} `json:"data"`
+}
+
+type SyncCommitteeUpdate struct {
+	Version string   `json:"version"`
+	Data    SyncData `json:"data"`
+}
+
+type AttestedHeader struct {
+	Beacon Beacon `json:"beacon"`
+}
+type NextSyncCommittee struct {
+	Pubkeys         []string `json:"pubkeys"`
+	AggregatePubkey string   `json:"aggregate_pubkey"`
+}
+type FinalizedHeader struct {
+	Beacon Beacon `json:"beacon"`
+}
+
+type SyncData struct {
+	AttestedHeader          AttestedHeader    `json:"attested_header"`
+	NextSyncCommittee       NextSyncCommittee `json:"next_sync_committee"`
+	NextSyncCommitteeBranch []string          `json:"next_sync_committee_branch"`
+	FinalizedHeader         FinalizedHeader   `json:"finalized_header"`
+	FinalityBranch          []string          `json:"finality_branch"`
+	SyncAggregate           SyncAggregate     `json:"sync_aggregate"`
+	SignatureSlot           string            `json:"signature_slot"`
+}
+
 type LightClientFinalityUpdate struct {
 	Version string `json:"version"`
 	Data    Data   `json:"data"`

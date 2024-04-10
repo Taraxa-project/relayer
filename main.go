@@ -18,6 +18,8 @@ const (
 	taraxaContractAddress = "0x0DC0d841F962759DA25547c686fa440cF6C28C61"
 	taraxaNodeURL         = "https://rpc.devnet.taraxa.io"
 	key                   = "fc6c309495809b69ce77b3250cacfef94d28698d8fb425501a59836fe30fab1d"
+	// lightNodeEndpoint = "http://unstable.holesky.beacon-api.nimbus.team/" // Holesky
+	lightNodeEndpoint = "https://www.lightclientdata.org"
 )
 
 func main() {
@@ -28,7 +30,12 @@ func main() {
 		log.Fatalf("Failed to convert private key: %v", err)
 	}
 
-	relayer, err := relayer.NewRelayer(ethereumAPIEndpoint, taraxaNodeURL, common.HexToAddress(taraxaContractAddress), privateKey)
+	relayer, err := relayer.NewRelayer(&relayer.RelayerConfig{
+		ethereumAPIEndpoint,
+		taraxaNodeURL,
+		common.HexToAddress(taraxaContractAddress),
+		privateKey,
+		lightNodeEndpoint})
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +59,7 @@ func main() {
 	}()
 
 	relayer.Start(ctx)
+	// relayer.UpdateNewHeader(8826112)
 
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
