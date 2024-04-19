@@ -59,15 +59,15 @@ func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, er
 }
 
 func (r *Relayer) GetSyncCommitteeUpdate(startPeriod, count int64) (*SyncCommitteeUpdate, error) {
-	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/updates?start_period=%dcount=%d", r.lightNodeEndpoint, startPeriod, count)
-	var syncUpdate *SyncCommitteeUpdate
-	syncUpdate, err := FetchAndParseData[SyncCommitteeUpdate](url)
+	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/updates?start_period=%d&count=%d", r.lightNodeEndpoint, startPeriod, count)
+	var syncUpdates *[]SyncCommitteeUpdate
+	syncUpdates, err := FetchAndParseData[[]SyncCommitteeUpdate](url)
 	if err != nil {
-		log.Fatalf("Error fetching and parsing finality header: %v", err)
+		log.Fatalf("Error fetching and parsing sync committee updates: %v", err)
 		return nil, err
 	}
 
-	return syncUpdate, nil
+	return &(*syncUpdates)[0], nil
 }
 
 // FetchAndParseData fetches data from a given URL and parses the JSON response into the provided type.

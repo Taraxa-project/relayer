@@ -83,10 +83,9 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		case epoch := <-r.onFinalizedEpoch:
 			log.Printf("Processing new block for epoch: %d", epoch)
 
-			r.UpdateNewHeader(epoch)
+			r.UpdateLightClient(epoch, r.currentPeriod != GetPeriodFromEpoch(epoch))
 			if r.currentPeriod != GetPeriodFromEpoch(epoch) {
 				r.currentPeriod = GetPeriodFromEpoch(epoch)
-				r.UpdateSyncCommittee(epoch)
 			}
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")

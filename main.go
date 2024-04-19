@@ -14,12 +14,11 @@ import (
 )
 
 const (
-	ethereumAPIEndpoint   = "https://restless-spring-uranium.quiknode.pro/31384766eed9e4977424797ae8b020ee6dd6b9eb"
-	taraxaContractAddress = "0x0DC0d841F962759DA25547c686fa440cF6C28C61"
-	taraxaNodeURL         = "https://rpc.devnet.taraxa.io"
+	ethereumAPIEndpoint   = "https://responsive-weathered-morning.ethereum-holesky.quiknode.pro/4e7ca7b018c76a5ee1041bd2eb9125293d8ec3a1"
+	taraxaContractAddress = "0xC77919c1c830FB8176246e547C36546866ae0f92"
+	taraxaNodeURL         = "https://rpc-pr-2618.prnet.taraxa.io"
 	key                   = "fc6c309495809b69ce77b3250cacfef94d28698d8fb425501a59836fe30fab1d"
-	// lightNodeEndpoint = "http://unstable.holesky.beacon-api.nimbus.team/" // Holesky
-	lightNodeEndpoint = "https://www.lightclientdata.org"
+	lightNodeEndpoint     = "https://beacon-pr-2618.prnet.taraxa.io"
 )
 
 func main() {
@@ -31,11 +30,12 @@ func main() {
 	}
 
 	relayer, err := relayer.NewRelayer(&relayer.RelayerConfig{
-		ethereumAPIEndpoint,
-		taraxaNodeURL,
-		common.HexToAddress(taraxaContractAddress),
-		privateKey,
-		lightNodeEndpoint})
+		BeaconNodeEndpoint: ethereumAPIEndpoint,
+		TaraxaNodeURL:      taraxaNodeURL,
+		TaraxaContractAddr: common.HexToAddress(taraxaContractAddress),
+		Key:                privateKey,
+		LightNodeEndpoint:  lightNodeEndpoint,
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -58,8 +58,8 @@ func main() {
 		os.Exit(0)
 	}()
 
-	relayer.Start(ctx)
-	// relayer.UpdateNewHeader(8826112)
+	// relayer.Start(ctx)
+	relayer.UpdateLightClient(45932, false)
 
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
