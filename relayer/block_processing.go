@@ -125,6 +125,23 @@ func convertToBeaconChainLightClientHeader(blockHeader BeaconBlockHeader) Beacon
 		ExcessBlobGas:    blockHeader.Execution.ExcessBlobGas,
 		LogsBloom:        sha256.Sum256(blockHeader.Execution.LogsBloom[:]),
 	}
+	{
+		data := ExtraData{ExtraData: blockHeader.Execution.ExtraData}
+		extraData, err := data.HashTreeRoot()
+		if err != nil {
+			log.Fatalf("Failed to hash extra data: %v", err)
+		}
+		executionPayloadHeader.ExtraData = extraData
+	}
+
+	{
+		data := LogsBloom{LogsBloom: blockHeader.Execution.LogsBloom}
+		logBloom, err := data.HashTreeRoot()
+		if err != nil {
+			log.Fatalf("Failed to hash logs bloom: %v", err)
+		}
+		executionPayloadHeader.LogsBloom = logBloom
+	}
 
 	return BeaconLightClient.BeaconChainLightClientHeader{
 		Beacon:          beaconBlockHeader,
