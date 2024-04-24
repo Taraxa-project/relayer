@@ -9,7 +9,13 @@ import (
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/herumi/bls-eth-go-binary/bls"
 )
+
+func init() {
+	_ = bls.Init(bls.BLS12_381)
+	_ = bls.SetETHmode(bls.EthModeDraft07)
+}
 
 // Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
 func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate, error) {
@@ -156,9 +162,17 @@ func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate altair.SyncAggr
 		newSyncCommitteeBits[i/32][i%32] = syncAggregate.SyncCommitteeBits[i]
 	}
 
+	var signature bls.Sign
+	bytes := make([]byte, len(syncAggregate.SyncCommitteeSignature))
+	copy(bytes, syncAggregate.SyncCommitteeSignature[:])
+
+	if err := signature.Deserialize(bytes); err != nil {
+		log.Fatalf("Failed to deserialize signature: %v", err)
+	}
+
 	return BeaconLightClient.BeaconLightClientUpdateSyncAggregate{
 		SyncCommitteeBits:      newSyncCommitteeBits,
-		SyncCommitteeSignature: syncAggregate.SyncCommitteeSignature[:],
+		SyncCommitteeSignature: signature.SerializeUncompressed(),
 	}
 }
 
@@ -167,11 +181,20 @@ func ConvertToSyncCommittee(sc NextSyncCommittee) BeaconLightClient.BeaconChainS
 
 	for i, pubkey := range sc.Pubkeys {
 		// Assuming the pubkey strings are prefixed with "0x" for hex encoding.
-		decoded, _ := hex.DecodeString(pubkey[2:])
-		pubkeys[i] = decoded
+		var key bls.PublicKey
+		if err := key.DeserializeHexStr(pubkey[2:]); err != nil {
+			log.Fatalf("Failed to deserialize pubkey: %v", err)
+		}
+		var p *bls.G1 = bls.CastFromPublicKey(&key)
+		pubkeys[i] = p.SerializeUncompressed()
 	}
 
 	aggregatePubkey, _ := hex.DecodeString(sc.AggregatePubkey[2:])
+
+	var key bls.PublicKey
+	if err := key.DeserializeHexStr(sc.AggregatePubkey[2:]); err != nil {
+		log.Fatalf("Failed to deserialize pubkey: %v", err)
+	}
 
 	return BeaconLightClient.BeaconChainSyncCommittee{
 		Pubkeys:         pubkeys,
