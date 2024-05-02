@@ -59,7 +59,7 @@ func main() {
 	}()
 
 	// relayer.Start(ctx)
-	relayer.UpdateLightClient(45932, false)
+	relayer.UpdateLightClient(48806, false)
 
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()

@@ -3,6 +3,7 @@ package relayer
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"log"
 
 	"relayer/BeaconLightClient"
@@ -23,7 +24,7 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	if err != nil {
 		return nil, err
 	}
-	syncUpdate, err := r.GetSyncCommitteeUpdate(GetPeriodFromEpoch(epoch), 1)
+	syncUpdate, err := r.GetSyncCommitteeUpdate(GetPeriodFromEpoch(epoch)-1, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +60,7 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 
 	// Fetch beacon block data for the given slot
 	updateData, err := r.GetBeaconBlockData(epoch)
+	// print(*updateData)
 	if err != nil {
 		log.Printf("Failed to get beacon block data: %v", err)
 		return
@@ -222,4 +224,96 @@ func ConvertNextSyncCommitteeBranch(input []string) [][32]byte {
 	}
 
 	return result
+}
+
+// Helper function to convert byte slices to hex string
+func bytesToHex(bytes []byte) string {
+	return hex.EncodeToString(bytes)
+}
+
+// Print function for BeaconLightClientUpdateFinalizedHeaderUpdate
+func print(update BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate) {
+	// Print AttestedHeader fields
+	fmt.Println("AttestedHeader:")
+	printLightClientHeader(update.AttestedHeader)
+
+	// Print SignatureSyncCommittee fields
+	fmt.Println("SignatureSyncCommittee:")
+	printSyncCommittee(update.SignatureSyncCommittee)
+
+	// Print FinalizedHeader fields
+	fmt.Println("FinalizedHeader:")
+	printLightClientHeader(update.FinalizedHeader)
+
+	// Print FinalityBranch
+	fmt.Println("FinalityBranch:")
+	for i, branch := range update.FinalityBranch {
+		fmt.Printf("\tBranch[%d]: 0x%s\n", i, bytesToHex(branch[:]))
+	}
+
+	// Print SyncAggregate fields
+	fmt.Println("SyncAggregate:")
+	printSyncAggregate(update.SyncAggregate)
+
+	// Print ForkVersion
+	fmt.Printf("ForkVersion: 0x%s\n", bytesToHex(update.ForkVersion[:]))
+
+	// Print SignatureSlot
+	fmt.Printf("SignatureSlot: %d\n", update.SignatureSlot)
+}
+
+// Helper function to print LightClientHeader
+// Helper function to print LightClientHeader including ExecutionPayloadHeader
+func printLightClientHeader(header BeaconLightClient.BeaconChainLightClientHeader) {
+	fmt.Println("\tBeacon (BeaconChainBeaconBlockHeader):")
+	fmt.Printf("\t\tSlot: %d\n", header.Beacon.Slot)
+	fmt.Printf("\t\tProposerIndex: %d\n", header.Beacon.ProposerIndex)
+	fmt.Printf("\t\tParentRoot: 0x%s\n", bytesToHex(header.Beacon.ParentRoot[:]))
+	fmt.Printf("\t\tStateRoot: 0x%s\n", bytesToHex(header.Beacon.StateRoot[:]))
+	fmt.Printf("\t\tBodyRoot: 0x%s\n", bytesToHex(header.Beacon.BodyRoot[:]))
+
+	fmt.Println("\tExecution (BeaconChainExecutionPayloadHeader):")
+	fmt.Printf("\t\tParentHash: 0x%s\n", bytesToHex(header.Execution.ParentHash[:]))
+	fmt.Printf("\t\tFeeRecipient: %s\n", header.Execution.FeeRecipient.Hex()) // Assuming common.Address has Hex() method
+	fmt.Printf("\t\tStateRoot: 0x%s\n", bytesToHex(header.Execution.StateRoot[:]))
+	fmt.Printf("\t\tReceiptsRoot: 0x%s\n", bytesToHex(header.Execution.ReceiptsRoot[:]))
+	fmt.Printf("\t\tLogsBloom: 0x%s\n", bytesToHex(header.Execution.LogsBloom[:]))
+	fmt.Printf("\t\tPrevRandao: 0x%s\n", bytesToHex(header.Execution.PrevRandao[:]))
+	fmt.Printf("\t\tBlockNumber: %d\n", header.Execution.BlockNumber)
+	fmt.Printf("\t\tGasLimit: %d\n", header.Execution.GasLimit)
+	fmt.Printf("\t\tGasUsed: %d\n", header.Execution.GasUsed)
+	fmt.Printf("\t\tTimestamp: %d\n", header.Execution.Timestamp)
+	fmt.Printf("\t\tExtraData: 0x%s\n", bytesToHex(header.Execution.ExtraData[:]))
+	if header.Execution.BaseFeePerGas != nil {
+		fmt.Printf("\t\tBaseFeePerGas: %s\n", header.Execution.BaseFeePerGas.Text(10)) // Print as hexadecimal
+	} else {
+		fmt.Printf("\t\tBaseFeePerGas: nil\n")
+	}
+	fmt.Printf("\t\tBlockHash: 0x%s\n", bytesToHex(header.Execution.BlockHash[:]))
+	fmt.Printf("\t\tTransactionsRoot: 0x%s\n", bytesToHex(header.Execution.TransactionsRoot[:]))
+	fmt.Printf("\t\tWithdrawalsRoot: 0x%s\n", bytesToHex(header.Execution.WithdrawalsRoot[:]))
+	fmt.Printf("\t\tBlobGasUsed: %d\n", header.Execution.BlobGasUsed)
+	fmt.Printf("\t\tExcessBlobGas: %d\n", header.Execution.ExcessBlobGas)
+
+	fmt.Println("\tExecutionBranch:")
+	for i, branch := range header.ExecutionBranch {
+		fmt.Printf("\t\tBranch[%d]: 0x%s\n", i, bytesToHex(branch[:]))
+	}
+}
+
+// Helper function to print SyncCommittee
+func printSyncCommittee(committee BeaconLightClient.BeaconChainSyncCommittee) {
+	fmt.Println("\tPubkeys:")
+	for i, pubkey := range committee.Pubkeys {
+		fmt.Printf("\t\tpubkeys[%d]= hex\"%s\";\n", i, bytesToHex(pubkey))
+	}
+	fmt.Printf("\tAggregatePubkey: %s\n", bytesToHex(committee.AggregatePubkey))
+}
+
+// Helper function to print SyncAggregate
+func printSyncAggregate(aggregate BeaconLightClient.BeaconLightClientUpdateSyncAggregate) {
+	fmt.Printf("\tSyncCommitteeBits: [First Array Slice]: %s\n", bytesToHex(aggregate.SyncCommitteeBits[0][:]))
+	fmt.Printf("\tSyncCommitteeBits: [Second Array Slice]: %s\n", bytesToHex(aggregate.SyncCommitteeBits[1][:]))
+	// Add similar for the second array slice if needed
+	fmt.Printf("\tSyncCommitteeSignature: %s\n", bytesToHex(aggregate.SyncCommitteeSignature))
 }
