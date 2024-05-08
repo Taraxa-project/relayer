@@ -35,15 +35,12 @@ func main() {
 	// Parse flags
 	pflag.Parse()
 
-	// Read config from environment variables
-	viper.AutomaticEnv()
-
 	// Bind environment variables to viper
-	viper.BindEnv("ethereum_api_endpoint", "ETHEREUM_API_ENDPOINT")
-	viper.BindEnv("taraxa_contract_address", "TARAXA_CONTRACT_ADDRESS")
-	viper.BindEnv("taraxa_node_url", "TARAXA_NODE_URL")
-	viper.BindEnv("key", "KEY")
-	viper.BindEnv("light_node_endpoint", "LIGHT_NODE_ENDPOINT")
+	_ = viper.BindEnv("EthereumAPIEndpoint", "ETHEREUM_API_ENDPOINT")
+	_ = viper.BindEnv("TaraxaContractAddress", "TARAXA_CONTRACT_ADDRESS")
+	_ = viper.BindEnv("TaraxaNodeURL", "TARAXA_NODE_URL")
+	_ = viper.BindEnv("Key", "KEY")
+	_ = viper.BindEnv("LightNodeEndpoint", "LIGHT_NODE_ENDPOINT")
 
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatalf("Failed to unmarshal config: %v", err)

@@ -25,7 +25,7 @@ go.work
 
 # Binaries for programs and plugins
 bin/
-relayer
+build/
 *.exe
 *.exe~
 *.dll
