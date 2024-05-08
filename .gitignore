@@ -19,3 +19,15 @@
 
 # Go workspace file
 go.work
+
+# Editor directories and files
+.vscode
+
+# Binaries for programs and plugins
+bin/
+relayer
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
