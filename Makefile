@@ -28,8 +28,7 @@ tidy:
 	go mod tidy
 
 build: clean
-	@mkdir -p $(BUILD_DIR)/linux_amd64
-	env GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR)/linux_amd64/$(EXECUTABLE)
+	go build -o $(BUILD_DIR)/$(EXECUTABLE)
 
 clean:
 	rm -rf $(BUILD_DIR)
