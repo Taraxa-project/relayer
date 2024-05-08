@@ -37,6 +37,7 @@ type Relayer struct {
 	taraBridge         *bridge_contract_interface.BridgeContractInterface
 	onFinalizedEpoch   chan int64
 	currentPeriod      int64
+	finalizedBlock     uint64
 }
 
 // NewRelayer creates a new Relayer instance
