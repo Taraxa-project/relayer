@@ -24,12 +24,16 @@ type Config struct {
 }
 
 func main() {
+	var config Config
+
 	// Bind flags to viper
-	pflag.String("ethereum_api_endpoint", "", "Ethereum API endpoint")
-	pflag.String("taraxa_contract_address", "", "Taraxa contract address")
-	pflag.String("taraxa_node_url", "", "Taraxa node URL")
-	pflag.String("key", "", "Private key")
-	pflag.String("light_node_endpoint", "", "Light node endpoint")
+	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", "", "Ethereum API endpoint")
+	pflag.StringVar(&config.TaraxaContractAddress, "taraxa_contract_address", "", "Taraxa contract address")
+	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", "", "Taraxa node URL")
+	pflag.StringVar(&config.Key, "key", "", "Private key")
+	pflag.StringVar(&config.LightNodeEndpoint, "light_node_endpoint", "", "Light node endpoint")
+	// Parse flags
+	pflag.Parse()
 
 	// Read config from environment variables
 	viper.AutomaticEnv()
@@ -41,14 +45,11 @@ func main() {
 	viper.BindEnv("key", "KEY")
 	viper.BindEnv("light_node_endpoint", "LIGHT_NODE_ENDPOINT")
 
-	// Parse flags
-	pflag.Parse()
-
-	// Read config from flags
-	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatalf("Failed to unmarshal config: %v", err)
 	}
+
+	log.Printf("Starting relayer with config: %+v", config)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
