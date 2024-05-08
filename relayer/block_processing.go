@@ -81,7 +81,7 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 		log.Printf("Submitted transaction %s for importing next sync committee", tx.Hash().Hex())
 	} else {
 		// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-		tx, err := r.beaconLightClient.ImportFinalizedHeader(r.auth, *updateData)
+		tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
 		if err != nil {
 			log.Printf("Failed to import finalized header: %v", err)
 			return

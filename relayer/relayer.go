@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"log"
+	"math/big"
 	"relayer/BeaconLightClient"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
@@ -37,7 +38,8 @@ type Relayer struct {
 	taraBridge         *bridge_contract_interface.BridgeContractInterface
 	onFinalizedEpoch   chan int64
 	currentPeriod      int64
-	finalizedBlock     uint64
+	finalizedBlock     *big.Int
+	bridgeContractAddr common.Address
 }
 
 // NewRelayer creates a new Relayer instance
@@ -77,6 +79,7 @@ func NewRelayer(cfg *RelayerConfig) (*Relayer, error) {
 		ethBridge:          ethBridge,
 		taraBridge:         taraBridge,
 		lightNodeEndpoint:  cfg.LightNodeEndpoint,
+		bridgeContractAddr: cfg.EthBridgeAddr,
 	}, nil
 }
 

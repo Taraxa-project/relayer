@@ -25,12 +25,12 @@ func GetPeriodFromEpoch(epoch int64) int64 {
 func connectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*ethclient.Client, *bind.TransactOpts, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to connect to Taraxa node: %v", err)
+		return nil, nil, fmt.Errorf("failed to connect to node: %v", err)
 	}
 
 	chainID, err := client.ChainID(ctx)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to retrieve Taraxa chain ID: %v", err)
+		return nil, nil, fmt.Errorf("failed to retrieve chain ID: %v", err)
 	}
 
 	log.Printf("Connected to chain id: %d, on %s", chainID, url)
@@ -38,7 +38,7 @@ func connectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*et
 	// Prepare Taraxa transact options
 	auth, err := bind.NewKeyedTransactorWithChainID(key, chainID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create authorized transactor for Taraxa: %v", err)
+		return nil, nil, fmt.Errorf("failed to create authorized transactor: %v", err)
 	}
 
 	return client, auth, nil

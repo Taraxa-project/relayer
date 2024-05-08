@@ -1,11 +1,13 @@
 package relayer
 
 import (
+	"context"
 	"log"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient/gethclient"
 )
 
 func (r *Relayer) callFinalize() *types.Transaction {
@@ -30,7 +32,7 @@ func (r *Relayer) waitForFinalize(trx *types.Transaction) {
 				return
 			}
 			log.Printf("Receipt: %v", receipt)
-			r.finalizedBlock = receipt.BlockNumber.Uint64()
+			r.finalizedBlock = receipt.BlockNumber
 			break // Break out of the loop if receipt is found
 		}
 	}()
@@ -42,8 +44,13 @@ func (r *Relayer) getProof() {
 	// 	log.Fatalf("Failed to get bridge root: %v", err)
 	// }
 
+	client := gethclient.New(r.ethClient.Client())
 
-	// trx, err := r.tara
+	_, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{"0x0000000000000000000000000000000000000000000000000000000000000006"}, r.finalizedBlock)
+	if err != nil {
+		log.Fatalf("Failed to get proof: %v", err)
+	}
+	//processBridgeRoot
 }
 
 func (r *Relayer) applyState() {
