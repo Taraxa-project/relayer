@@ -11,30 +11,58 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
-const (
-	ethereumAPIEndpoint   = "https://responsive-weathered-morning.ethereum-holesky.quiknode.pro/4e7ca7b018c76a5ee1041bd2eb9125293d8ec3a1"
-	taraxaContractAddress = "0xC77919c1c830FB8176246e547C36546866ae0f92"
-	taraxaNodeURL         = "https://rpc-pr-2618.prnet.taraxa.io"
-	key                   = "fc6c309495809b69ce77b3250cacfef94d28698d8fb425501a59836fe30fab1d"
-	lightNodeEndpoint     = "https://beacon-pr-2618.prnet.taraxa.io"
-)
+type Config struct {
+	EthereumAPIEndpoint   string
+	TaraxaContractAddress string
+	TaraxaNodeURL         string
+	Key                   string
+	LightNodeEndpoint     string
+}
 
 func main() {
+	// Bind flags to viper
+	pflag.String("ethereum_api_endpoint", "", "Ethereum API endpoint")
+	pflag.String("taraxa_contract_address", "", "Taraxa contract address")
+	pflag.String("taraxa_node_url", "", "Taraxa node URL")
+	pflag.String("key", "", "Private key")
+	pflag.String("light_node_endpoint", "", "Light node endpoint")
+
+	// Read config from environment variables
+	viper.AutomaticEnv()
+
+	// Bind environment variables to viper
+	viper.BindEnv("ethereum_api_endpoint", "ETHEREUM_API_ENDPOINT")
+	viper.BindEnv("taraxa_contract_address", "TARAXA_CONTRACT_ADDRESS")
+	viper.BindEnv("taraxa_node_url", "TARAXA_NODE_URL")
+	viper.BindEnv("key", "KEY")
+	viper.BindEnv("light_node_endpoint", "LIGHT_NODE_ENDPOINT")
+
+	// Parse flags
+	pflag.Parse()
+
+	// Read config from flags
+	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		log.Fatalf("Failed to unmarshal config: %v", err)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
-	privateKey, err := crypto.HexToECDSA(key)
+	privateKey, err := crypto.HexToECDSA(config.Key)
 	if err != nil {
 		log.Fatalf("Failed to convert private key: %v", err)
 	}
 
 	relayer, err := relayer.NewRelayer(&relayer.RelayerConfig{
-		BeaconNodeEndpoint: ethereumAPIEndpoint,
-		TaraxaNodeURL:      taraxaNodeURL,
-		TaraxaContractAddr: common.HexToAddress(taraxaContractAddress),
+		BeaconNodeEndpoint: config.EthereumAPIEndpoint,
+		TaraxaNodeURL:      config.TaraxaNodeURL,
+		TaraxaContractAddr: common.HexToAddress(config.TaraxaContractAddress),
 		Key:                privateKey,
-		LightNodeEndpoint:  lightNodeEndpoint,
+		LightNodeEndpoint:  config.LightNodeEndpoint,
 	})
 	if err != nil {
 		panic(err)
@@ -58,8 +86,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// relayer.Start(ctx)
-	relayer.UpdateLightClient(48806, false)
+	relayer.Start(ctx)
 
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
