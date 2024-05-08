@@ -1,7 +1,7 @@
 # builder image
 FROM golang:1.21.1-alpine as gobuilder
 
-RUN apk update && apk add curl protobuf make \
+RUN apk update && apk add curl protobuf make gcc musl-dev \
     rm -rf /var/cache/apk/*
 
 RUN mkdir /app
@@ -19,7 +19,7 @@ RUN make build
 FROM alpine
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
-COPY --from=gobuilder /app/build/linux_amd64/relayer /relayer
+COPY --from=gobuilder /app/build/relayer /relayer
 
 # Run
 CMD [ "/relayer" ]

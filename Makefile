@@ -28,6 +28,7 @@ tidy:
 	go mod tidy
 
 build: clean
+	@mkdir -p $(BUILD_DIR)
 	go build -o $(BUILD_DIR)/$(EXECUTABLE)
 
 clean:
