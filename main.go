@@ -59,11 +59,11 @@ func main() {
 	}
 
 	relayer, err := relayer.NewRelayer(&relayer.RelayerConfig{
-		BeaconNodeEndpoint: config.EthereumAPIEndpoint,
-		TaraxaNodeURL:      config.TaraxaNodeURL,
-		TaraxaContractAddr: common.HexToAddress(config.TaraxaContractAddress),
-		Key:                privateKey,
-		LightNodeEndpoint:  config.LightNodeEndpoint,
+		BeaconNodeEndpoint:  config.EthereumAPIEndpoint,
+		TaraxaRPCURL:        config.TaraxaNodeURL,
+		TaraxaEthClientAddr: common.HexToAddress(config.TaraxaContractAddress),
+		Key:                 privateKey,
+		LightNodeEndpoint:   config.LightNodeEndpoint,
 	})
 	if err != nil {
 		panic(err)

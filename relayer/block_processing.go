@@ -72,7 +72,7 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 			return
 		}
 		// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.auth, *updateData, *syncCommitteeData)
+		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, *updateData, *syncCommitteeData)
 		if err != nil {
 			log.Printf("Failed to import next sync committee: %v", err)
 			return
