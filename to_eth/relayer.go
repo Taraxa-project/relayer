@@ -1,4 +1,4 @@
-package relayer
+package to_eth
 
 import (
 	"context"
@@ -7,10 +7,11 @@ import (
 	"log"
 	"math/big"
 	"relayer/BeaconLightClient"
+	"relayer/common"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
+	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -18,9 +19,9 @@ type RelayerConfig struct {
 	BeaconNodeEndpoint  string
 	TaraxaRPCURL        string
 	EthRPCURL           string
-	TaraxaEthClientAddr common.Address
-	TaraxaBridgeAddr    common.Address
-	EthBridgeAddr       common.Address
+	TaraxaEthClientAddr eth_common.Address
+	TaraxaBridgeAddr    eth_common.Address
+	EthBridgeAddr       eth_common.Address
 	Key                 *ecdsa.PrivateKey
 	LightNodeEndpoint   string
 }
@@ -39,17 +40,17 @@ type Relayer struct {
 	onFinalizedEpoch   chan int64
 	currentPeriod      int64
 	finalizedBlock     *big.Int
-	bridgeContractAddr common.Address
+	bridgeContractAddr eth_common.Address
 }
 
 // NewRelayer creates a new Relayer instance
 func NewRelayer(cfg *RelayerConfig) (*Relayer, error) {
-	taraxaClient, taraAuth, err := connectToChain(context.Background(), cfg.TaraxaRPCURL, cfg.Key)
+	taraxaClient, taraAuth, err := common.ConnectToChain(context.Background(), cfg.TaraxaRPCURL, cfg.Key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Taraxa network: %v", err)
 	}
 
-	ethClient, ethAuth, err := connectToChain(context.Background(), cfg.EthRPCURL, cfg.Key)
+	ethClient, ethAuth, err := common.ConnectToChain(context.Background(), cfg.EthRPCURL, cfg.Key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to ETH network: %v", err)
 	}
@@ -85,7 +86,7 @@ func NewRelayer(cfg *RelayerConfig) (*Relayer, error) {
 
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
-	go r.startEventProcessing(ctx)
+	// go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
 }
 
@@ -99,10 +100,10 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		case epoch := <-r.onFinalizedEpoch:
 			log.Printf("Processing new block for epoch: %d", epoch)
 
-			r.UpdateLightClient(epoch, r.currentPeriod != GetPeriodFromEpoch(epoch))
-			if r.currentPeriod != GetPeriodFromEpoch(epoch) {
-				r.currentPeriod = GetPeriodFromEpoch(epoch)
-			}
+			// r.UpdateLightClient(epoch, r.currentPeriod != common.GetPeriodFromEpoch(epoch))
+			// if r.currentPeriod != common.GetPeriodFromEpoch(epoch) {
+			// 	r.currentPeriod = common.GetPeriodFromEpoch(epoch)
+			// }
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return

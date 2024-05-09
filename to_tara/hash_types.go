@@ -1,4 +1,4 @@
-package relayer
+package to_tara
 
 type ExtraData struct {
 	ExtraData []byte `ssz-max:"32"`

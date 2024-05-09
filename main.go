@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"relayer/relayer"
+	"relayer/to_tara"
 	"syscall"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -58,7 +58,7 @@ func main() {
 		log.Fatalf("Failed to convert private key: %v", err)
 	}
 
-	relayer, err := relayer.NewRelayer(&relayer.RelayerConfig{
+	relayer, err := to_tara.NewRelayer(&to_tara.RelayerConfig{
 		BeaconNodeEndpoint:  config.EthereumAPIEndpoint,
 		TaraxaRPCURL:        config.TaraxaNodeURL,
 		TaraxaEthClientAddr: common.HexToAddress(config.TaraxaContractAddress),
