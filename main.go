@@ -6,7 +6,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"relayer/relayer"
+	"relayer/to_eth"
+	"relayer/to_tara"
 	"syscall"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -16,11 +17,18 @@ import (
 )
 
 type Config struct {
-	EthereumAPIEndpoint   string
-	TaraxaContractAddress string
-	TaraxaNodeURL         string
-	Key                   string
-	LightNodeEndpoint     string
+	EthereumAPIEndpoint string
+
+	BeaconLightClientAddress string
+	EthClientOnTaraAddress   string
+	TaraBridgeAddress        string
+
+	TaraClientOnEthAddress string
+	EthBridgeAddress       string
+
+	TaraxaNodeURL     string
+	PrivateKey        string
+	LightNodeEndpoint string
 }
 
 func main() {
@@ -28,9 +36,13 @@ func main() {
 
 	// Bind flags to viper
 	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", "", "Ethereum API endpoint")
-	pflag.StringVar(&config.TaraxaContractAddress, "taraxa_contract_address", "", "Taraxa contract address")
+	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", "", "Address of the BeaconLightClient contract on Taraxa chain")
+	pflag.StringVar(&config.EthClientOnTaraAddress, "eth_client_on_tara_address", "", "Address of the EthClient contract on Taraxa chain")
+	pflag.StringVar(&config.TaraBridgeAddress, "tara_bridge_address", "", "Address of the Tara bridge contract on Taraxa chain")
+	pflag.StringVar(&config.TaraClientOnEthAddress, "tara_client_on_eth_address", "", "Address of the TaraClient contract on Ethereum chain")
+	pflag.StringVar(&config.EthBridgeAddress, "eth_bridge_address", "", "Address of the Eth bridge contract on Ethereum chain")
 	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", "", "Taraxa node URL")
-	pflag.StringVar(&config.Key, "key", "", "Private key")
+	pflag.StringVar(&config.PrivateKey, "private_key", "", "Private key")
 	pflag.StringVar(&config.LightNodeEndpoint, "light_node_endpoint", "", "Light node endpoint")
 	// Parse flags
 	pflag.Parse()
@@ -40,9 +52,13 @@ func main() {
 
 	// Bind environment variables to viper
 	viper.BindEnv("ethereum_api_endpoint", "ETHEREUM_API_ENDPOINT")
-	viper.BindEnv("taraxa_contract_address", "TARAXA_CONTRACT_ADDRESS")
+	viper.BindEnv("beacon_light_client_address", "BEACON_LIGHT_CLIENT_ADDRESS")
+	viper.BindEnv("eth_client_on_tara_address", "ETH_CLIENT_ON_TARA_ADDRESS")
+	viper.BindEnv("tara_bridge_address", "TARA_BRIDGE_ADDRESS")
+	viper.BindEnv("tara_client_on_eth_address", "TARA_CLIENT_ON_ETH_ADDRESS")
+	viper.BindEnv("eth_bridge_address", "ETH_BRIDGE_ADDRESS")
 	viper.BindEnv("taraxa_node_url", "TARAXA_NODE_URL")
-	viper.BindEnv("key", "KEY")
+	viper.BindEnv("private_key", "PRIVATE_KEY")
 	viper.BindEnv("light_node_endpoint", "LIGHT_NODE_ENDPOINT")
 
 	if err := viper.Unmarshal(&config); err != nil {
@@ -53,15 +69,15 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	privateKey, err := crypto.HexToECDSA(config.Key)
+	privateKey, err := crypto.HexToECDSA(config.PrivateKey)
 	if err != nil {
 		log.Fatalf("Failed to convert private key: %v", err)
 	}
 
-	relayer, err := relayer.NewRelayer(&relayer.RelayerConfig{
+	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
 		BeaconNodeEndpoint:  config.EthereumAPIEndpoint,
 		TaraxaRPCURL:        config.TaraxaNodeURL,
-		TaraxaEthClientAddr: common.HexToAddress(config.TaraxaContractAddress),
+		EthClientOnTaraAddr: common.HexToAddress(config.EthClientOnTaraAddress),
 		Key:                 privateKey,
 		LightNodeEndpoint:   config.LightNodeEndpoint,
 	})
@@ -69,6 +85,15 @@ func main() {
 		panic(err)
 	}
 
+	ethRelayer, err := to_eth.NewRelayer(&to_eth.Config{
+		TaraxaRPCURL:          config.TaraxaNodeURL,
+		EthRPCURL:             config.EthereumAPIEndpoint,
+		TaraxaClientOnEthAddr: common.HexToAddress(config.TaraClientOnEthAddress),
+		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
+		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
+		Key:                   privateKey,
+		LightNodeEndpoint:     config.LightNodeEndpoint,
+	})
 	// Handle interrupt signals
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
@@ -78,7 +103,8 @@ func main() {
 		fmt.Println("\nReceived an interrupt, closing connection...")
 
 		// Perform cleanup
-		relayer.Close()
+		taraRelayer.Close()
+		ethRelayer.Close()
 
 		// Additional cleanup can be done here
 		cancel() // Cancel the context to stop any ongoing operations
@@ -87,8 +113,8 @@ func main() {
 		os.Exit(0)
 	}()
 
-	relayer.Start(ctx)
-
+	taraRelayer.Start(ctx)
+	ethRelayer.Start(ctx)
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
 }

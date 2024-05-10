@@ -1,4 +1,4 @@
-package relayer
+package to_tara
 
 import (
 	"crypto/sha256"
@@ -7,9 +7,10 @@ import (
 	"log"
 
 	"relayer/BeaconLightClient"
+	"relayer/common"
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
-	"github.com/ethereum/go-ethereum/common"
+	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/herumi/bls-eth-go-binary/bls"
 )
 
@@ -24,7 +25,7 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	if err != nil {
 		return nil, err
 	}
-	syncUpdate, err := r.GetSyncCommitteeUpdate(GetPeriodFromEpoch(epoch)-1, 1)
+	syncUpdate, err := r.GetSyncCommitteeUpdate(common.GetPeriodFromEpoch(epoch)-1, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 }
 
 func (r *Relayer) GetSyncCommitteeData(epoch int64) (*BeaconLightClient.BeaconLightClientUpdateSyncCommitteePeriodUpdate, error) {
-	syncUpdate, err := r.GetSyncCommitteeUpdate(GetPeriodFromEpoch(epoch), 1)
+	syncUpdate, err := r.GetSyncCommitteeUpdate(common.GetPeriodFromEpoch(epoch), 1)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +117,7 @@ func convertToBeaconChainLightClientHeader(blockHeader BeaconBlockHeader) Beacon
 	// Assuming these values for demonstration; you'd extract or map these from your actual data
 	executionPayloadHeader := BeaconLightClient.BeaconChainExecutionPayloadHeader{
 		ParentHash:       blockHeader.Execution.ParentHash,
-		FeeRecipient:     common.Address(blockHeader.Execution.FeeRecipient),
+		FeeRecipient:     eth_common.Address(blockHeader.Execution.FeeRecipient),
 		StateRoot:        blockHeader.Execution.StateRoot,
 		ReceiptsRoot:     blockHeader.Execution.ReceiptsRoot,
 		PrevRandao:       blockHeader.Execution.PrevRandao,

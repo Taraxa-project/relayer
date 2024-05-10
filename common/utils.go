@@ -1,4 +1,4 @@
-package relayer
+package common
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func GetPeriodFromEpoch(epoch int64) int64 {
 	return epoch / EPOCHS_PER_SYNC_COMMITTEE_PERIOD
 }
 
-func connectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*ethclient.Client, *bind.TransactOpts, error) {
+func ConnectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*ethclient.Client, *bind.TransactOpts, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to connect to node: %v", err)
