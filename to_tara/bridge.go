@@ -3,54 +3,61 @@ package to_tara
 import (
 	"context"
 	"log"
-	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient/gethclient"
 )
 
-func (r *Relayer) callFinalize() *types.Transaction {
+func (r *Relayer) finalize() {
 	trx, err := r.ethBridge.FinalizeEpoch(r.taraAuth)
 	if err != nil {
 		log.Fatalf("Failed to call finalize: %v", err)
-		return nil
 	}
-	return trx
-}
-
-func (r *Relayer) waitForFinalize(trx *types.Transaction) {
-	go func() {
-		for {
-			receipt, err := r.ethClient.TransactionReceipt(r.taraAuth.Context, trx.Hash())
-			if err == ethereum.NotFound {
-				// Retry after a delay
-				time.Sleep(5 * time.Second) // Adjust the delay as needed
-				continue
-			} else if err != nil {
-				log.Fatalf("Failed to get receipt: %v", err)
-				return
-			}
-			log.Printf("Receipt: %v", receipt)
-			r.finalizedBlock = receipt.BlockNumber
-			break // Break out of the loop if receipt is found
-		}
-	}()
+	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
+	if err != nil {
+		log.Fatalf("Failed to wait for finalize: %v", err)
+	}
+	log.Printf("Receipt: %v", receipt)
+	r.finalizedBlock = receipt.BlockNumber
+	r.onFinalizedBlockNumber <- receipt.BlockNumber.Uint64()
 }
 
 func (r *Relayer) getProof() {
-	// root, err := r.taraBridge.bridgeRootKey(nil)
-	// if err != nil {
-	// 	log.Fatalf("Failed to get bridge root: %v", err)
-	// }
+	key, err := r.ethClientContract.BridgeRootKey(nil)
+	if err != nil {
+		log.Fatalf("Failed to get bridge root: %v", err)
+	}
 
 	client := gethclient.New(r.ethClient.Client())
 
-	_, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{"0x0000000000000000000000000000000000000000000000000000000000000006"}, r.finalizedBlock)
+	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{string(key[:])}, r.finalizedBlock)
 	if err != nil {
 		log.Fatalf("Failed to get proof: %v", err)
 	}
-	//processBridgeRoot
+	if len(root.StorageProof) != 1 {
+		log.Fatalf("Invalid storage proof length: %d", len(root.StorageProof))
+		return
+	}
+
+	accountProof := make([][]byte, len(root.AccountProof))
+	for i, proof := range root.AccountProof {
+		accountProof[i] = []byte(proof)
+	}
+
+	storageProof := make([][]byte, len(root.StorageProof[0].Proof))
+	for i, proof := range root.StorageProof[0].Proof {
+		storageProof[i] = []byte(proof)
+	}
+
+	trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, accountProof, storageProof)
+	if err != nil {
+		log.Fatalf("Failed to call ProcessBridgeRoot: %v", err)
+		return
+	}
+	_, err = bind.WaitMined(context.Background(), r.ethClient, trx)
+	if err != nil {
+		log.Fatalf("Failed to wait for ProcessBridgeRoot: %v", err)
+	}
 }
 
 func (r *Relayer) applyState() {

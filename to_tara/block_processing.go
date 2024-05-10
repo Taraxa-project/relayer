@@ -1,14 +1,17 @@
 package to_tara
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"log"
 
 	"relayer/BeaconLightClient"
 	"relayer/common"
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/herumi/bls-eth-go-binary/bls"
 )
@@ -55,7 +58,34 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	}, nil
 }
 
-func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
+func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) error {
+	log.Printf("Attempting to update new header for epoch: %d", epoch)
+
+	// Fetch beacon block data for the given slot
+	updateData, err := r.GetBeaconBlockData(epoch)
+	if blockNumber > updateData.FinalizedHeader.Execution.BlockNumber {
+		return fmt.Errorf("Block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
+	}
+	// print(*updateData)
+	if err != nil {
+		return fmt.Errorf("Failed to get beacon block data: %v", err)
+	}
+	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
+	tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
+	if err != nil {
+		return fmt.Errorf("Failed to import finalized header: %v", err)
+	}
+
+	log.Printf("Submitted transaction %s for importing finalized header", tx.Hash().Hex())
+	_, err = bind.WaitMined(context.Background(), r.ethClient, tx)
+
+	if err != nil {
+		return fmt.Errorf("Failed to UpdateLightClient: %v", err)
+	}
+	return nil
+}
+
+func (r *Relayer) updateSyncCommittee(epoch int64) {
 	log.Printf("Attempting to update new header for epoch: %d", epoch)
 
 	// Fetch beacon block data for the given slot
@@ -65,31 +95,20 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 		log.Printf("Failed to get beacon block data: %v", err)
 		return
 	}
-	if updateSyncCommittee {
-		syncCommitteeData, err := r.GetSyncCommitteeData(epoch)
-		if err != nil {
-			log.Printf("Failed to get sync committee data: %v", err)
-			return
-		}
-		// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, *updateData, *syncCommitteeData)
-		if err != nil {
-			log.Printf("Failed to import next sync committee: %v", err)
-			return
-		}
 
-		log.Printf("Submitted transaction %s for importing next sync committee", tx.Hash().Hex())
-	} else {
-		// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-		tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
-		if err != nil {
-			log.Printf("Failed to import finalized header: %v", err)
-			return
-		}
-
-		log.Printf("Submitted transaction %s for importing finalized header", tx.Hash().Hex())
+	syncCommitteeData, err := r.GetSyncCommitteeData(epoch)
+	if err != nil {
+		log.Printf("Failed to get sync committee data: %v", err)
+		return
+	}
+	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
+	tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, *updateData, *syncCommitteeData)
+	if err != nil {
+		log.Printf("Failed to import next sync committee: %v", err)
+		return
 	}
 
+	log.Printf("Submitted transaction %s for importing next sync committee", tx.Hash().Hex())
 }
 
 func (r *Relayer) GetSyncCommitteeData(epoch int64) (*BeaconLightClient.BeaconLightClientUpdateSyncCommitteePeriodUpdate, error) {

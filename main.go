@@ -72,11 +72,15 @@ func main() {
 	}
 
 	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
-		BeaconNodeEndpoint:  config.EthereumAPIEndpoint,
-		TaraxaRPCURL:        config.TaraxaNodeURL,
-		EthClientOnTaraAddr: common.HexToAddress(config.EthClientOnTaraAddress),
-		Key:                 privateKey,
-		LightNodeEndpoint:   config.LightNodeEndpoint,
+		BeaconNodeEndpoint:    config.EthereumAPIEndpoint,
+		EthRPCURL:             config.EthereumAPIEndpoint,
+		TaraxaRPCURL:          config.TaraxaNodeURL,
+		BeaconLightClientAddr: common.HexToAddress(config.BeaconLightClientAddress),
+		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
+		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
+		EthClientOnTaraAddr:   common.HexToAddress(config.EthClientOnTaraAddress),
+		Key:                   privateKey,
+		LightNodeEndpoint:     config.LightNodeEndpoint,
 	})
 	if err != nil {
 		panic(err)
