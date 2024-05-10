@@ -47,19 +47,16 @@ func main() {
 	// Parse flags
 	pflag.Parse()
 
-	// Read config from environment variables
-	viper.AutomaticEnv()
-
 	// Bind environment variables to viper
-	viper.BindEnv("ethereum_api_endpoint", "ETHEREUM_API_ENDPOINT")
-	viper.BindEnv("beacon_light_client_address", "BEACON_LIGHT_CLIENT_ADDRESS")
-	viper.BindEnv("eth_client_on_tara_address", "ETH_CLIENT_ON_TARA_ADDRESS")
-	viper.BindEnv("tara_bridge_address", "TARA_BRIDGE_ADDRESS")
-	viper.BindEnv("tara_client_on_eth_address", "TARA_CLIENT_ON_ETH_ADDRESS")
-	viper.BindEnv("eth_bridge_address", "ETH_BRIDGE_ADDRESS")
-	viper.BindEnv("taraxa_node_url", "TARAXA_NODE_URL")
-	viper.BindEnv("private_key", "PRIVATE_KEY")
-	viper.BindEnv("light_node_endpoint", "LIGHT_NODE_ENDPOINT")
+	_ = viper.BindEnv("ethereum_api_endpoint", "ETHEREUM_API_ENDPOINT")
+	_ = viper.BindEnv("beacon_light_client_address", "BEACON_LIGHT_CLIENT_ADDRESS")
+	_ = viper.BindEnv("eth_client_on_tara_address", "ETH_CLIENT_ON_TARA_ADDRESS")
+	_ = viper.BindEnv("tara_bridge_address", "TARA_BRIDGE_ADDRESS")
+	_ = viper.BindEnv("tara_client_on_eth_address", "TARA_CLIENT_ON_ETH_ADDRESS")
+	_ = viper.BindEnv("eth_bridge_address", "ETH_BRIDGE_ADDRESS")
+	_ = viper.BindEnv("taraxa_node_url", "TARAXA_NODE_URL")
+	_ = viper.BindEnv("private_key", "PRIVATE_KEY")
+	_ = viper.BindEnv("light_node_endpoint", "LIGHT_NODE_ENDPOINT")
 
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatalf("Failed to unmarshal config: %v", err)
@@ -94,6 +91,10 @@ func main() {
 		Key:                   privateKey,
 		LightNodeEndpoint:     config.LightNodeEndpoint,
 	})
+
+	if err != nil {
+		panic(err)
+	}
 	// Handle interrupt signals
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
