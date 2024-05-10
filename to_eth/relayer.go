@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"math/big"
 	"relayer/common"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
@@ -39,8 +38,6 @@ type Relayer struct {
 	taraBridge         *bridge_contract_interface.BridgeContractInterface
 	taraClientOnEth    *tara_client_interface.TaraClientContractInterface
 	onFinalizedEpoch   chan int64
-	currentPeriod      int64
-	finalizedBlock     *big.Int
 	bridgeContractAddr eth_common.Address
 }
 
