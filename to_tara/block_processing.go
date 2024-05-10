@@ -1,4 +1,4 @@
-package relayer
+package to_tara
 
 import (
 	"crypto/sha256"
@@ -6,9 +6,10 @@ import (
 	"log"
 
 	"relayer/BeaconLightClient"
+	"relayer/common"
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
-	"github.com/ethereum/go-ethereum/common"
+	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/herumi/bls-eth-go-binary/bls"
 )
 
@@ -23,7 +24,7 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	if err != nil {
 		return nil, err
 	}
-	syncUpdate, err := r.GetSyncCommitteeUpdate(GetPeriodFromEpoch(epoch)-1, 1)
+	syncUpdate, err := r.GetSyncCommitteeUpdate(common.GetPeriodFromEpoch(epoch)-1, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +72,7 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 			return
 		}
 		// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.auth, *updateData, *syncCommitteeData)
+		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, *updateData, *syncCommitteeData)
 		if err != nil {
 			log.Printf("Failed to import next sync committee: %v", err)
 			return
@@ -80,7 +81,7 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 		log.Printf("Submitted transaction %s for importing next sync committee", tx.Hash().Hex())
 	} else {
 		// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-		tx, err := r.beaconLightClient.ImportFinalizedHeader(r.auth, *updateData)
+		tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
 		if err != nil {
 			log.Printf("Failed to import finalized header: %v", err)
 			return
@@ -92,7 +93,7 @@ func (r *Relayer) UpdateLightClient(epoch int64, updateSyncCommittee bool) {
 }
 
 func (r *Relayer) GetSyncCommitteeData(epoch int64) (*BeaconLightClient.BeaconLightClientUpdateSyncCommitteePeriodUpdate, error) {
-	syncUpdate, err := r.GetSyncCommitteeUpdate(GetPeriodFromEpoch(epoch), 1)
+	syncUpdate, err := r.GetSyncCommitteeUpdate(common.GetPeriodFromEpoch(epoch), 1)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func convertToBeaconChainLightClientHeader(blockHeader BeaconBlockHeader) Beacon
 	// Assuming these values for demonstration; you'd extract or map these from your actual data
 	executionPayloadHeader := BeaconLightClient.BeaconChainExecutionPayloadHeader{
 		ParentHash:       blockHeader.Execution.ParentHash,
-		FeeRecipient:     common.Address(blockHeader.Execution.FeeRecipient),
+		FeeRecipient:     eth_common.Address(blockHeader.Execution.FeeRecipient),
 		StateRoot:        blockHeader.Execution.StateRoot,
 		ReceiptsRoot:     blockHeader.Execution.ReceiptsRoot,
 		PrevRandao:       blockHeader.Execution.PrevRandao,
