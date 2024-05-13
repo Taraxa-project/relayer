@@ -2,14 +2,18 @@ package to_tara
 
 import (
 	"context"
+	"encoding/hex"
+	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient/gethclient"
 )
 
 func (r *Relayer) finalize() {
-	trx, err := r.ethBridge.FinalizeEpoch(r.taraAuth)
+	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
 	if err != nil {
 		log.Fatalf("Failed to call finalize: %v", err)
 	}
@@ -25,12 +29,14 @@ func (r *Relayer) finalize() {
 func (r *Relayer) getProof() {
 	key, err := r.ethClientContract.BridgeRootKey(nil)
 	if err != nil {
-		log.Fatalf("Failed to get bridge root: %v", err)
+		log.Fatalf("Failed to get bridge root key: %v", err)
 	}
+	strKey := "0x" + hex.EncodeToString(key[:])
+	log.Printf("Bridge root key: %s", strKey)
 
 	client := gethclient.New(r.ethClient.Client())
 
-	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{string(key[:])}, r.finalizedBlock)
+	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, r.finalizedBlock)
 	if err != nil {
 		log.Fatalf("Failed to get proof: %v", err)
 	}
@@ -39,21 +45,25 @@ func (r *Relayer) getProof() {
 		return
 	}
 
-	accountProof := make([][]byte, len(root.AccountProof))
-	for i, proof := range root.AccountProof {
-		accountProof[i] = []byte(proof)
+	// log.Printf("Root: %v", root)
+
+	accountProof, err := decodeProofs(root.AccountProof)
+	if err != nil {
+		log.Fatalf("Failed to decode account proof: %v", err)
 	}
 
-	storageProof := make([][]byte, len(root.StorageProof[0].Proof))
-	for i, proof := range root.StorageProof[0].Proof {
-		storageProof[i] = []byte(proof)
+	storageProof, err := decodeProofs(root.StorageProof[0].Proof)
+	if err != nil {
+		log.Fatalf("Failed to decode storage proof: %v", err)
 	}
 
-	trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, accountProof, storageProof)
+	trx, err := r.ethClientContract.ProcessBridgeRoot(r.ethAuth, accountProof, storageProof)
 	if err != nil {
 		log.Fatalf("Failed to call ProcessBridgeRoot: %v", err)
-		return
 	}
+
+	log.Println("ProcessBridgeRoot trx: ", trx.Hash().Hex())
+
 	_, err = bind.WaitMined(context.Background(), r.ethClient, trx)
 	if err != nil {
 		log.Fatalf("Failed to wait for ProcessBridgeRoot: %v", err)
@@ -71,4 +81,18 @@ func (r *Relayer) applyState() {
 		log.Fatalf("Failed to apply state: %v", err)
 	}
 	log.Printf("Apply state trx: %v", trx.Hash().Hex())
+}
+
+func decodeProofs(hexStrings []string) ([][]byte, error) {
+	decodedBytes := make([][]byte, len(hexStrings))
+	for i, proof := range hexStrings {
+		// Check for '0x' prefix and remove it if present
+		cleanProof := strings.TrimPrefix(proof, "0x")
+		data, err := hex.DecodeString(cleanProof)
+		if err != nil {
+			return nil, errors.New("failed to decode proof at index " + fmt.Sprint(i) + ": " + err.Error())
+		}
+		decodedBytes[i] = data
+	}
+	return decodedBytes, nil
 }

@@ -65,9 +65,12 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
 
-	// TODO: init eth client on tara here
+	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
+	}
 
-	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
+	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}
@@ -75,11 +78,6 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 	ethClientContract, err := EthClient.NewEthClient(cfg.EthClientOnTaraAddr, taraxaClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the ethClientContract contract: %v", err)
-	}
-
-	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
-	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
 	}
 
 	return &Relayer{

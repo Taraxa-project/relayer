@@ -64,23 +64,23 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) error {
 	// Fetch beacon block data for the given slot
 	updateData, err := r.GetBeaconBlockData(epoch)
 	if blockNumber > updateData.FinalizedHeader.Execution.BlockNumber {
-		return fmt.Errorf("Block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
+		return fmt.Errorf("block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
 	}
 	// print(*updateData)
 	if err != nil {
-		return fmt.Errorf("Failed to get beacon block data: %v", err)
+		return fmt.Errorf("failed to get beacon block data: %v", err)
 	}
 	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
 	tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
 	if err != nil {
-		return fmt.Errorf("Failed to import finalized header: %v", err)
+		return fmt.Errorf("failed to import finalized header: %v", err)
 	}
 
 	log.Printf("Submitted transaction %s for importing finalized header", tx.Hash().Hex())
 	_, err = bind.WaitMined(context.Background(), r.ethClient, tx)
 
 	if err != nil {
-		return fmt.Errorf("Failed to UpdateLightClient: %v", err)
+		return fmt.Errorf("failed to UpdateLightClient: %v", err)
 	}
 	return nil
 }
