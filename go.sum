@@ -4,8 +4,8 @@ github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migc
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDOSA=
 github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9SBzvHz7e8=
-github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.4 h1:v/ykzFlEKn7CUhWJ9aZE6cERm006gqhp9WXqB00AZK8=
-github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.4/go.mod h1:+wAnbGuPBUY0VGX5ET2RNlB1DFRBiZNzv7daylGqpVQ=
+github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.6 h1:d3ikxOQnsNKeN1l5eQ+UdybWuOV6HGOHTE7uZl8crv8=
+github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.6/go.mod h1:+wAnbGuPBUY0VGX5ET2RNlB1DFRBiZNzv7daylGqpVQ=
 github.com/VictoriaMetrics/fastcache v1.12.1 h1:i0mICQuojGDL3KblA7wUNlY5lOK6a4bwt3uRKnkZU40=
 github.com/VictoriaMetrics/fastcache v1.12.1/go.mod h1:tX04vaqcNoQeGLD+ra5pU5sWkuxnzWhEzLwhP9w653o=
 github.com/attestantio/go-eth2-client v0.19.10 h1:NLs9mcBvZpBTZ3du7Ey2NHQoj8d3UePY7pFBXX6C6qs=

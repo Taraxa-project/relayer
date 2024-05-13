@@ -5,7 +5,7 @@ go 1.21.6
 toolchain go1.21.10
 
 require (
-	github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.4
+	github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.6
 	github.com/attestantio/go-eth2-client v0.19.10
 	github.com/ethereum/go-ethereum v1.13.14
 	github.com/spf13/pflag v1.0.5
