@@ -5,8 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"math/big"
+
+	log "github.com/sirupsen/logrus"
 
 	"relayer/bindings/BeaconLightClient"
 	"relayer/internal/common"

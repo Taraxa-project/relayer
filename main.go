@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"relayer/internal/logging"
 	"relayer/internal/to_eth"
 	"relayer/internal/to_tara"
 	"syscall"
@@ -14,6 +15,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -38,7 +41,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
-
+	var log_level string
 	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", os.Getenv("ETHEREUM_API_ENDPOINT"), "Ethereum API endpoint")
 	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", os.Getenv("BEACON_LIGHT_CLIENT_ADDRESS"), "Address of the BeaconLightClient contract on Taraxa chain")
 	pflag.StringVar(&config.EthClientOnTaraAddress, "eth_client_on_tara_address", os.Getenv("ETH_CLIENT_ON_TARA_ADDRESS"), "Address of the EthClient contract on Taraxa chain")
@@ -48,7 +51,11 @@ func main() {
 	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", os.Getenv("TARAXA_NODE_URL"), "Taraxa node URL")
 	pflag.StringVar(&config.PrivateKey, "private_key", os.Getenv("PRIVATE_KEY"), "Private key")
 	pflag.StringVar(&config.LightNodeEndpoint, "light_node_endpoint", os.Getenv("LIGHT_NODE_ENDPOINT"), "Light node endpoint")
+	pflag.StringVar(&log_level, "log_level", os.Getenv("LOG_LEVEL"), "log level. could be only [trace, debug, info, warn, error, fatal]")
 	pflag.Parse()
+
+	data_dir := "./"
+	logging.Config(filepath.Join(data_dir, "logs"), log_level)
 
 	log.Printf("Starting relayer with config: %+v", config)
 
