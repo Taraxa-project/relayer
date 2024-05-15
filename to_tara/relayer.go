@@ -5,7 +5,6 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"log"
-	"math/big"
 	"relayer/BeaconLightClient"
 	"relayer/EthClient"
 	"relayer/common"
@@ -44,7 +43,6 @@ type Relayer struct {
 	onFinalizedEpoch       chan int64
 	onFinalizedBlockNumber chan uint64
 	currentPeriod          int64
-	finalizedBlock         *big.Int
 	bridgeContractAddr     eth_common.Address
 }
 
@@ -108,6 +106,7 @@ func (r *Relayer) Start(ctx context.Context) {
 
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
+	// go r.finalize()
 }
 
 func (r *Relayer) Close() {
@@ -128,19 +127,20 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				r.currentPeriod = common.GetPeriodFromEpoch(epoch)
 			}
 			if finalizedBlockNumber != 0 {
-				err := r.updateLightClient(epoch, finalizedBlockNumber)
+				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
+				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
-					log.Fatalf("Failed to update light client: %v", err)
+					log.Println("Did not to update light client:", err)
 				} else {
-					finalizedBlockNumber = 0
 					go func() {
-						r.getProof()
+						r.getProof(blockNum)
 						r.applyState()
 					}()
+					finalizedBlockNumber = 0
 				}
 			}
-
 		case blockNumber := <-r.onFinalizedBlockNumber:
+			log.Println("Received finalized block number", blockNumber)
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
 			log.Println("Calling finalize")

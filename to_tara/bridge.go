@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -15,28 +16,30 @@ import (
 func (r *Relayer) finalize() {
 	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
 	if err != nil {
-		log.Fatalf("Failed to call finalize: %v", err)
+		log.Println("Failed to call finalize:", err)
+		return
 	}
 	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
 	if err != nil {
-		log.Fatalf("Failed to wait for finalize: %v", err)
+		log.Println("Failed to wait for finalize:", err)
+		return
 	}
-	log.Printf("Receipt: %v", receipt)
-	r.finalizedBlock = receipt.BlockNumber
+	log.Printf("Finalized bridge on block: %d", receipt.BlockNumber.Uint64())
 	r.onFinalizedBlockNumber <- receipt.BlockNumber.Uint64()
 }
 
-func (r *Relayer) getProof() {
+func (r *Relayer) getProof(finalizedBlock *big.Int) {
 	key, err := r.ethClientContract.BridgeRootKey(nil)
 	if err != nil {
 		log.Fatalf("Failed to get bridge root key: %v", err)
 	}
 	strKey := "0x" + hex.EncodeToString(key[:])
-	log.Printf("Bridge root key: %s", strKey)
+
+	log.Printf("Bridge root key: %s and block %s", strKey, finalizedBlock.String())
 
 	client := gethclient.New(r.ethClient.Client())
 
-	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, r.finalizedBlock)
+	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, finalizedBlock)
 	if err != nil {
 		log.Fatalf("Failed to get proof: %v", err)
 	}
@@ -57,14 +60,14 @@ func (r *Relayer) getProof() {
 		log.Fatalf("Failed to decode storage proof: %v", err)
 	}
 
-	trx, err := r.ethClientContract.ProcessBridgeRoot(r.ethAuth, accountProof, storageProof)
+	trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, accountProof, storageProof)
 	if err != nil {
 		log.Fatalf("Failed to call ProcessBridgeRoot: %v", err)
 	}
 
 	log.Println("ProcessBridgeRoot trx: ", trx.Hash().Hex())
 
-	_, err = bind.WaitMined(context.Background(), r.ethClient, trx)
+	_, err = bind.WaitMined(context.Background(), r.taraxaClient, trx)
 	if err != nil {
 		log.Fatalf("Failed to wait for ProcessBridgeRoot: %v", err)
 	}
@@ -75,7 +78,6 @@ func (r *Relayer) applyState() {
 	if err != nil {
 		log.Fatalf("Failed to get state with proof: %v", err)
 	}
-
 	trx, err := r.taraBridge.ApplyState(r.taraAuth, proof)
 	if err != nil {
 		log.Fatalf("Failed to apply state: %v", err)

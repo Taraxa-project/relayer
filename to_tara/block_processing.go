@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"math/big"
 
 	"relayer/BeaconLightClient"
 	"relayer/common"
@@ -58,31 +59,33 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	}, nil
 }
 
-func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) error {
+func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, error) {
 	log.Printf("Attempting to update new header for epoch: %d", epoch)
 
 	// Fetch beacon block data for the given slot
 	updateData, err := r.GetBeaconBlockData(epoch)
 	if blockNumber > updateData.FinalizedHeader.Execution.BlockNumber {
-		return fmt.Errorf("block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
+		return nil, fmt.Errorf("block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
 	}
 	// print(*updateData)
 	if err != nil {
-		return fmt.Errorf("failed to get beacon block data: %v", err)
+		return nil, fmt.Errorf("failed to get beacon block data: %v", err)
 	}
+	log.Printf("Block number: %d", blockNumber)
 	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
 	tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
 	if err != nil {
-		return fmt.Errorf("failed to import finalized header: %v", err)
+		return nil, fmt.Errorf("failed to import finalized header: %v", err)
 	}
 
 	log.Printf("Submitted transaction %s for importing finalized header", tx.Hash().Hex())
-	_, err = bind.WaitMined(context.Background(), r.ethClient, tx)
+	receipt, err := bind.WaitMined(context.Background(), r.taraxaClient, tx)
 
 	if err != nil {
-		return fmt.Errorf("failed to UpdateLightClient: %v", err)
+		return nil, fmt.Errorf("failed to UpdateLightClient: %v", err)
 	}
-	return nil
+	log.Printf("Beacon chain light client updated on block: %d", receipt.BlockNumber.Uint64())
+	return big.NewInt(int64(updateData.FinalizedHeader.Execution.BlockNumber)), nil
 }
 
 func (r *Relayer) updateSyncCommittee(epoch int64) {
