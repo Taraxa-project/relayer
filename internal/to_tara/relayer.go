@@ -5,9 +5,9 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"log"
-	"relayer/BeaconLightClient"
-	"relayer/EthClient"
-	"relayer/common"
+	"relayer/bindings/BeaconLightClient"
+	"relayer/bindings/EthClient"
+	"relayer/internal/common"
 	"time"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"

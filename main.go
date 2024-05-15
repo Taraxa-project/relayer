@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"relayer/to_eth"
-	"relayer/to_tara"
+	"relayer/internal/to_eth"
+	"relayer/internal/to_tara"
 	"syscall"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -106,8 +106,8 @@ func main() {
 		os.Exit(0)
 	}()
 
-	taraRelayer.Start(ctx)
-	// ethRelayer.Start(ctx)
+	// taraRelayer.Start(ctx)
+	ethRelayer.Start(ctx)
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
 }

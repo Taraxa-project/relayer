@@ -24,8 +24,8 @@ jobs:
             echo "export VERSION=$(git rev-parse --short HEAD)" >> $BASH_ENV
 
       - run:
-         name: Login into gcr
-         command: |
+          name: Login into gcr
+          command: |
             echo ${GCLOUD_SERVICE_KEY} | docker login -u _json_key --password-stdin https://gcr.io
 
       - setup_remote_docker:
@@ -34,13 +34,13 @@ jobs:
 
       - run:
           name: Build docker image
-          command: | 
+          command: |
             docker build -t ${IMAGE}:${VERSION} .
 
       - run:
           name: Tag docker image
-          command: | 
-            
+          command: |
+
             if [[ ${CIRCLE_BRANCH} == "main" ]]; then
               docker tag ${IMAGE}:${VERSION} ${GCP_IMAGE}:${CIRCLE_SHA1}
               docker tag ${IMAGE}:${VERSION} ${GCP_IMAGE}:${VERSION}
@@ -60,7 +60,7 @@ jobs:
 
       - run:
           name: Push docker image to registry
-          command: | 
+          command: |
 
             if [[ ${CIRCLE_BRANCH} == "main" ]]; then
               docker push ${GCP_IMAGE}:${CIRCLE_SHA1}
@@ -80,7 +80,6 @@ jobs:
             fi
 
 workflows:
-
   build-and-push-docker-image:
     jobs:
       - build_and_push_docker_image:
@@ -88,7 +87,7 @@ workflows:
             - GCR
           filters:
             branches:
-               only:
+              only:
                 - main
                 - develop
             tags:
@@ -119,10 +118,10 @@ workflows:
           filters:
             branches:
               only:
-              - /^chart\/.*/
-              - /^chore\/chart-.*/
-              - /^fix\/chart-.*/
-              - /^feature\/chart-.*/
+                - /^chart\/.*/
+                - /^chore\/chart-.*/
+                - /^fix\/chart-.*/
+                - /^feature\/chart-.*/
 
   release-helm-chart:
     jobs:
