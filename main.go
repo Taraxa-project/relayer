@@ -12,8 +12,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -34,33 +34,21 @@ type Config struct {
 func main() {
 	var config Config
 
-	// Bind flags to viper
-	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", "", "Ethereum API endpoint")
-	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", "", "Address of the BeaconLightClient contract on Taraxa chain")
-	pflag.StringVar(&config.EthClientOnTaraAddress, "eth_client_on_tara_address", "", "Address of the EthClient contract on Taraxa chain")
-	pflag.StringVar(&config.TaraBridgeAddress, "tara_bridge_address", "", "Address of the Tara bridge contract on Taraxa chain")
-	pflag.StringVar(&config.TaraClientOnEthAddress, "tara_client_on_eth_address", "", "Address of the TaraClient contract on Ethereum chain")
-	pflag.StringVar(&config.EthBridgeAddress, "eth_bridge_address", "", "Address of the Eth bridge contract on Ethereum chain")
-	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", "", "Taraxa node URL")
-	pflag.StringVar(&config.PrivateKey, "private_key", "", "Private key")
-	pflag.StringVar(&config.LightNodeEndpoint, "light_node_endpoint", "", "Light node endpoint")
-	// Parse flags
-	pflag.Parse()
-
-	// Bind environment variables to viper
-	_ = viper.BindEnv("ethereum_api_endpoint", "ETHEREUM_API_ENDPOINT")
-	_ = viper.BindEnv("beacon_light_client_address", "BEACON_LIGHT_CLIENT_ADDRESS")
-	_ = viper.BindEnv("eth_client_on_tara_address", "ETH_CLIENT_ON_TARA_ADDRESS")
-	_ = viper.BindEnv("tara_bridge_address", "TARA_BRIDGE_ADDRESS")
-	_ = viper.BindEnv("tara_client_on_eth_address", "TARA_CLIENT_ON_ETH_ADDRESS")
-	_ = viper.BindEnv("eth_bridge_address", "ETH_BRIDGE_ADDRESS")
-	_ = viper.BindEnv("taraxa_node_url", "TARAXA_NODE_URL")
-	_ = viper.BindEnv("private_key", "PRIVATE_KEY")
-	_ = viper.BindEnv("light_node_endpoint", "LIGHT_NODE_ENDPOINT")
-
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatalf("Failed to unmarshal config: %v", err)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
 	}
+
+	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", os.Getenv("ETHEREUM_API_ENDPOINT"), "Ethereum API endpoint")
+	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", os.Getenv("BEACON_LIGHT_CLIENT_ADDRESS"), "Address of the BeaconLightClient contract on Taraxa chain")
+	pflag.StringVar(&config.EthClientOnTaraAddress, "eth_client_on_tara_address", os.Getenv("ETH_CLIENT_ON_TARA_ADDRESS"), "Address of the EthClient contract on Taraxa chain")
+	pflag.StringVar(&config.TaraBridgeAddress, "tara_bridge_address", os.Getenv("TARA_BRIDGE_ADDRESS"), "Address of the Tara bridge contract on Taraxa chain")
+	pflag.StringVar(&config.TaraClientOnEthAddress, "tara_client_on_eth_address", os.Getenv("TARA_CLIENT_ON_ETH_ADDRESS"), "Address of the TaraClient contract on Ethereum chain")
+	pflag.StringVar(&config.EthBridgeAddress, "eth_bridge_address", os.Getenv("ETH_BRIDGE_ADDRESS"), "Address of the Eth bridge contract on Ethereum chain")
+	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", os.Getenv("TARAXA_NODE_URL"), "Taraxa node URL")
+	pflag.StringVar(&config.PrivateKey, "private_key", os.Getenv("PRIVATE_KEY"), "Private key")
+	pflag.StringVar(&config.LightNodeEndpoint, "light_node_endpoint", os.Getenv("LIGHT_NODE_ENDPOINT"), "Light node endpoint")
+	pflag.Parse()
 
 	log.Printf("Starting relayer with config: %+v", config)
 
@@ -72,11 +60,15 @@ func main() {
 	}
 
 	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
-		BeaconNodeEndpoint:  config.EthereumAPIEndpoint,
-		TaraxaRPCURL:        config.TaraxaNodeURL,
-		EthClientOnTaraAddr: common.HexToAddress(config.EthClientOnTaraAddress),
-		Key:                 privateKey,
-		LightNodeEndpoint:   config.LightNodeEndpoint,
+		BeaconNodeEndpoint:    config.EthereumAPIEndpoint,
+		EthRPCURL:             config.EthereumAPIEndpoint,
+		TaraxaRPCURL:          config.TaraxaNodeURL,
+		BeaconLightClientAddr: common.HexToAddress(config.BeaconLightClientAddress),
+		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
+		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
+		EthClientOnTaraAddr:   common.HexToAddress(config.EthClientOnTaraAddress),
+		Key:                   privateKey,
+		LightNodeEndpoint:     config.LightNodeEndpoint,
 	})
 	if err != nil {
 		panic(err)
@@ -115,7 +107,7 @@ func main() {
 	}()
 
 	taraRelayer.Start(ctx)
-	ethRelayer.Start(ctx)
+	// ethRelayer.Start(ctx)
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
 }

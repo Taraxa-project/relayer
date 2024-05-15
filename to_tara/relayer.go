@@ -5,9 +5,10 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"log"
-	"math/big"
 	"relayer/BeaconLightClient"
+	"relayer/EthClient"
 	"relayer/common"
+	"time"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -29,19 +30,20 @@ type Config struct {
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	beaconNodeEndpoint string
-	lightNodeEndpoint  string
-	taraxaClient       *ethclient.Client
-	taraAuth           *bind.TransactOpts
-	ethClient          *ethclient.Client
-	ethAuth            *bind.TransactOpts
-	beaconLightClient  *BeaconLightClient.BeaconLightClient
-	ethBridge          *bridge_contract_interface.BridgeContractInterface
-	taraBridge         *bridge_contract_interface.BridgeContractInterface
-	onFinalizedEpoch   chan int64
-	currentPeriod      int64
-	finalizedBlock     *big.Int
-	bridgeContractAddr eth_common.Address
+	beaconNodeEndpoint     string
+	lightNodeEndpoint      string
+	taraxaClient           *ethclient.Client
+	taraAuth               *bind.TransactOpts
+	ethClient              *ethclient.Client
+	ethAuth                *bind.TransactOpts
+	beaconLightClient      *BeaconLightClient.BeaconLightClient
+	ethClientContract      *EthClient.EthClient
+	ethBridge              *bridge_contract_interface.BridgeContractInterface
+	taraBridge             *bridge_contract_interface.BridgeContractInterface
+	onFinalizedEpoch       chan int64
+	onFinalizedBlockNumber chan uint64
+	currentPeriod          int64
+	bridgeContractAddr     eth_common.Address
 }
 
 // NewRelayer creates a new Relayer instance
@@ -61,16 +63,19 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
 
-	// TODO: init eth client on tara here
+	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
+	}
 
-	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
+	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}
 
-	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
+	ethClientContract, err := EthClient.NewEthClient(cfg.EthClientOnTaraAddr, taraxaClient)
 	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
+		return nil, fmt.Errorf("failed to instantiate the ethClientContract contract: %v", err)
 	}
 
 	return &Relayer{
@@ -80,6 +85,7 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		ethClient:          ethClient,
 		ethAuth:            ethAuth,
 		beaconLightClient:  beaconLightClient,
+		ethClientContract:  ethClientContract,
 		ethBridge:          ethBridge,
 		taraBridge:         taraBridge,
 		lightNodeEndpoint:  cfg.LightNodeEndpoint,
@@ -89,24 +95,56 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
+	r.onFinalizedBlockNumber = make(chan uint64)
+
+	slot, err := r.beaconLightClient.Slot(nil)
+	if err != nil {
+		log.Fatalf("Failed to get current slot from contract: %v", err)
+		return
+	}
+	r.currentPeriod = common.GetPeriodFromSlot(int64(slot))
+
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
+	// go r.finalize()
 }
 
 func (r *Relayer) Close() {
 	close(r.onFinalizedEpoch)
+	close(r.onFinalizedBlockNumber)
 }
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
+	var finalizedBlockNumber uint64
+	ticker := time.NewTicker(20 * time.Minute)
+	defer ticker.Stop()
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
 			log.Printf("Processing new block for epoch: %d", epoch)
-
-			r.UpdateLightClient(epoch, r.currentPeriod != common.GetPeriodFromEpoch(epoch))
 			if r.currentPeriod != common.GetPeriodFromEpoch(epoch) {
+				r.updateSyncCommittee(epoch)
 				r.currentPeriod = common.GetPeriodFromEpoch(epoch)
 			}
+			if finalizedBlockNumber != 0 {
+				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
+				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
+				if err != nil {
+					log.Println("Did not to update light client:", err)
+				} else {
+					go func() {
+						r.getProof(blockNum)
+						r.applyState()
+					}()
+					finalizedBlockNumber = 0
+				}
+			}
+		case blockNumber := <-r.onFinalizedBlockNumber:
+			log.Println("Received finalized block number", blockNumber)
+			finalizedBlockNumber = blockNumber
+		case <-ticker.C:
+			log.Println("Calling finalize")
+			r.finalize()
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return

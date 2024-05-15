@@ -18,6 +18,10 @@ func GetSlotFromEpoch(epoch int64) int64 {
 	return epoch * SLOTS_PER_EPOCH
 }
 
+func GetPeriodFromSlot(slot int64) int64 {
+	return slot / EPOCHS_PER_SYNC_COMMITTEE_PERIOD / SLOTS_PER_EPOCH
+}
+
 func GetPeriodFromEpoch(epoch int64) int64 {
 	return epoch / EPOCHS_PER_SYNC_COMMITTEE_PERIOD
 }
