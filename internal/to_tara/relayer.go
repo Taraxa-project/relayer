@@ -105,9 +105,9 @@ func (r *Relayer) Start(ctx context.Context) {
 	}
 	r.currentPeriod = common.GetPeriodFromSlot(int64(slot))
 
+	r.initialize()
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
-	// go r.finalize()
 }
 
 func (r *Relayer) Close() {
@@ -117,8 +117,9 @@ func (r *Relayer) Close() {
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
 	var finalizedBlockNumber uint64
-	ticker := time.NewTicker(20 * time.Minute)
+	ticker := time.NewTicker(30 * time.Minute)
 	defer ticker.Stop()
+
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
@@ -131,7 +132,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
 				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
-					log.Println("Did not to update light client:", err)
+					log.Fatalf("Did not to update light client: %v", err)
 				} else {
 					go func() {
 						r.getProof(blockNum)
@@ -142,6 +143,10 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			}
 		case blockNumber := <-r.onFinalizedBlockNumber:
 			log.Println("Received finalized block number", blockNumber)
+			if finalizedBlockNumber != 0 {
+				log.Println("Finalized block number was not processed yet, skipping this one")
+				continue
+			}
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
 			log.Println("Calling finalize")
@@ -152,3 +157,22 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		}
 	}
 }
+
+func (r *Relayer) initialize() {
+	ethEpoch, err := r.ethBridge.FinalizedEpoch(nil)
+	if err != nil {
+		log.Fatalf("Failed to get finalized epoch from ETH contract: %v", err)
+	}
+	taraEpoch, err := r.taraBridge.FinalizedEpoch(nil)
+	if err != nil {
+		log.Fatalf("Failed to get finalized epoch from TARA contract: %v", err)
+	}
+	if ethEpoch != taraEpoch {
+		log.Fatalf("ETH and TARA contracts are not in sync. ETH: %d, TARA: %d", ethEpoch, taraEpoch)
+		// r.sync(taraEpoch, ethEpoch)
+	}
+}
+
+// func (r *Relayer) sync(from, to *big.Int) {
+// 	//TODO
+// }

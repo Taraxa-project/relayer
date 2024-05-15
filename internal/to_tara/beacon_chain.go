@@ -36,7 +36,7 @@ func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
 }
 
 func (r *Relayer) GetForkVersion(state string) (*ForkVersion, error) {
-	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.beaconNodeEndpoint, state)
+	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.lightNodeEndpoint, state)
 	var forkVersion *ForkVersion
 	forkVersion, err := FetchAndParseData[ForkVersion](url)
 	if err != nil {

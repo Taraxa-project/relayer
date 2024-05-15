@@ -46,7 +46,6 @@ func (r *Relayer) getProof(finalizedBlock *big.Int) {
 	}
 	if len(root.StorageProof) != 1 {
 		log.Fatalf("Invalid storage proof length: %d", len(root.StorageProof))
-		return
 	}
 
 	// log.Printf("Root: %v", root)
