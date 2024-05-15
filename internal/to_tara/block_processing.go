@@ -5,11 +5,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"math/big"
 
-	"relayer/BeaconLightClient"
-	"relayer/common"
+	log "github.com/sirupsen/logrus"
+
+	"relayer/bindings/BeaconLightClient"
+	"relayer/internal/common"
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"

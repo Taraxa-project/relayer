@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"relayer/common"
+	"relayer/internal/common"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	tara_client_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/eth/tara_client_contract_client/contract_interface"
@@ -92,6 +92,14 @@ func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
 	// go r.startEventProcessing(ctx)
 	go r.ProcessPillarBlocks(ctx)
+}
+
+func (r *Relayer) BridgeBlock() {
+	r.ProcessPillarBlocks(context.Background())
+}
+
+func (r *Relayer) BridgeState() {
+	r.ProcessPillarBlocks(context.Background())
 }
 
 func (r *Relayer) Close() {

@@ -127,6 +127,7 @@ func (r *Relayer) processNewPillarBlock(pillarBlockData *tara_rpc_types.PillarBl
 }
 
 func (r *Relayer) ProcessPillarBlocks(ctx context.Context) {
+	r.processNewPillarBlock(nil)
 	// Listen to new pillar block data
 	newPillarBlockData := make(chan *tara_rpc_types.PillarBlockData)
 	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", "includeSignatures")
