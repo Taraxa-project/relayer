@@ -90,16 +90,10 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
-	// go r.startEventProcessing(ctx)
-	go r.ProcessPillarBlocks(ctx)
-}
+	// sync
+	r.processPillarBlocks()
 
-func (r *Relayer) BridgeBlock() {
-	r.ProcessPillarBlocks(context.Background())
-}
-
-func (r *Relayer) BridgeState() {
-	r.ProcessPillarBlocks(context.Background())
+	go r.ListenForPillarBlockUpdates(ctx)
 }
 
 func (r *Relayer) Close() {
