@@ -4,14 +4,15 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"relayer/bindings/BeaconLightClient"
-	"relayer/bindings/EthClient"
-	"relayer/internal/common"
 	"time"
+
+	"github.com/Taraxa-project/relayer/bindings/BeaconLightClient"
+	"github.com/Taraxa-project/relayer/bindings/EthClient"
+	"github.com/Taraxa-project/relayer/internal/common"
 
 	log "github.com/sirupsen/logrus"
 
-	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
+	bridge_contract_interface "github.com/Taraxa-project/relayer/clients/bridge_contract_client/contract_interface"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"

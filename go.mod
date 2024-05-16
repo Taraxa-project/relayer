@@ -1,4 +1,4 @@
-module relayer
+module github.com/Taraxa-project/relayer
 
 go 1.21.6
 

@@ -9,8 +9,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"relayer/bindings/BeaconLightClient"
-	"relayer/internal/common"
+	"github.com/Taraxa-project/relayer/bindings/BeaconLightClient"
+	"github.com/Taraxa-project/relayer/internal/common"
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"

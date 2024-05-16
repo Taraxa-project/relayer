@@ -1,0 +1,16 @@
+{
+    "tara_network": {
+        "http_url": "https://rpc-pr-2618.prnet.taraxa.io",     
+        "ws_url": "wss://ws-pr-2618.prnet.taraxa.io/",
+        "chain_id": 200,
+        "dpos_contract_address": "0x00000000000000000000000000000000000000FE",
+        "bridge_contract_address": "0xFBC597EEf68722E05bbC1e52264103b416551dFB",
+        "eth_client_contract_address": "0x0"
+    },
+    "eth_network": {
+        "http_url": "https://holesky.drpc.org",     
+        "chain_id": 17000,
+        "tara_client_contract_address": "0x515d5e39a9FfF8dBBD84C8064ea3Bc4ad2610442",
+        "bridge_contract_address": "0x762dA247D9F269b1689d4baaD587243eccF7910c"
+    }
+}

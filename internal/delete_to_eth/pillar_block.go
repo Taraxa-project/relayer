@@ -5,8 +5,8 @@ import (
 	"log"
 	"math/big"
 
-	tara_client_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/eth/tara_client_contract_client/contract_interface"
-	tara_rpc_types "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/tara/rpc_client/types"
+	tara_client_contract_interface "github.com/Taraxa-project/relayer/clients/eth/tara_client_contract_client/contract_interface"
+	tara_rpc_types "github.com/Taraxa-project/relayer/clients/tara/rpc_client/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 )

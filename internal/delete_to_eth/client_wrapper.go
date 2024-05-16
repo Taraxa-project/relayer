@@ -3,7 +3,7 @@ package to_eth
 import (
 	"context"
 
-	tara_rpc_types "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/tara/rpc_client/types"
+	tara_rpc_types "github.com/Taraxa-project/relayer/clients/tara/rpc_client/types"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/ethclient"
