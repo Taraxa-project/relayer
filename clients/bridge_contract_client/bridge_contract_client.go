@@ -11,7 +11,7 @@ import (
 
 type BridgeContractClient struct {
 	*client_base.ClientBase
-	bridgeInterface *bridge_contract_interface.BridgeContractInterface
+	*bridge_contract_interface.BridgeContractInterface
 }
 
 func NewBridgeContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol) (*BridgeContractClient, error) {
@@ -24,7 +24,7 @@ func NewBridgeContractClient(config client_base.NetConfig, communicationProtocol
 	}
 
 	// TODO: fix config
-	bridgeContractClient.bridgeInterface, err = bridge_contract_interface.NewBridgeContractInterface(bridgeContractClient.Config.ContractAddress, bridgeContractClient.EthClient)
+	bridgeContractClient.BridgeContractInterface, err = bridge_contract_interface.NewBridgeContractInterface(bridgeContractClient.Config.ContractAddress, bridgeContractClient.EthClient)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func NewSharedBridgeContractClient(clientBase *client_base.ClientBase, contractA
 	bridgeContractClient := new(BridgeContractClient)
 	bridgeContractClient.ClientBase = clientBase
 
-	bridgeContractClient.bridgeInterface, err = bridge_contract_interface.NewBridgeContractInterface(contractAddress, bridgeContractClient.EthClient)
+	bridgeContractClient.BridgeContractInterface, err = bridge_contract_interface.NewBridgeContractInterface(contractAddress, bridgeContractClient.EthClient)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func NewSharedBridgeContractClient(clientBase *client_base.ClientBase, contractA
 }
 
 func (BridgeContractClient *BridgeContractClient) GetStateWithProof() (bridge_contract_interface.SharedStructsStateWithProof, error) {
-	return BridgeContractClient.bridgeInterface.GetStateWithProof(&bind.CallOpts{})
+	return BridgeContractClient.BridgeContractInterface.GetStateWithProof(&bind.CallOpts{})
 }
 
 func (BridgeContractClient *BridgeContractClient) ApplyState(transactor *client_base.Transactor, stateWithProof bridge_contract_interface.SharedStructsStateWithProof) (*types.Transaction, error) {
@@ -56,5 +56,14 @@ func (BridgeContractClient *BridgeContractClient) ApplyState(transactor *client_
 		return nil, err
 	}
 
-	return BridgeContractClient.bridgeInterface.ApplyState(transactOpts, stateWithProof)
+	return BridgeContractClient.BridgeContractInterface.ApplyState(transactOpts, stateWithProof)
+}
+
+func (BridgeContractClient *BridgeContractClient) FinalizeEpoch(transactor *client_base.Transactor) (*types.Transaction, error) {
+	transactOpts, err := BridgeContractClient.CreateNewTransactOpts(transactor)
+	if err != nil {
+		return nil, err
+	}
+
+	return BridgeContractClient.BridgeContractInterface.FinalizeEpoch(transactOpts)
 }

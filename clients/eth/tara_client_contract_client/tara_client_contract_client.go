@@ -11,7 +11,7 @@ import (
 // TaraClientContractClient contains variables needed for communication with taraxa client smart contract on eth
 type TaraClientContractClient struct {
 	*client_base.ClientBase
-	taraClientInterface *tara_client_contract_interface.TaraClientContractInterface
+	*tara_client_contract_interface.TaraClientContractInterface
 }
 
 func NewTaraClientContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol) (*TaraClientContractClient, error) {
@@ -23,7 +23,7 @@ func NewTaraClientContractClient(config client_base.NetConfig, communicationProt
 		return nil, err
 	}
 
-	taraClientContractClient.taraClientInterface, err = tara_client_contract_interface.NewTaraClientContractInterface(taraClientContractClient.Config.ContractAddress, taraClientContractClient.EthClient)
+	taraClientContractClient.TaraClientContractInterface, err = tara_client_contract_interface.NewTaraClientContractInterface(taraClientContractClient.Config.ContractAddress, taraClientContractClient.EthClient)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func NewSharedTaraClientContractClient(clientBase *client_base.ClientBase, contr
 	taraClientContractClient := new(TaraClientContractClient)
 	taraClientContractClient.ClientBase = clientBase
 
-	taraClientContractClient.taraClientInterface, err = tara_client_contract_interface.NewTaraClientContractInterface(contractAddress, taraClientContractClient.EthClient)
+	taraClientContractClient.TaraClientContractInterface, err = tara_client_contract_interface.NewTaraClientContractInterface(contractAddress, taraClientContractClient.EthClient)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func NewSharedTaraClientContractClient(clientBase *client_base.ClientBase, contr
 }
 
 func (taraClientContractClient *TaraClientContractClient) GetFinalizedPillarBlock() (tara_client_contract_interface.PillarBlockFinalizedBlock, error) {
-	return taraClientContractClient.taraClientInterface.GetFinalized(&bind.CallOpts{})
+	return taraClientContractClient.TaraClientContractInterface.GetFinalized(&bind.CallOpts{})
 }
 
 func (taraClientContractClient *TaraClientContractClient) FinalizeBlocks(transactor *client_base.Transactor, blocks []tara_client_contract_interface.PillarBlockWithChanges, lastBlockSigs []tara_client_contract_interface.CompactSignature) (*types.Transaction, error) {
@@ -55,5 +55,5 @@ func (taraClientContractClient *TaraClientContractClient) FinalizeBlocks(transac
 		return nil, err
 	}
 
-	return taraClientContractClient.taraClientInterface.FinalizeBlocks(transactOpts, blocks, lastBlockSigs)
+	return taraClientContractClient.TaraClientContractInterface.FinalizeBlocks(transactOpts, blocks, lastBlockSigs)
 }

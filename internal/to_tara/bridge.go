@@ -15,12 +15,12 @@ import (
 )
 
 func (r *Relayer) finalize() {
-	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
+	trx, err := r.ethClient.BridgeContractClient.FinalizeEpoch(r.ethTransactor)
 	if err != nil {
 		log.Println("Failed to call finalize:", err)
 		return
 	}
-	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
+	receipt, err := bind.WaitMined(context.Background(), r.ethClient.EthClient, trx)
 	if err != nil {
 		log.Println("Failed to wait for finalize:", err)
 		return
@@ -38,9 +38,9 @@ func (r *Relayer) getProof(finalizedBlock *big.Int) {
 
 	log.Printf("Bridge root key: %s and block %s", strKey, finalizedBlock.String())
 
-	client := gethclient.New(r.ethClient.Client())
+	client := gethclient.New(r.ethClient.EthClient.Client())
 
-	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, finalizedBlock)
+	root, err := client.GetProof(context.Background(), r.ethClient.Config.BridgeContractAddress, []string{strKey}, finalizedBlock)
 	if err != nil {
 		log.Fatalf("Failed to get proof: %v", err)
 	}
@@ -60,14 +60,21 @@ func (r *Relayer) getProof(finalizedBlock *big.Int) {
 		log.Fatalf("Failed to decode storage proof: %v", err)
 	}
 
-	trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, accountProof, storageProof)
+	opts, err := r.taraClient.CreateNewTransactOpts(r.taraTransactor)
+	if err != nil {
+		log.Printf("failed to create transact opts: %v", err)
+		return
+	}
+
+	// TODO: add ethClientContractClient into the taraClient
+	trx, err := r.ethClientContract.ProcessBridgeRoot(opts, accountProof, storageProof)
 	if err != nil {
 		log.Fatalf("Failed to call ProcessBridgeRoot: %v", err)
 	}
 
 	log.Println("ProcessBridgeRoot trx: ", trx.Hash().Hex())
 
-	_, err = bind.WaitMined(context.Background(), r.taraxaClient, trx)
+	_, err = bind.WaitMined(context.Background(), r.taraClient.EthClient, trx)
 	if err != nil {
 		log.Fatalf("Failed to wait for ProcessBridgeRoot: %v", err)
 	}
@@ -82,7 +89,7 @@ func (r *Relayer) applyState(finalizedBlock *big.Int) {
 	if err != nil {
 		log.Fatalf("Failed to get state with proof: %v", err)
 	}
-	trx, err := r.taraBridge.ApplyState(r.taraAuth, proof)
+	trx, err := r.taraClient.BridgeContractClient.ApplyState(r.taraTransactor, proof)
 	if err != nil {
 		log.Fatalf("Failed to apply state: %v", err)
 	}

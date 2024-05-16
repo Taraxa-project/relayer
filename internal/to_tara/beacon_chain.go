@@ -11,7 +11,7 @@ import (
 
 // Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
 func (r *Relayer) GetBlockHeader(blockType string) (*BeaconBlock, error) {
-	url := fmt.Sprintf("%s/eth/v1/beacon/headers/%s", r.beaconNodeEndpoint, blockType)
+	url := fmt.Sprintf("%s/eth/v1/beacon/headers/%s", r.Config.BeaconNodeEndpoint, blockType)
 	var beaconBlockHeader *BeaconBlock
 	beaconBlockHeader, err := FetchAndParseData[BeaconBlock](url)
 	if err != nil {
@@ -24,7 +24,7 @@ func (r *Relayer) GetBlockHeader(blockType string) (*BeaconBlock, error) {
 
 // Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
 func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
-	url := fmt.Sprintf("%s/eth/v2/beacon/blocks/%s", r.beaconNodeEndpoint, slot)
+	url := fmt.Sprintf("%s/eth/v2/beacon/blocks/%s", r.Config.BeaconNodeEndpoint, slot)
 	var beaconBlockHeader *BeaconBlock
 	beaconBlockHeader, err := FetchAndParseData[BeaconBlock](url)
 	if err != nil {
@@ -36,7 +36,7 @@ func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
 }
 
 func (r *Relayer) GetForkVersion(state string) (*ForkVersion, error) {
-	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.lightNodeEndpoint, state)
+	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.Config.LightNodeEndpoint, state)
 	var forkVersion *ForkVersion
 	forkVersion, err := FetchAndParseData[ForkVersion](url)
 	if err != nil {
@@ -48,7 +48,7 @@ func (r *Relayer) GetForkVersion(state string) (*ForkVersion, error) {
 }
 
 func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, error) {
-	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/finality_update", r.lightNodeEndpoint)
+	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/finality_update", r.Config.LightNodeEndpoint)
 	var finalityUpdate *LightClientFinalityUpdate
 	finalityUpdate, err := FetchAndParseData[LightClientFinalityUpdate](url)
 	if err != nil {
@@ -60,7 +60,7 @@ func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, er
 }
 
 func (r *Relayer) GetSyncCommitteeUpdate(startPeriod, count int64) (*SyncCommitteeUpdate, error) {
-	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/updates?start_period=%d&count=%d", r.lightNodeEndpoint, startPeriod, count)
+	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/updates?start_period=%d&count=%d", r.Config.LightNodeEndpoint, startPeriod, count)
 	var syncUpdates *[]SyncCommitteeUpdate
 	syncUpdates, err := FetchAndParseData[[]SyncCommitteeUpdate](url)
 	if err != nil {

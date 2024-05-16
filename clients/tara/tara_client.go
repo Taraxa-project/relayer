@@ -19,9 +19,10 @@ type TaraClient struct {
 
 type TaraClientConfig struct {
 	client_base.NetConfig
-	BridgeContractAddress    common.Address `json:"bridge_contract_address"`
-	DposContractAddress      common.Address `json:"dpos_contract_address"`
-	EthClientContractAddress common.Address `json:"eth_client_contract_address"`
+	BridgeContractAddress            common.Address `json:"bridge_contract_address"`
+	DposContractAddress              common.Address `json:"dpos_contract_address"`
+	EthClientContractAddress         common.Address `json:"eth_client_contract_address"`
+	BeaconLightClientContractAddress common.Address `json:"beacon_light_client_contract_address"`
 }
 
 func NewTaraClient(config TaraClientConfig, communicationProtocol client_base.CommunicationProtocol) (*TaraClient, error) {

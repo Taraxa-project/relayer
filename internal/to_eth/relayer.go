@@ -14,17 +14,24 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
+type RelayerConfig struct {
+	*eth_client.EthClientConfig
+}
+
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	taraClient       *tara_client.TaraClient
-	ethClient        *eth_client.EthClient
-	transactor       *client_base.Transactor
+	ethClient     *eth_client.EthClient
+	ethTransactor *client_base.Transactor
+
+	taraClient     *tara_client.TaraClient
+	taraTransactor *client_base.Transactor
+
 	ficusHfConfig    tara_rpc_types.FicusHfConfig
 	onFinalizedEpoch chan int64
 }
 
 // NewRelayer creates a new Relayer instance
-func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthClient, transactor *client_base.Transactor) (*Relayer, error) {
+func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthClient, ethTransactor *client_base.Transactor, taraTransactor *client_base.Transactor) (*Relayer, error) {
 	// Get tara config
 	taraNodeConfig, err := taraClient.RpcClient.GetTaraConfig()
 	if err != nil {
@@ -48,7 +55,8 @@ func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthCli
 	relayer := new(Relayer)
 	relayer.ethClient = ethClient
 	relayer.taraClient = taraClient
-	relayer.transactor = transactor
+	relayer.ethTransactor = ethTransactor
+	relayer.taraTransactor = taraTransactor
 	relayer.ficusHfConfig = taraNodeConfig.Hardforks.FicusHf
 
 	return relayer, nil
@@ -89,7 +97,7 @@ func (r *Relayer) processBridgeStateProof(finalizeBlocksTx *types.Transaction) {
 	}
 
 	// Send tara state with proof to eth bridge contract
-	applyStateTx, err := r.ethClient.BridgeContractClient.ApplyState(r.transactor, taraStateWithProof)
+	applyStateTx, err := r.ethClient.BridgeContractClient.ApplyState(r.ethTransactor, taraStateWithProof)
 	if err != nil {
 		log.Fatal("ApplyState err: ", err)
 	}
@@ -157,7 +165,7 @@ func (r *Relayer) processNewPillarBlock(pillarBlockData *tara_rpc_types.PillarBl
 		// Send blocks into the tara client contract on ethereum
 		if numOfProcessedBlocks == maxNumOfBlocksInBatch || period == expectedLatestPillarBlockPeriod {
 			// TODO: use transact opts, not transactor obj
-			finalizeBlocksTx, err := r.ethClient.TaraClientContractClient.FinalizeBlocks(r.transactor, blocks, blocksSignatures[len(blocksSignatures)-1])
+			finalizeBlocksTx, err := r.ethClient.TaraClientContractClient.FinalizeBlocks(r.ethTransactor, blocks, blocksSignatures[len(blocksSignatures)-1])
 			if err != nil {
 				log.Fatal("FinalizeBlocks tx failed: ", err)
 			}
@@ -172,7 +180,7 @@ func (r *Relayer) processNewPillarBlock(pillarBlockData *tara_rpc_types.PillarBl
 	}
 }
 
-func (r *Relayer) ProcessPillarBlocks(ctx context.Context) {
+func (r *Relayer) processPillarBlocks(ctx context.Context) {
 	// Send all missing pillar blocks to tara client contract on ethereum
 	r.processNewPillarBlock(nil)
 
@@ -197,15 +205,15 @@ func (r *Relayer) ProcessPillarBlocks(ctx context.Context) {
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
 	// go r.startEventProcessing(ctx)
-	go r.ProcessPillarBlocks(ctx)
+	go r.processPillarBlocks(ctx)
 }
 
 func (r *Relayer) BridgeBlock() {
-	r.ProcessPillarBlocks(context.Background())
+	r.processPillarBlocks(context.Background())
 }
 
 func (r *Relayer) BridgeState() {
-	r.ProcessPillarBlocks(context.Background())
+	r.processPillarBlocks(context.Background())
 }
 
 func (r *Relayer) Close() {

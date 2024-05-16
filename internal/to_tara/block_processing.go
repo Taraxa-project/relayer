@@ -71,14 +71,20 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, 
 		return nil, fmt.Errorf("failed to get beacon block data: %v", err)
 	}
 	log.Printf("Block number: %d", blockNumber)
+
+	// TODO: should be here ethTransactor ? What is beaconLightClient ???
+	opts, err := r.taraClient.CreateNewTransactOpts(r.taraTransactor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create transact opts: %v", err)
+	}
 	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-	tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
+	tx, err := r.beaconLightClient.ImportFinalizedHeader(opts, *updateData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to import finalized header: %v", err)
 	}
 
 	log.Printf("Submitted transaction %s for importing finalized header", tx.Hash().Hex())
-	receipt, err := bind.WaitMined(context.Background(), r.taraxaClient, tx)
+	receipt, err := bind.WaitMined(context.Background(), r.taraClient.EthClient, tx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to UpdateLightClient: %v", err)
@@ -103,8 +109,15 @@ func (r *Relayer) updateSyncCommittee(epoch int64) {
 		log.Printf("Failed to get sync committee data: %v", err)
 		return
 	}
+
+	opts, err := r.taraClient.CreateNewTransactOpts(r.taraTransactor)
+	if err != nil {
+		log.Printf("failed to create transact opts: %v", err)
+		return
+	}
 	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-	tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, *updateData, *syncCommitteeData)
+	// TODO: put beaconClientContractClient into the tarClient
+	tx, err := r.beaconLightClient.ImportNextSyncCommittee(opts, *updateData, *syncCommitteeData)
 	if err != nil {
 		log.Printf("Failed to import next sync committee: %v", err)
 		return

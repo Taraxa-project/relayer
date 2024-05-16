@@ -17,7 +17,7 @@ func (r *Relayer) startEventProcessing(ctx context.Context) {
 	client := &http.Client{}
 
 	// Construct the request to the Ethereum 2.0 node's event stream
-	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/eth/v1/events?topics=finalized_checkpoint", r.beaconNodeEndpoint), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/eth/v1/events?topics=finalized_checkpoint", r.Config.BeaconLightClientContractAddress), nil)
 	if err != nil {
 		log.Fatalf("Failed to create request: %v", err)
 	}

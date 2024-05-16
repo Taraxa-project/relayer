@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"os"
 
-	eth_client "github.com/Taraxa-project/relayer/clients/eth"
-	tara_client "github.com/Taraxa-project/relayer/clients/tara"
+	"github.com/Taraxa-project/relayer/internal/to_eth"
+	"github.com/Taraxa-project/relayer/internal/to_tara"
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 )
 
 type RelayerConfig struct {
-	TaraClientConfig tara_client.TaraClientConfig `json:"tara_network"`
-	EthClientConfig  eth_client.EthClientConfig   `json:"eth_network"`
+	TaraRelayerConfig to_tara.RelayerConfig `json:"tara_relayer"`
+	EthRelayerConfig  to_eth.RelayerConfig  `json:"eth_relayer"`
 }
 
 type WalletConfig struct {

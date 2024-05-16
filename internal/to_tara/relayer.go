@@ -2,7 +2,6 @@ package to_tara
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"fmt"
 	"time"
 
@@ -10,89 +9,81 @@ import (
 	"github.com/Taraxa-project/relayer/bindings/EthClient"
 	"github.com/Taraxa-project/relayer/internal/common"
 
+	eth_client "github.com/Taraxa-project/relayer/clients/eth"
+	tara_client "github.com/Taraxa-project/relayer/clients/tara"
 	log "github.com/sirupsen/logrus"
 
-	bridge_contract_interface "github.com/Taraxa-project/relayer/clients/bridge_contract_client/contract_interface"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	eth_common "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/Taraxa-project/relayer/clients/client_base"
 )
 
-type Config struct {
-	BeaconNodeEndpoint    string
-	TaraxaRPCURL          string
-	EthRPCURL             string
-	BeaconLightClientAddr eth_common.Address
-	EthClientOnTaraAddr   eth_common.Address
-	TaraxaBridgeAddr      eth_common.Address
-	EthBridgeAddr         eth_common.Address
-	Key                   *ecdsa.PrivateKey
-	LightNodeEndpoint     string
+type RelayerConfig struct {
+	*tara_client.TaraClientConfig
+	BeaconNodeEndpoint string `json:"beacon_node_endpoint"`
+	LightNodeEndpoint  string `json:"light_node_endpoint"`
 }
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	beaconNodeEndpoint     string
-	lightNodeEndpoint      string
-	taraxaClient           *ethclient.Client
-	taraAuth               *bind.TransactOpts
-	ethClient              *ethclient.Client
-	ethAuth                *bind.TransactOpts
-	beaconLightClient      *BeaconLightClient.BeaconLightClient
-	ethClientContract      *EthClient.EthClient
-	ethBridge              *bridge_contract_interface.BridgeContractInterface
-	taraBridge             *bridge_contract_interface.BridgeContractInterface
+	ethClient     *eth_client.EthClient
+	ethTransactor *client_base.Transactor
+
+	taraClient     *tara_client.TaraClient
+	taraTransactor *client_base.Transactor
+
+	beaconLightClient *BeaconLightClient.BeaconLightClient // TODO: move to taraClient
+	ethClientContract *EthClient.EthClient                 // TODO: move to taraClient
+
+	Config RelayerConfig
+
 	onFinalizedEpoch       chan int64
 	onFinalizedBlockNumber chan uint64
 	currentPeriod          int64
-	bridgeContractAddr     eth_common.Address
 }
 
 // NewRelayer creates a new Relayer instance
-func NewRelayer(cfg *Config) (*Relayer, error) {
-	taraxaClient, taraAuth, err := common.ConnectToChain(context.Background(), cfg.TaraxaRPCURL, cfg.Key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to Taraxa network: %v", err)
-	}
+func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthClient, ethTransactor *client_base.Transactor, taraTransactor *client_base.Transactor, config RelayerConfig) (*Relayer, error) {
+	// // Get tara config
+	// taraNodeConfig, err := taraClient.RpcClient.GetTaraConfig()
+	// if err != nil {
+	// 	log.Fatal("GetTaraConfig err: ", err)
+	// }
+	// if taraClient.Config.ChainID.Uint64() != taraNodeConfig.ChainId {
+	// 	log.Fatal("Configured chainID != retrived chain ID ", taraClient.Config.ChainID.Uint64(), taraNodeConfig.ChainId)
+	// }
+	// log.Println("Configured ficus hardfork number ", uint64(taraNodeConfig.Hardforks.FicusHf.BlockNum), ", pillar blocks interval: ", uint64(taraNodeConfig.Hardforks.FicusHf.PillarBlocksInterval))
 
-	ethClient, ethAuth, err := common.ConnectToChain(context.Background(), cfg.EthRPCURL, cfg.Key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to ETH network: %v", err)
-	}
+	// // TODO: taraClient.EthClient should work too !!!
+	// currentBlockNumber, err := taraClient.RpcClient.EthClient.BlockNumber(context.Background())
+	// if err != nil {
+	// 	log.Fatal("BlockNumber err: ", err)
+	// }
+	// log.Println("Current tara block number: ", currentBlockNumber)
+	// if currentBlockNumber < uint64(taraNodeConfig.Hardforks.FicusHf.BlockNum) {
+	// 	log.Fatal("No need to run relayer yet. Ficus hardfork block num: ", uint64(taraNodeConfig.Hardforks.FicusHf.BlockNum), ", current block num ", currentBlockNumber)
+	// }
 
-	beaconLightClient, err := BeaconLightClient.NewBeaconLightClient(cfg.BeaconLightClientAddr, taraxaClient)
+	// TODO: move beacon client into the taraClient
+	beaconLightClient, err := BeaconLightClient.NewBeaconLightClient(taraClient.Config.BeaconLightClientContractAddress, taraClient.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
 
-	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
-	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
-	}
-
-	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
-	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
-	}
-
-	ethClientContract, err := EthClient.NewEthClient(cfg.EthClientOnTaraAddr, taraxaClient)
+	// TODO: move ethClientContract into the taraClient
+	ethClientContract, err := EthClient.NewEthClient(taraClient.Config.EthClientContractAddress, taraClient.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the ethClientContract contract: %v", err)
 	}
 
-	return &Relayer{
-		beaconNodeEndpoint: cfg.BeaconNodeEndpoint,
-		taraxaClient:       taraxaClient,
-		taraAuth:           taraAuth,
-		ethClient:          ethClient,
-		ethAuth:            ethAuth,
-		beaconLightClient:  beaconLightClient,
-		ethClientContract:  ethClientContract,
-		ethBridge:          ethBridge,
-		taraBridge:         taraBridge,
-		lightNodeEndpoint:  cfg.LightNodeEndpoint,
-		bridgeContractAddr: cfg.EthBridgeAddr,
-	}, nil
+	relayer := new(Relayer)
+	relayer.ethClient = ethClient
+	relayer.taraClient = taraClient
+	relayer.ethTransactor = ethTransactor
+	relayer.taraTransactor = taraTransactor
+	relayer.Config = config
+	relayer.beaconLightClient = beaconLightClient
+	relayer.ethClientContract = ethClientContract
+
+	return relayer, nil
 }
 
 func (r *Relayer) Start(ctx context.Context) {
@@ -160,12 +151,12 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 }
 
 func (r *Relayer) checkAndFinalize() {
-	ethEpoch, err := r.ethBridge.FinalizedEpoch(nil)
+	ethEpoch, err := r.ethClient.BridgeContractClient.FinalizedEpoch(nil)
 	if err != nil {
 		log.Warningf("Failed to get finalized epoch from ETH contract: %v", err)
 		return
 	}
-	taraEpoch, err := r.taraBridge.FinalizedEpoch(nil)
+	taraEpoch, err := r.taraClient.BridgeContractClient.FinalizedEpoch(nil)
 	if err != nil {
 		log.Warningf("Failed to get finalized epoch from TARA contract: %v", err)
 		return

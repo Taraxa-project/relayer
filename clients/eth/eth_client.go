@@ -12,6 +12,7 @@ type EthClient struct {
 	*client_base.ClientBase
 	TaraClientContractClient *tara_client_contract_client.TaraClientContractClient
 	BridgeContractClient     *bridge_contract_client.BridgeContractClient
+	Config                   EthClientConfig
 }
 
 type EthClientConfig struct {
@@ -38,6 +39,7 @@ func NewEthClient(config EthClientConfig, communicationProtocol client_base.Comm
 	if err != nil {
 		return nil, err
 	}
+	ethClient.Config = config
 
 	return ethClient, nil
 }
