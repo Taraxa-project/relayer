@@ -28,10 +28,10 @@ func transformPillarBlockData(pillarBlockData *tara_rpc_types.PillarBlockData) (
 	return
 }
 
-func (r *Relayer) getStateWithProof(epoch *big.Int, period *big.Int) (*bridge_contract_interface.SharedStructsStateWithProof, error) {
+func (r *Relayer) getStateWithProof(epoch *big.Int, block_num *big.Int) (*bridge_contract_interface.SharedStructsStateWithProof, error) {
 	opts := bind.CallOpts{}
-	if period != nil {
-		opts.BlockNumber = period
+	if block_num != nil {
+		opts.BlockNumber = block_num
 	}
 	taraStateWithProof, err := r.taraBridge.GetStateWithProof(&opts)
 	if err != nil {
@@ -45,10 +45,10 @@ func (r *Relayer) getStateWithProof(epoch *big.Int, period *big.Int) (*bridge_co
 	}
 
 	if taraStateWithProof.State.Epoch.Cmp(epoch) > 0 {
-		return r.getStateWithProof(epoch, period.Sub(period, bigPillarBlocksInterval))
+		return r.getStateWithProof(epoch, block_num.Sub(block_num, bigPillarBlocksInterval))
 	}
 
-	return r.getStateWithProof(epoch, period.Add(period, bigPillarBlocksInterval))
+	return r.getStateWithProof(epoch, block_num.Add(block_num, bigPillarBlocksInterval))
 }
 
 func (r *Relayer) bridgeState() {
