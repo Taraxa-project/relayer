@@ -73,8 +73,12 @@ func (r *Relayer) getProof(finalizedBlock *big.Int) {
 	}
 }
 
-func (r *Relayer) applyState() {
-	proof, err := r.ethBridge.GetStateWithProof(nil)
+func (r *Relayer) applyState(finalizedBlock *big.Int) {
+	opts := bind.CallOpts{}
+	if finalizedBlock != nil {
+		opts.BlockNumber = finalizedBlock
+	}
+	proof, err := r.ethBridge.GetStateWithProof(&opts)
 	if err != nil {
 		log.Fatalf("Failed to get state with proof: %v", err)
 	}

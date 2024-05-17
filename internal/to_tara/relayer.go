@@ -105,9 +105,9 @@ func (r *Relayer) Start(ctx context.Context) {
 	}
 	r.currentPeriod = common.GetPeriodFromSlot(int64(slot))
 
-	r.initialize()
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
+	r.checkAndFinalize()
 }
 
 func (r *Relayer) Close() {
@@ -117,7 +117,7 @@ func (r *Relayer) Close() {
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
 	var finalizedBlockNumber uint64
-	ticker := time.NewTicker(30 * time.Minute)
+	ticker := time.NewTicker(20 * time.Minute)
 	defer ticker.Stop()
 
 	for {
@@ -136,7 +136,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				} else {
 					go func() {
 						r.getProof(blockNum)
-						r.applyState()
+						r.applyState(blockNum)
 					}()
 					finalizedBlockNumber = 0
 				}
@@ -149,8 +149,8 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			}
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
-			log.Println("Calling finalize")
-			r.finalize()
+			log.Println("Checking for if we need to finalize")
+			r.checkAndFinalize()
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return
@@ -158,21 +158,19 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	}
 }
 
-func (r *Relayer) initialize() {
+func (r *Relayer) checkAndFinalize() {
 	ethEpoch, err := r.ethBridge.FinalizedEpoch(nil)
 	if err != nil {
-		log.Fatalf("Failed to get finalized epoch from ETH contract: %v", err)
+		log.Warningf("Failed to get finalized epoch from ETH contract: %v", err)
+		return
 	}
 	taraEpoch, err := r.taraBridge.FinalizedEpoch(nil)
 	if err != nil {
-		log.Fatalf("Failed to get finalized epoch from TARA contract: %v", err)
+		log.Warningf("Failed to get finalized epoch from TARA contract: %v", err)
+		return
 	}
 	if ethEpoch != taraEpoch {
-		log.Fatalf("ETH and TARA contracts are not in sync. ETH: %d, TARA: %d", ethEpoch, taraEpoch)
-		// r.sync(taraEpoch, ethEpoch)
+		log.Printf("Finalizing ETH epoch %d on TARA epoch %d", ethEpoch, taraEpoch)
+		r.finalize()
 	}
 }
-
-// func (r *Relayer) sync(from, to *big.Int) {
-// 	//TODO
-// }
