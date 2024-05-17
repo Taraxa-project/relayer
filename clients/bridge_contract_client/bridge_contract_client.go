@@ -14,11 +14,11 @@ type BridgeContractClient struct {
 	*bridge_contract_interface.BridgeContractInterface
 }
 
-func NewBridgeContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol, privateKeyStr *string) (*BridgeContractClient, error) {
+func NewBridgeContractClient(config client_base.NetConfig, privateKeyStr *string) (*BridgeContractClient, error) {
 	var err error
 
 	bridgeContractClient := new(BridgeContractClient)
-	bridgeContractClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol, privateKeyStr)
+	bridgeContractClient.ClientBase, err = client_base.NewClientBase(config, privateKeyStr)
 	if err != nil {
 		return nil, err
 	}

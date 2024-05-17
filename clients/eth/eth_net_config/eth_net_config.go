@@ -2,7 +2,6 @@ package eth_net_config
 
 import (
 	"errors"
-	"math/big"
 
 	"github.com/Taraxa-project/relayer/clients/client_base"
 	"github.com/ethereum/go-ethereum/common"
@@ -17,8 +16,7 @@ func GenNetConfig(network client_base.Network) (*client_base.NetConfig, error) {
 		return nil, errors.New("Mainnet not supported")
 		break
 	case client_base.Testnet:
-		config.HttpUrl = "https://holesky.drpc.org"
-		config.ChainID = big.NewInt(17000)
+		config.Url = "https://holesky.drpc.org"
 		config.ContractAddress = common.HexToAddress("0x0")
 		break
 	case client_base.Devnet:

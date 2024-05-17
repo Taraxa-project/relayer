@@ -33,9 +33,6 @@ func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthCli
 	if err != nil {
 		log.Fatal("GetTaraConfig err: ", err)
 	}
-	if taraClient.Config.ChainID.Uint64() != taraNodeConfig.ChainId {
-		log.Fatal("Configured chainID != retrived chain ID ", taraClient.Config.ChainID.Uint64(), taraNodeConfig.ChainId)
-	}
 	log.Println("Configured ficus hardfork number ", uint64(taraNodeConfig.Hardforks.FicusHf.BlockNum), ", pillar blocks interval: ", uint64(taraNodeConfig.Hardforks.FicusHf.PillarBlocksInterval))
 
 	// TODO: taraClient.EthClient should work too !!!
@@ -158,7 +155,6 @@ func (r *Relayer) processNewPillarBlock(pillarBlockData *tara_rpc_types.PillarBl
 
 		// Send blocks into the tara client contract on ethereum
 		if numOfProcessedBlocks == maxNumOfBlocksInBatch || period == expectedLatestPillarBlockPeriod {
-			// TODO: use transact opts, not transactor obj
 			finalizeBlocksTx, err := r.ethClient.TaraClientContractClient.FinalizeBlocks(blocks, blocksSignatures[len(blocksSignatures)-1])
 			if err != nil {
 				log.Fatal("FinalizeBlocks tx failed: ", err)

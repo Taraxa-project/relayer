@@ -17,11 +17,11 @@ type DposContractClient struct {
 	*dpos_interface.DposInterface
 }
 
-func NewDposContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol, privateKeyStr *string) (*DposContractClient, error) {
+func NewDposContractClient(config client_base.NetConfig, privateKeyStr *string) (*DposContractClient, error) {
 	var err error
 
 	dposContractClient := new(DposContractClient)
-	dposContractClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol, privateKeyStr)
+	dposContractClient.ClientBase, err = client_base.NewClientBase(config, privateKeyStr)
 	if err != nil {
 		return nil, err
 	}

@@ -13,11 +13,11 @@ type RpcClient struct {
 	*client_base.ClientBase
 }
 
-func NewRpcClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol) (*RpcClient, error) {
+func NewRpcClient(config client_base.NetConfig) (*RpcClient, error) {
 	var err error
 
 	rpcClient := new(RpcClient)
-	rpcClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol, nil)
+	rpcClient.ClientBase, err = client_base.NewClientBase(config, nil)
 	if err != nil {
 		return nil, err
 	}

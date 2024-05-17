@@ -22,7 +22,7 @@ func main() {
 	config.BridgeContractAddress = common.HexToAddress("0x0")
 	config.TaraClientContractAddress = common.HexToAddress("0x0")
 
-	ethClient, err := eth_client.NewEthClient(config, client_base.Http, nil)
+	ethClient, err := eth_client.NewEthClient(config, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

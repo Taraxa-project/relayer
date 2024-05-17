@@ -21,11 +21,11 @@ type EthClientConfig struct {
 	TaraClientContractAddress common.Address `json:"tara_client_contract_address"`
 }
 
-func NewEthClient(config EthClientConfig, communicationProtocol client_base.CommunicationProtocol, privateKeyStr *string) (*EthClient, error) {
+func NewEthClient(config EthClientConfig, privateKeyStr *string) (*EthClient, error) {
 	var err error
 
 	ethClient := new(EthClient)
-	ethClient.ClientBase, err = client_base.NewClientBase(config.NetConfig, communicationProtocol, privateKeyStr)
+	ethClient.ClientBase, err = client_base.NewClientBase(config.NetConfig, privateKeyStr)
 	if err != nil {
 		return nil, err
 	}

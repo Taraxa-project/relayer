@@ -11,17 +11,12 @@ import (
 func main() {
 	log.Print("Dpos client demo")
 
-	// var config client_base.NetConfig
-	// config.HttpUrl = "http://localhost:7017"
-	// config.ChainID = big.NewInt(649)
-	// config.ContractAddress = common.HexToAddress("0x00000000000000000000000000000000000000FE")
-
 	config, err := tara_net_config.GenNetConfig(client_base.Mainnet)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dposContractClient, err := dpos_contract_client.NewDposContractClient(*config, client_base.Http, nil)
+	dposContractClient, err := dpos_contract_client.NewDposContractClient(*config, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

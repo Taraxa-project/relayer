@@ -20,17 +20,8 @@ const (
 	Devnet
 )
 
-type CommunicationProtocol uint8
-
-const (
-	Http = iota
-	WebSocket
-)
-
 type NetConfig struct {
-	HttpUrl         string         `json:"http_url"`
-	WsUrl           string         `json:"ws_url"`
-	ChainID         *big.Int       `json:"chain_id"`
+	Url             string         `json:"url"`
 	ContractAddress common.Address `json:"contract_address"`
 }
 
@@ -46,29 +37,11 @@ type ClientBase struct {
 	Config     NetConfig
 }
 
-func NewClientBase(config NetConfig, communicationProtocol CommunicationProtocol, privateKeyStr *string) (*ClientBase, error) {
+func NewClientBase(config NetConfig, privateKeyStr *string) (*ClientBase, error) {
 	var err error
-	var networkUrl string
-
-	switch communicationProtocol {
-	case Http:
-		if config.HttpUrl == "" {
-			return nil, errors.New("config.HttpUrl not configured")
-		}
-		networkUrl = config.HttpUrl
-		break
-	case WebSocket:
-		if config.WsUrl == "" {
-			return nil, errors.New("config.WsUrl not configured")
-		}
-		networkUrl = config.WsUrl
-		break
-	default:
-		return nil, errors.New("invalid communicationProtocol argument")
-	}
 
 	clientBase := new(ClientBase)
-	clientBase.EthClient, err = ethclient.Dial(networkUrl)
+	clientBase.EthClient, err = ethclient.Dial(config.Url)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +72,12 @@ func (cb *ClientBase) NewTransactor(privateKeyStr string) (*Transactor, error) {
 		return nil, errors.New("error casting public key to ECDSA")
 	}
 
-	transactOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, cb.Config.ChainID)
+	chainID, err := cb.EthClient.ChainID(context.Background())
+	if err != nil {
+		return nil, errors.New("failed to retrieve chain ID")
+	}
+
+	transactOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
 	if err != nil {
 		return nil, err
 	}

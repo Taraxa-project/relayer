@@ -20,7 +20,7 @@ func main() {
 	// config.HttpUrl = "http://localhost:7017"
 	// config.ChainID = big.NewInt(649)
 
-	rpcClient, err := rpc_client.NewRpcClient(*config, client_base.Http)
+	rpcClient, err := rpc_client.NewRpcClient(*config)
 	if err != nil {
 		log.Fatal(err)
 	}

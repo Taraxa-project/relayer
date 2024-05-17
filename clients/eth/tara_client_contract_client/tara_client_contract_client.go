@@ -14,11 +14,11 @@ type TaraClientContractClient struct {
 	*tara_client_contract_interface.TaraClientContractInterface
 }
 
-func NewTaraClientContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol, privateKeyStr *string) (*TaraClientContractClient, error) {
+func NewTaraClientContractClient(config client_base.NetConfig, privateKeyStr *string) (*TaraClientContractClient, error) {
 	var err error
 
 	taraClientContractClient := new(TaraClientContractClient)
-	taraClientContractClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol, privateKeyStr)
+	taraClientContractClient.ClientBase, err = client_base.NewClientBase(config, privateKeyStr)
 	if err != nil {
 		return nil, err
 	}
