@@ -86,7 +86,7 @@ func (r *Relayer) applyState(finalizedBlock *big.Int) {
 	if finalizedBlock != nil {
 		opts.BlockNumber = finalizedBlock
 	}
-	proof, err := r.ethBridge.GetStateWithProof(&opts)
+	proof, err := r.ethClient.BridgeContractClient.BridgeContractInterface.GetStateWithProof(&opts)
 	if err != nil {
 		log.Fatalf("Failed to get state with proof: %v", err)
 	}
