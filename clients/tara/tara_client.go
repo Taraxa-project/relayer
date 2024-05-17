@@ -2,7 +2,6 @@ package tara_client
 
 import (
 	"github.com/Taraxa-project/relayer/clients/bridge_contract_client"
-	"github.com/Taraxa-project/relayer/clients/tara/dpos_contract_client"
 	"github.com/Taraxa-project/relayer/clients/tara/rpc_client"
 	"github.com/ethereum/go-ethereum/common"
 
@@ -12,7 +11,6 @@ import (
 type TaraClient struct {
 	*client_base.ClientBase
 	Config               TaraClientConfig
-	DposContractClient   *dpos_contract_client.DposContractClient
 	BridgeContractClient *bridge_contract_client.BridgeContractClient
 	RpcClient            *rpc_client.RpcClient
 }
@@ -36,11 +34,6 @@ func NewTaraClient(config TaraClientConfig, privateKeyStr *string) (*TaraClient,
 
 	taraClient := new(TaraClient)
 	taraClient.BridgeContractClient, err = bridge_contract_client.NewSharedBridgeContractClient(ethClient.ClientBase, config.BridgeContractAddress)
-	if err != nil {
-		return nil, err
-	}
-
-	taraClient.DposContractClient, err = dpos_contract_client.NewSharedDposContractClient(ethClient.ClientBase, config.DposContractAddress)
 	if err != nil {
 		return nil, err
 	}

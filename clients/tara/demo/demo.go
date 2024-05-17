@@ -28,13 +28,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	totalEligibleVotesCount, err := taraClient.DposContractClient.GetTotalEligibleVotesCount()
-	if err != nil {
-		log.Print("GetTotalEligibleVotesCount err: ", err)
-	} else {
-		log.Printf("GetTotalEligibleVotesCount: %d\n\n", totalEligibleVotesCount)
-	}
-
 	stateWithProof, err := taraClient.BridgeContractClient.GetStateWithProof()
 	if err != nil {
 		log.Print("GetStateWithProof err: ", err)
