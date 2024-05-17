@@ -107,7 +107,7 @@ func (r *Relayer) Start(ctx context.Context) {
 
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
-	// go r.finalize()
+	r.checkAndFinalize()
 }
 
 func (r *Relayer) Close() {
@@ -119,6 +119,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	var finalizedBlockNumber uint64
 	ticker := time.NewTicker(20 * time.Minute)
 	defer ticker.Stop()
+
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
@@ -131,24 +132,45 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
 				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
-					log.Println("Did not to update light client:", err)
+					log.Fatalf("Did not to update light client: %v", err)
 				} else {
 					go func() {
 						r.getProof(blockNum)
-						r.applyState()
+						r.applyState(blockNum)
 					}()
 					finalizedBlockNumber = 0
 				}
 			}
 		case blockNumber := <-r.onFinalizedBlockNumber:
 			log.Println("Received finalized block number", blockNumber)
+			if finalizedBlockNumber != 0 {
+				log.Println("Finalized block number was not processed yet, skipping this one")
+				continue
+			}
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
-			log.Println("Calling finalize")
-			r.finalize()
+			log.Println("Checking for if we need to finalize")
+			r.checkAndFinalize()
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return
 		}
+	}
+}
+
+func (r *Relayer) checkAndFinalize() {
+	ethEpoch, err := r.ethBridge.FinalizedEpoch(nil)
+	if err != nil {
+		log.Warningf("Failed to get finalized epoch from ETH contract: %v", err)
+		return
+	}
+	taraEpoch, err := r.taraBridge.FinalizedEpoch(nil)
+	if err != nil {
+		log.Warningf("Failed to get finalized epoch from TARA contract: %v", err)
+		return
+	}
+	if ethEpoch != taraEpoch {
+		log.Printf("Finalizing ETH epoch %d on TARA epoch %d", ethEpoch, taraEpoch)
+		r.finalize()
 	}
 }

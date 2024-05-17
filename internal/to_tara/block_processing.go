@@ -39,12 +39,10 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	}
 	// Convert forkVersion.Data.CurrentVersion string to [4]byte
 	var forkVersionBytes [4]byte
-
 	forkBytes, err := hexStringToByteArray(forkVersion.Data.CurrentVersion, len(forkVersionBytes))
 	if err != nil {
 		return nil, err
 	}
-
 	copy(forkVersionBytes[:], forkBytes)
 
 	// Fetch data from a Beacon Node API (you need to implement this based on your data source)
