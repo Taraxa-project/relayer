@@ -18,7 +18,7 @@ func main() {
 	}
 	config.ContractAddress = common.HexToAddress("0x402908C007aAC2fAf83D57945ff95cF2de49b359")
 
-	taraClientContractClient, err := tara_client_contract_client.NewTaraClientContractClient(*config, client_base.Http)
+	taraClientContractClient, err := tara_client_contract_client.NewTaraClientContractClient(*config, client_base.Http, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

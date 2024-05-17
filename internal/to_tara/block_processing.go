@@ -72,8 +72,8 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, 
 	}
 	log.Printf("Block number: %d", blockNumber)
 
-	// TODO: should be here ethTransactor ? What is beaconLightClient ???
-	opts, err := r.taraClient.CreateNewTransactOpts(r.taraTransactor)
+	// TODO: gen opts from BeaconLightClient
+	opts, err := r.taraClient.GenTransactOpts()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create transact opts: %v", err)
 	}
@@ -110,7 +110,8 @@ func (r *Relayer) updateSyncCommittee(epoch int64) {
 		return
 	}
 
-	opts, err := r.taraClient.CreateNewTransactOpts(r.taraTransactor)
+	// TODO: gen opts from BeaconLightClient
+	opts, err := r.taraClient.GenTransactOpts()
 	if err != nil {
 		log.Printf("failed to create transact opts: %v", err)
 		return

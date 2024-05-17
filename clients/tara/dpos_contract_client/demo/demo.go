@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	dposContractClient, err := dpos_contract_client.NewDposContractClient(*config, client_base.Http)
+	dposContractClient, err := dpos_contract_client.NewDposContractClient(*config, client_base.Http, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -15,7 +15,7 @@ import (
 )
 
 func (r *Relayer) finalize() {
-	trx, err := r.ethClient.BridgeContractClient.FinalizeEpoch(r.ethTransactor)
+	trx, err := r.ethClient.BridgeContractClient.FinalizeEpoch()
 	if err != nil {
 		log.Println("Failed to call finalize:", err)
 		return
@@ -60,7 +60,8 @@ func (r *Relayer) getProof(finalizedBlock *big.Int) {
 		log.Fatalf("Failed to decode storage proof: %v", err)
 	}
 
-	opts, err := r.taraClient.CreateNewTransactOpts(r.taraTransactor)
+	// TODO: gen opts from ethClientContractClient
+	opts, err := r.taraClient.GenTransactOpts()
 	if err != nil {
 		log.Printf("failed to create transact opts: %v", err)
 		return
@@ -89,7 +90,7 @@ func (r *Relayer) applyState(finalizedBlock *big.Int) {
 	if err != nil {
 		log.Fatalf("Failed to get state with proof: %v", err)
 	}
-	trx, err := r.taraClient.BridgeContractClient.ApplyState(r.taraTransactor, proof)
+	trx, err := r.taraClient.BridgeContractClient.ApplyState(proof)
 	if err != nil {
 		log.Fatalf("Failed to apply state: %v", err)
 	}

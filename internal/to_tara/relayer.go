@@ -12,8 +12,6 @@ import (
 	eth_client "github.com/Taraxa-project/relayer/clients/eth"
 	tara_client "github.com/Taraxa-project/relayer/clients/tara"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/Taraxa-project/relayer/clients/client_base"
 )
 
 type RelayerConfig struct {
@@ -24,11 +22,8 @@ type RelayerConfig struct {
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	ethClient     *eth_client.EthClient
-	ethTransactor *client_base.Transactor
-
-	taraClient     *tara_client.TaraClient
-	taraTransactor *client_base.Transactor
+	ethClient  *eth_client.EthClient
+	taraClient *tara_client.TaraClient
 
 	beaconLightClient *BeaconLightClient.BeaconLightClient // TODO: move to taraClient
 	ethClientContract *EthClient.EthClient                 // TODO: move to taraClient
@@ -41,7 +36,7 @@ type Relayer struct {
 }
 
 // NewRelayer creates a new Relayer instance
-func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthClient, ethTransactor *client_base.Transactor, taraTransactor *client_base.Transactor, config RelayerConfig) (*Relayer, error) {
+func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthClient, config RelayerConfig) (*Relayer, error) {
 	// // Get tara config
 	// taraNodeConfig, err := taraClient.RpcClient.GetTaraConfig()
 	// if err != nil {
@@ -77,8 +72,6 @@ func NewRelayer(taraClient *tara_client.TaraClient, ethClient *eth_client.EthCli
 	relayer := new(Relayer)
 	relayer.ethClient = ethClient
 	relayer.taraClient = taraClient
-	relayer.ethTransactor = ethTransactor
-	relayer.taraTransactor = taraTransactor
 	relayer.Config = config
 	relayer.beaconLightClient = beaconLightClient
 	relayer.ethClientContract = ethClientContract

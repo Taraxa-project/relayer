@@ -41,11 +41,12 @@ type Transactor struct {
 }
 
 type ClientBase struct {
-	EthClient *ethclient.Client
-	Config    NetConfig
+	EthClient  *ethclient.Client
+	transactor *Transactor
+	Config     NetConfig
 }
 
-func NewClientBase(config NetConfig, communicationProtocol CommunicationProtocol) (*ClientBase, error) {
+func NewClientBase(config NetConfig, communicationProtocol CommunicationProtocol, privateKeyStr *string) (*ClientBase, error) {
 	var err error
 	var networkUrl string
 
@@ -71,12 +72,21 @@ func NewClientBase(config NetConfig, communicationProtocol CommunicationProtocol
 	if err != nil {
 		return nil, err
 	}
+
+	if privateKeyStr != nil {
+		transactor, err := clientBase.NewTransactor(*privateKeyStr)
+		if err != nil {
+			return nil, errors.New("Unable to create transactor")
+		}
+		clientBase.transactor = transactor
+	}
+
 	clientBase.Config = config
 
 	return clientBase, nil
 }
 
-func (ClientBase *ClientBase) NewTransactor(privateKeyStr string) (*Transactor, error) {
+func (cb *ClientBase) NewTransactor(privateKeyStr string) (*Transactor, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return nil, err
@@ -89,12 +99,12 @@ func (ClientBase *ClientBase) NewTransactor(privateKeyStr string) (*Transactor, 
 		return nil, errors.New("error casting public key to ECDSA")
 	}
 
-	transactOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, ClientBase.Config.ChainID)
+	transactOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, cb.Config.ChainID)
 	if err != nil {
 		return nil, err
 	}
 
-	nonce, err := ClientBase.EthClient.PendingNonceAt(context.Background(), address)
+	nonce, err := cb.EthClient.PendingNonceAt(context.Background(), address)
 	if err != nil {
 		return nil, err
 	}
@@ -108,31 +118,31 @@ func (ClientBase *ClientBase) NewTransactor(privateKeyStr string) (*Transactor, 
 	return transactor, nil
 }
 
-func (ClientBase *ClientBase) CreateNewTransactOpts(transactor *Transactor) (*bind.TransactOpts, error) {
-	nonce, err := ClientBase.EthClient.PendingNonceAt(context.Background(), transactor.Address)
+func (cb *ClientBase) GenTransactOpts() (*bind.TransactOpts, error) {
+	nonce, err := cb.EthClient.PendingNonceAt(context.Background(), cb.transactor.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	gasPrice, err := ClientBase.EthClient.SuggestGasPrice(context.Background())
+	gasPrice, err := cb.EthClient.SuggestGasPrice(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	maxNonce := transactor.Nonce
+	maxNonce := cb.transactor.Nonce
 	if nonce > maxNonce {
 		maxNonce = nonce
 	}
 
 	transactOpts := new(bind.TransactOpts)
-	*transactOpts = *transactor.TransactOpts
+	*transactOpts = *cb.transactor.TransactOpts
 
 	transactOpts.Nonce = big.NewInt(int64(maxNonce))
 	transactOpts.GasLimit = uint64(300000) // in units
 	transactOpts.GasPrice = gasPrice
 
 	// Increment transactos nonce for the next tx
-	transactor.Nonce++
+	cb.transactor.Nonce++
 
 	return transactOpts, nil
 }

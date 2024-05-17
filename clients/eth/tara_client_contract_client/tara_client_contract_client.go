@@ -14,11 +14,11 @@ type TaraClientContractClient struct {
 	*tara_client_contract_interface.TaraClientContractInterface
 }
 
-func NewTaraClientContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol) (*TaraClientContractClient, error) {
+func NewTaraClientContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol, privateKeyStr *string) (*TaraClientContractClient, error) {
 	var err error
 
 	taraClientContractClient := new(TaraClientContractClient)
-	taraClientContractClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol)
+	taraClientContractClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol, privateKeyStr)
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +49,8 @@ func (taraClientContractClient *TaraClientContractClient) GetFinalizedPillarBloc
 	return taraClientContractClient.TaraClientContractInterface.GetFinalized(&bind.CallOpts{})
 }
 
-func (taraClientContractClient *TaraClientContractClient) FinalizeBlocks(transactor *client_base.Transactor, blocks []tara_client_contract_interface.PillarBlockWithChanges, lastBlockSigs []tara_client_contract_interface.CompactSignature) (*types.Transaction, error) {
-	transactOpts, err := taraClientContractClient.CreateNewTransactOpts(transactor)
+func (taraClientContractClient *TaraClientContractClient) FinalizeBlocks(blocks []tara_client_contract_interface.PillarBlockWithChanges, lastBlockSigs []tara_client_contract_interface.CompactSignature) (*types.Transaction, error) {
+	transactOpts, err := taraClientContractClient.GenTransactOpts()
 	if err != nil {
 		return nil, err
 	}

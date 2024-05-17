@@ -14,11 +14,11 @@ type BridgeContractClient struct {
 	*bridge_contract_interface.BridgeContractInterface
 }
 
-func NewBridgeContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol) (*BridgeContractClient, error) {
+func NewBridgeContractClient(config client_base.NetConfig, communicationProtocol client_base.CommunicationProtocol, privateKeyStr *string) (*BridgeContractClient, error) {
 	var err error
 
 	bridgeContractClient := new(BridgeContractClient)
-	bridgeContractClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol)
+	bridgeContractClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol, privateKeyStr)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +50,8 @@ func (BridgeContractClient *BridgeContractClient) GetStateWithProof() (bridge_co
 	return BridgeContractClient.BridgeContractInterface.GetStateWithProof(&bind.CallOpts{})
 }
 
-func (BridgeContractClient *BridgeContractClient) ApplyState(transactor *client_base.Transactor, stateWithProof bridge_contract_interface.SharedStructsStateWithProof) (*types.Transaction, error) {
-	transactOpts, err := BridgeContractClient.CreateNewTransactOpts(transactor)
+func (BridgeContractClient *BridgeContractClient) ApplyState(stateWithProof bridge_contract_interface.SharedStructsStateWithProof) (*types.Transaction, error) {
+	transactOpts, err := BridgeContractClient.GenTransactOpts()
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (BridgeContractClient *BridgeContractClient) ApplyState(transactor *client_
 	return BridgeContractClient.BridgeContractInterface.ApplyState(transactOpts, stateWithProof)
 }
 
-func (BridgeContractClient *BridgeContractClient) FinalizeEpoch(transactor *client_base.Transactor) (*types.Transaction, error) {
-	transactOpts, err := BridgeContractClient.CreateNewTransactOpts(transactor)
+func (BridgeContractClient *BridgeContractClient) FinalizeEpoch() (*types.Transaction, error) {
+	transactOpts, err := BridgeContractClient.GenTransactOpts()
 	if err != nil {
 		return nil, err
 	}

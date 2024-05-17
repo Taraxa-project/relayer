@@ -26,7 +26,7 @@ func main() {
 	config.BridgeContractAddress = common.HexToAddress("0xFBC597EEf68722E05bbC1e52264103b416551dFB")
 	config.DposContractAddress = common.HexToAddress("0x00000000000000000000000000000000000000FE")
 
-	taraClient, err := tara_client.NewTaraClient(config, client_base.WebSocket)
+	taraClient, err := tara_client.NewTaraClient(config, client_base.WebSocket, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

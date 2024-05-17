@@ -8,7 +8,7 @@
         "eth_client_contract_address": "0x0",
         "beacon_light_client_contract_address" : "0x0",
         "beacon_node_endpoint": "",
-        "LIGHT_node_endpoint": ""
+        "light_node_endpoint": ""
     },
     "eth_relayer": {
         "http_url": "https://holesky.drpc.org",     

@@ -17,7 +17,7 @@ func NewRpcClient(config client_base.NetConfig, communicationProtocol client_bas
 	var err error
 
 	rpcClient := new(RpcClient)
-	rpcClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol)
+	rpcClient.ClientBase, err = client_base.NewClientBase(config, communicationProtocol, nil)
 	if err != nil {
 		return nil, err
 	}

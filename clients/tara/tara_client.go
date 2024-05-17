@@ -25,11 +25,11 @@ type TaraClientConfig struct {
 	BeaconLightClientContractAddress common.Address `json:"beacon_light_client_contract_address"`
 }
 
-func NewTaraClient(config TaraClientConfig, communicationProtocol client_base.CommunicationProtocol) (*TaraClient, error) {
+func NewTaraClient(config TaraClientConfig, communicationProtocol client_base.CommunicationProtocol, privateKeyStr *string) (*TaraClient, error) {
 	var err error
 
 	ethClient := new(TaraClient)
-	ethClient.ClientBase, err = client_base.NewClientBase(config.NetConfig, communicationProtocol)
+	ethClient.ClientBase, err = client_base.NewClientBase(config.NetConfig, communicationProtocol, privateKeyStr)
 	if err != nil {
 		return nil, err
 	}

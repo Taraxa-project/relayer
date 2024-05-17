@@ -51,19 +51,7 @@ func main() {
 	relayerConfig, walletConfig := config.LoadConfigs(*configPath, *walletPath)
 
 	// Create shared clients
-	taraClient, ethClient := createSharedClients(relayerConfig)
-
-	// Create eth transactor
-	ethTransactor, err := ethClient.NewTransactor(walletConfig.PrivateKey)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create tara transactor
-	taraTransactor, err := taraClient.NewTransactor(walletConfig.PrivateKey)
-	if err != nil {
-		log.Fatal(err)
-	}
+	taraClient, ethClient := createSharedClients(relayerConfig, &walletConfig.PrivateKey, &walletConfig.PrivateKey)
 
 	data_dir := "./"
 	logging.Config(filepath.Join(data_dir, "logs"), *logLevel)
@@ -72,12 +60,12 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	taraRelayer, err := to_tara.NewRelayer(taraClient, ethClient, ethTransactor, taraTransactor, relayerConfig.TaraRelayerConfig)
+	taraRelayer, err := to_tara.NewRelayer(taraClient, ethClient, relayerConfig.TaraRelayerConfig)
 	if err != nil {
 		panic(err)
 	}
 
-	ethRelayer, err := to_eth.NewRelayer(taraClient, ethClient, ethTransactor, taraTransactor)
+	ethRelayer, err := to_eth.NewRelayer(taraClient, ethClient)
 	if err != nil {
 		panic(err)
 	}
@@ -107,16 +95,16 @@ func main() {
 	<-ctx.Done()
 }
 
-func createSharedClients(relayerConfig config.RelayerConfig) (taraClient *tara_client.TaraClient, ethClient *eth_client.EthClient) {
+func createSharedClients(relayerConfig config.RelayerConfig, taraNetworkPrivateKey *string, ethNetworkPrivateKey *string) (taraClient *tara_client.TaraClient, ethClient *eth_client.EthClient) {
 	var err error
 
-	taraClient, err = tara_client.NewTaraClient(*relayerConfig.TaraRelayerConfig.TaraClientConfig, client_base.WebSocket)
+	taraClient, err = tara_client.NewTaraClient(*relayerConfig.TaraRelayerConfig.TaraClientConfig, client_base.WebSocket, taraNetworkPrivateKey)
 	if err != nil {
 		log.Fatal("NewTaraClient err: ", err)
 	}
 
 	// Tara client contract client on ethereum
-	ethClient, err = eth_client.NewEthClient(*relayerConfig.EthRelayerConfig.EthClientConfig, client_base.Http)
+	ethClient, err = eth_client.NewEthClient(*relayerConfig.EthRelayerConfig.EthClientConfig, client_base.Http, ethNetworkPrivateKey)
 	if err != nil {
 		log.Fatal("NewEthClient err: ", err)
 	}
