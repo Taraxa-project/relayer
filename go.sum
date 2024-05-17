@@ -6,8 +6,6 @@ github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDO
 github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9SBzvHz7e8=
 github.com/Taraxa-project/go-ethereum v1.12.2-tara h1:CqlGcoCuiVcQ+7KC4Ajd0hlK4Waf9z+n1m/lHwfZ/o4=
 github.com/Taraxa-project/go-ethereum v1.12.2-tara/go.mod h1:1JU/x0JQLBndZb2727eswdCzyF2rFd8SZUj7HDQuVqc=
-github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.4 h1:v/ykzFlEKn7CUhWJ9aZE6cERm006gqhp9WXqB00AZK8=
-github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.4/go.mod h1:+wAnbGuPBUY0VGX5ET2RNlB1DFRBiZNzv7daylGqpVQ=
 github.com/VictoriaMetrics/fastcache v1.6.0 h1:C/3Oi3EiBCqufydp1neRZkqcwmEiuRT9c3fqvvgKm5o=
 github.com/VictoriaMetrics/fastcache v1.6.0/go.mod h1:0qHz5QP0GMX4pfmMA/zt5RgfNuXJrTP0zS7DqpHGGTw=
 github.com/attestantio/go-eth2-client v0.19.10 h1:NLs9mcBvZpBTZ3du7Ey2NHQoj8d3UePY7pFBXX6C6qs=
