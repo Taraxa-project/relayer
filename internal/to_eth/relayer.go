@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"log"
 	"relayer/internal/common"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
@@ -27,18 +28,19 @@ type Config struct {
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	beaconNodeEndpoint string
-	lightNodeEndpoint  string
-	taraxaClient       *TaraxaClientWrapper
-	taraxaNodeConfig   *tara_rpc_types.TaraConfig
-	taraAuth           *bind.TransactOpts
-	ethClient          *ethclient.Client
-	ethAuth            *bind.TransactOpts
-	ethBridge          *bridge_contract_interface.BridgeContractInterface
-	taraBridge         *bridge_contract_interface.BridgeContractInterface
-	taraClientOnEth    *tara_client_interface.TaraClientContractInterface
-	onFinalizedEpoch   chan int64
-	bridgeContractAddr eth_common.Address
+	beaconNodeEndpoint    string
+	lightNodeEndpoint     string
+	taraxaClient          *TaraxaClientWrapper
+	taraxaNodeConfig      *tara_rpc_types.TaraConfig
+	taraAuth              *bind.TransactOpts
+	ethClient             *ethclient.Client
+	ethAuth               *bind.TransactOpts
+	ethBridge             *bridge_contract_interface.BridgeContractInterface
+	taraBridge            *bridge_contract_interface.BridgeContractInterface
+	taraClientOnEth       *tara_client_interface.TaraClientContractInterface
+	onFinalizedEpoch      chan int64
+	bridgeContractAddr    eth_common.Address
+	lastAppliedBridgeRoot eth_common.Hash
 }
 
 // NewRelayer creates a new Relayer instance
@@ -63,14 +65,14 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
 
-	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
-	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
-	}
-
-	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
+	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
+	}
+
+	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}
 
 	return &Relayer{
@@ -90,6 +92,11 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
+	br, err := r.taraClientOnEth.GetFinalizedBridgeRoot(nil)
+	if err != nil {
+		log.Fatalf("Failed to get last applied bridge root: %v", err)
+	}
+	r.lastAppliedBridgeRoot = br
 	// sync
 	r.processPillarBlocks()
 
