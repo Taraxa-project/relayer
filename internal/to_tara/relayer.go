@@ -146,7 +146,9 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		case blockNumber := <-r.onFinalizedBlockNumber:
 			log.Println("Received finalized block number", blockNumber)
 			if finalizedBlockNumber != 0 {
-				log.Println("Finalized block number was not processed yet, skipping this one")
+				if finalizedBlockNumber != blockNumber {
+					log.Println("Finalized block number was not processed yet, skipping this one")
+				}
 				continue
 			}
 			finalizedBlockNumber = blockNumber
