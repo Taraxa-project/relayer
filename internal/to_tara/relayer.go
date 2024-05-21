@@ -150,7 +150,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
 			log.Println("Checking for if we need to finalize")
-			r.checkAndFinalize()
+			go r.checkAndFinalize()
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return
