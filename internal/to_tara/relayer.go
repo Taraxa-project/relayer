@@ -105,6 +105,8 @@ func (r *Relayer) Start(ctx context.Context) {
 	}
 	r.currentPeriod = common.GetPeriodFromSlot(int64(slot))
 
+	log.WithField("current period", r.currentPeriod).Info("Beacon light client deployed, starting relayer")
+
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
 	r.checkAndFinalize()
