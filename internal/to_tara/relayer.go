@@ -136,25 +136,23 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				if err != nil {
 					log.Println("Did not to update light client:", err)
 				} else {
-					go func() {
-						r.getProof(blockNum)
-						r.applyState(blockNum)
-					}()
+					r.getProof(blockNum)
+					r.applyState(blockNum)
 					finalizedBlockNumber = 0
 				}
 			}
 		case blockNumber := <-r.onFinalizedBlockNumber:
 			log.Println("Received finalized block number", blockNumber)
 			if finalizedBlockNumber != 0 {
-				if finalizedBlockNumber != blockNumber {
-					log.Println("Finalized block number was not processed yet, skipping this one")
-				}
+				log.Println("Finalized block number was not processed yet, skipping this one")
 				continue
 			}
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
 			log.Println("Checking for if we need to finalize")
-			go r.checkAndFinalize()
+			if finalizedBlockNumber == 0 {
+				go r.checkAndFinalize()
+			}
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return
