@@ -49,15 +49,11 @@ type NextSyncCommittee struct {
 	AggregatePubkey string   `json:"aggregate_pubkey"`
 }
 
-type Header struct {
-	Beacon phase0.BeaconBlockHeader `json:"beacon"`
-}
-
 type SyncData struct {
-	AttestedHeader          Header               `json:"attested_header"`
+	AttestedHeader          BeaconBlockHeader    `json:"attested_header"`
 	NextSyncCommittee       NextSyncCommittee    `json:"next_sync_committee"`
 	NextSyncCommitteeBranch []string             `json:"next_sync_committee_branch"`
-	FinalizedHeader         Header               `json:"finalized_header"`
+	FinalizedHeader         BeaconBlockHeader    `json:"finalized_header"`
 	FinalityBranch          []string             `json:"finality_branch"`
 	SyncAggregate           altair.SyncAggregate `json:"sync_aggregate"`
 	SignatureSlot           string               `json:"signature_slot"`
@@ -85,7 +81,8 @@ func (d *Data) UnmarshalJSON(data []byte) error {
 		SyncAggregate   json.RawMessage `json:"sync_aggregate"`
 		SignatureSlot   string          `json:"signature_slot"`
 	}
-	if err := json.Unmarshal(data, &raw); err != nil {
+	var err error
+	if err = json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
 
@@ -100,17 +97,9 @@ func (d *Data) UnmarshalJSON(data []byte) error {
 	}
 
 	// Decode FinalityBranch
-	d.FinalityBranch = make([][32]byte, len(raw.FinalityBranch))
-	for i, hexStr := range raw.FinalityBranch {
-		cleanHexStr := strings.TrimPrefix(hexStr, "0x")
-		bytes, err := hex.DecodeString(cleanHexStr)
-		if err != nil {
-			return fmt.Errorf("failed to decode 'FinalityBranch[%d]': %v", i, err)
-		}
-		if len(bytes) != 32 {
-			return fmt.Errorf("decoded byte slice for 'FinalityBranch[%d]' is not 32 bytes long", i)
-		}
-		copy(d.FinalityBranch[i][:], bytes)
+	d.FinalityBranch, err = stringToByteArr(raw.FinalityBranch)
+	if err != nil {
+		return fmt.Errorf("decoding FinalityBranch: %v", err)
 	}
 
 	// Unmarshal SyncAggregate
@@ -119,11 +108,10 @@ func (d *Data) UnmarshalJSON(data []byte) error {
 	}
 
 	// Assign SignatureSlot
-	signatureSlot, err := strconv.ParseUint(raw.SignatureSlot, 10, 64)
+	d.SignatureSlot, err = strconv.ParseUint(raw.SignatureSlot, 10, 64)
 	if err != nil {
 		return fmt.Errorf("parsing SignatureSlot: %v", err)
 	}
-	d.SignatureSlot = signatureSlot
 
 	return nil
 }
@@ -172,15 +160,4 @@ func (b *BeaconBlockHeader) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// hexStringToByteArray converts a hexadecimal string to a byte array of the specified length.
-func hexStringToByteArray(hexStr string, expectedLen int) ([]byte, error) {
-	cleanHexStr := strings.TrimPrefix(hexStr, "0x")
-	bytes, err := hex.DecodeString(cleanHexStr)
-	if err != nil {
-		return nil, err
-	}
-	if len(bytes) != expectedLen {
-		return nil, fmt.Errorf("decoded byte slice is not %d bytes long", expectedLen)
-	}
-	return bytes, nil
-}
+

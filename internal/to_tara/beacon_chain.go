@@ -35,16 +35,23 @@ func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
 	return beaconBlockHeader, nil
 }
 
-func (r *Relayer) GetForkVersion(state string) (*ForkVersion, error) {
+func (r *Relayer) GetForkVersion(state string) ([4]byte, error) {
 	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.lightNodeEndpoint, state)
 	var forkVersion *ForkVersion
 	forkVersion, err := FetchAndParseData[ForkVersion](url)
 	if err != nil {
 		log.Fatalf("Error fetching and parsing fork version: %v", err)
-		return nil, err
+		return [4]byte{}, err
 	}
 
-	return forkVersion, nil
+	var forkVersionBytes [4]byte
+	forkBytes, err := hexStringToByteArray(forkVersion.Data.CurrentVersion, len(forkVersionBytes))
+	if err != nil {
+		panic(err)
+	}
+	copy(forkVersionBytes[:], forkBytes)
+
+	return forkVersionBytes, nil
 }
 
 func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, error) {

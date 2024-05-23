@@ -43,6 +43,7 @@ type Relayer struct {
 	taraBridge             *bridge_contract_interface.BridgeContractInterface
 	onFinalizedEpoch       chan int64
 	onFinalizedBlockNumber chan uint64
+	onSyncCommitteeUpdate  chan int64
 	currentPeriod          int64
 	bridgeContractAddr     eth_common.Address
 }
@@ -97,15 +98,25 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
 	r.onFinalizedBlockNumber = make(chan uint64)
+	r.onSyncCommitteeUpdate = make(chan int64)
 
 	slot, err := r.beaconLightClient.Slot(nil)
 	if err != nil {
-		log.Fatalf("Failed to get current slot from contract: %v", err)
-		return
+		log.WithError(err).Fatal("Failed to get current slot from contract")
 	}
+
 	r.currentPeriod = common.GetPeriodFromSlot(int64(slot))
 
+	root, err := r.beaconLightClient.SyncCommitteeRoots(nil, uint64(r.currentPeriod+1))
+	if err != nil {
+		log.WithError(err).Fatal("Failed to get sync committee roots")
+	}
+
 	log.WithField("current period", r.currentPeriod).Info("Beacon light client deployed, starting relayer")
+
+	if root == [32]byte{} {
+		r.updateSyncCommittee(r.currentPeriod)
+	}
 
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
@@ -115,6 +126,7 @@ func (r *Relayer) Start(ctx context.Context) {
 func (r *Relayer) Close() {
 	close(r.onFinalizedEpoch)
 	close(r.onFinalizedBlockNumber)
+	close(r.onSyncCommitteeUpdate)
 }
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
@@ -127,12 +139,11 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		case epoch := <-r.onFinalizedEpoch:
 			log.Printf("Processing new block for epoch: %d", epoch)
 			if r.currentPeriod != common.GetPeriodFromEpoch(epoch) {
-				r.updateSyncCommittee(epoch)
-				r.currentPeriod = common.GetPeriodFromEpoch(epoch)
+				r.updateSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
 			if finalizedBlockNumber != 0 {
 				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
-				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
+				blockNum, err := r.updateLightClient(epoch, 0)
 				if err != nil {
 					log.Println("Did not to update light client:", err)
 				} else {
@@ -153,6 +164,9 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			if finalizedBlockNumber == 0 {
 				go r.checkAndFinalize()
 			}
+		case period := <-r.onSyncCommitteeUpdate:
+			r.currentPeriod = period
+			log.WithField("period", period).Info("Sync committee updated")
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return
