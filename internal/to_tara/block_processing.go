@@ -148,7 +148,7 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 		if err != nil {
 			log.WithError(err).Warn("Failed to update next sync committee")
 		}
-		r.onSyncCommitteeUpdate <- period
+		r.onSyncCommitteeUpdate <- period + 1
 	}()
 }
 
