@@ -17,7 +17,7 @@ import (
 func (r *Relayer) finalize() {
 	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
 	if err != nil {
-		log.Println("Failed to call finalize:", err)
+		log.WithField("trx", trx).WithError(err).Info("Failed to call finalize")
 		return
 	}
 	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
@@ -26,7 +26,6 @@ func (r *Relayer) finalize() {
 		return
 	}
 	log.Printf("Finalized bridge on block: %d", receipt.BlockNumber.Uint64())
-	r.onFinalizedBlockNumber <- receipt.BlockNumber.Uint64()
 }
 
 func (r *Relayer) getProof(finalizedBlock *big.Int) {

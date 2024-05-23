@@ -105,6 +105,8 @@ func (r *Relayer) Start(ctx context.Context) {
 	}
 	r.currentPeriod = common.GetPeriodFromSlot(int64(slot))
 
+	log.WithField("current period", r.currentPeriod).Info("Beacon light client deployed, starting relayer")
+
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
 	r.checkAndFinalize()
@@ -117,7 +119,7 @@ func (r *Relayer) Close() {
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
 	var finalizedBlockNumber uint64
-	ticker := time.NewTicker(20 * time.Minute)
+	ticker := time.NewTicker(2 * time.Minute)
 	defer ticker.Stop()
 
 	for {
@@ -132,12 +134,10 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
 				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
-					log.Fatalf("Did not to update light client: %v", err)
+					log.Println("Did not to update light client:", err)
 				} else {
-					go func() {
-						r.getProof(blockNum)
-						r.applyState(blockNum)
-					}()
+					r.getProof(blockNum)
+					r.applyState(blockNum)
 					finalizedBlockNumber = 0
 				}
 			}
@@ -150,7 +150,9 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
 			log.Println("Checking for if we need to finalize")
-			r.checkAndFinalize()
+			if finalizedBlockNumber == 0 {
+				go r.checkAndFinalize()
+			}
 		case <-ctx.Done():
 			log.Println("Stopping new block processing")
 			return
@@ -159,18 +161,24 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 }
 
 func (r *Relayer) checkAndFinalize() {
-	ethEpoch, err := r.ethBridge.FinalizedEpoch(nil)
+	r.finalize()
+	finalizedEpoch, err := r.ethBridge.FinalizedEpoch(nil)
 	if err != nil {
 		log.Warningf("Failed to get finalized epoch from ETH contract: %v", err)
 		return
 	}
-	taraEpoch, err := r.taraBridge.FinalizedEpoch(nil)
+	appliedEpoch, err := r.taraBridge.AppliedEpoch(nil)
 	if err != nil {
 		log.Warningf("Failed to get finalized epoch from TARA contract: %v", err)
 		return
 	}
-	if ethEpoch != taraEpoch {
-		log.Printf("Finalizing ETH epoch %d on TARA epoch %d", ethEpoch, taraEpoch)
-		r.finalize()
+	if finalizedEpoch.Cmp(appliedEpoch) > 0 {
+		log.Printf("Finalizing ETH epoch %d on TARA epoch %d", finalizedEpoch, appliedEpoch)
+
+		lastFinalizedBlock, err := r.ethBridge.LastFinalizedBlock(nil)
+		if err != nil {
+			log.Fatalf("Failed to get last finalized block: %v", err)
+		}
+		r.onFinalizedBlockNumber <- lastFinalizedBlock.Uint64()
 	}
 }
