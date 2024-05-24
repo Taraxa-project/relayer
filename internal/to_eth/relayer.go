@@ -4,8 +4,9 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"log"
 	"relayer/internal/common"
+
+	log "github.com/sirupsen/logrus"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	tara_client_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/eth/tara_client_contract_client/contract_interface"
@@ -94,7 +95,7 @@ func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
 	br, err := r.taraClientOnEth.GetFinalizedBridgeRoot(nil)
 	if err != nil {
-		log.Fatalf("Failed to get last applied bridge root: %v", err)
+		log.WithError(err).Error("Failed to get last applied bridge root")
 	}
 	r.lastAppliedBridgeRoot = br
 	// sync
