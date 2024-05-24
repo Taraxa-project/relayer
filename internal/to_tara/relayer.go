@@ -135,7 +135,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			}
 			if finalizedBlockNumber != 0 {
 				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
-				blockNum, err := r.updateLightClient(epoch, 0)
+				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
 					log.WithError(err).Error("Did not to update light client")
 				} else {
