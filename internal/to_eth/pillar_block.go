@@ -157,7 +157,7 @@ func (r *Relayer) processPillarBlocks() {
 		}
 	}
 	// TODO: don't process without blocks of if bridgeRoot wasn't change
-	if len(blocks) == 0 || (len(blocks) == maxNumOfBlocksInBatch && pendingBridgeRoot == r.lastAppliedBridgeRoot) {
+	if len(blocks) == 0 { // || (len(blocks) == maxNumOfBlocksInBatch && pendingBridgeRoot == r.lastAppliedBridgeRoot) {
 		log.WithField("blocks", len(blocks)).Info("No new pillar blocks to process")
 		r.bridgeState()
 		return
@@ -179,7 +179,7 @@ func (r *Relayer) processPillarBlocks() {
 	r.lastAppliedBridgeRoot = pendingBridgeRoot
 	// This means that we have more blocks to process
 	if period != expectedLatestPillarBlockPeriod {
-		log.WithField("period", period).Info("We have more pillar blocks, processing next batch")
+		log.WithField("period", period).WithField("expectedLatest", expectedLatestPillarBlockPeriod).Info("We have more pillar blocks, processing next batch")
 		r.processPillarBlocks()
 	} else {
 		log.Info("All pillar blocks processed, syncing bridge state")
