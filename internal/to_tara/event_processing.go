@@ -49,7 +49,7 @@ func (r *Relayer) processSSEStream(stream io.ReadCloser) {
 
 			var subscriptionData map[string]interface{}
 			if err := json.Unmarshal([]byte(dataLine), &subscriptionData); err != nil {
-				log.Printf("Error parsing JSON: %v", err)
+				log.WithError(err).Error("Error parsing JSON")
 				continue
 			}
 
@@ -64,16 +64,16 @@ func (r *Relayer) processSSEStream(stream io.ReadCloser) {
 				// If "epoch" is provided as a string, parse it to an integer
 				if epochVal, err := strconv.ParseUint(epoch, 10, 64); err == nil {
 					r.onFinalizedEpoch <- int64(epochVal)
-					log.Printf("Epoch value: %d", epochVal)
+					log.WithField("epoch", epochVal).Debug("Epoch value")
 				} else {
-					log.Printf("Error converting epoch from string to uint64: %v", err)
+					log.WithError(err).Error("Error converting epoch from string to uint64")
 				}
 			default:
-				log.Println("Epoch value is of an unrecognized type", subscriptionData)
+				log.WithField("data", subscriptionData).Warn("Epoch value is of an unrecognized type")
 			}
 		}
 		if err := scanner.Err(); err != nil {
-			log.Printf("Error reading stream: %v", err)
+			log.WithError(err).Error("Error reading stream")
 		}
 	}
 }

@@ -17,15 +17,15 @@ import (
 func (r *Relayer) finalize() {
 	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
 	if err != nil {
-		log.WithField("trx", trx).WithError(err).Info("Failed to call finalize")
+		log.WithField("trx", trx).WithError(err).Debug("Failed to call finalize")
 		return
 	}
 	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
 	if err != nil {
-		log.Println("Failed to wait for finalize:", err)
+		log.WithError(err).Warn("Failed to wait for finalize")
 		return
 	}
-	log.Printf("Finalized bridge on block: %d", receipt.BlockNumber.Uint64())
+	log.WithField("block", receipt.BlockNumber.Uint64()).Info("Finalized bridge on block")
 }
 
 func (r *Relayer) getProof(finalizedBlock *big.Int) {

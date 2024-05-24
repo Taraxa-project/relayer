@@ -43,7 +43,8 @@ type Relayer struct {
 	taraBridge             *bridge_contract_interface.BridgeContractInterface
 	onFinalizedEpoch       chan int64
 	onFinalizedBlockNumber chan uint64
-	currentPeriod          int64
+	onSyncCommitteeUpdate  chan int64
+	currentSyncPeriod      int64
 	bridgeContractAddr     eth_common.Address
 }
 
@@ -97,24 +98,27 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
 	r.onFinalizedBlockNumber = make(chan uint64)
+	r.onSyncCommitteeUpdate = make(chan int64)
 
 	slot, err := r.beaconLightClient.Slot(nil)
 	if err != nil {
-		log.Fatalf("Failed to get current slot from contract: %v", err)
-		return
+		log.WithError(err).Fatal("Failed to get current slot from contract")
 	}
-	r.currentPeriod = common.GetPeriodFromSlot(int64(slot))
 
-	log.WithField("current period", r.currentPeriod).Info("Beacon light client deployed, starting relayer")
+	r.currentSyncPeriod = common.GetPeriodFromSlot(int64(slot))
+	log.WithField("current period", r.currentSyncPeriod).Info("Beacon light client deployed, starting relayer")
 
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
+
 	r.checkAndFinalize()
+	r.checkAndUpdateNextSyncCommittee(r.currentSyncPeriod)
 }
 
 func (r *Relayer) Close() {
 	close(r.onFinalizedEpoch)
 	close(r.onFinalizedBlockNumber)
+	close(r.onSyncCommitteeUpdate)
 }
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
@@ -125,16 +129,15 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
-			log.Printf("Processing new block for epoch: %d", epoch)
-			if r.currentPeriod != common.GetPeriodFromEpoch(epoch) {
-				r.updateSyncCommittee(epoch)
-				r.currentPeriod = common.GetPeriodFromEpoch(epoch)
+			log.WithField("epoch", epoch).Info("Processing new block for epoch")
+			if r.currentSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
+				r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
 			if finalizedBlockNumber != 0 {
 				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
-				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
+				blockNum, err := r.updateLightClient(epoch, 0)
 				if err != nil {
-					log.Println("Did not to update light client:", err)
+					log.WithError(err).Error("Did not to update light client")
 				} else {
 					r.getProof(blockNum)
 					r.applyState(blockNum)
@@ -142,19 +145,22 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				}
 			}
 		case blockNumber := <-r.onFinalizedBlockNumber:
-			log.Println("Received finalized block number", blockNumber)
+			log.WithField("blockNumber", blockNumber).Info("Received finalized block number")
 			if finalizedBlockNumber != 0 {
-				log.Println("Finalized block number was not processed yet, skipping this one")
+				log.Warn("Finalized block number was not processed yet, skipping this one")
 				continue
 			}
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
-			log.Println("Checking for if we need to finalize")
+			log.Info("Checking for if we need to finalize")
 			if finalizedBlockNumber == 0 {
 				go r.checkAndFinalize()
 			}
+		case period := <-r.onSyncCommitteeUpdate:
+			log.WithField("period", period).Info("Next sync committee updated")
+			r.currentSyncPeriod = period - 1
 		case <-ctx.Done():
-			log.Println("Stopping new block processing")
+			log.Info("Stopping new block processing")
 			return
 		}
 	}
@@ -180,5 +186,16 @@ func (r *Relayer) checkAndFinalize() {
 			log.Fatalf("Failed to get last finalized block: %v", err)
 		}
 		r.onFinalizedBlockNumber <- lastFinalizedBlock.Uint64()
+	}
+}
+
+func (r *Relayer) checkAndUpdateNextSyncCommittee(period int64) {
+	root, err := r.beaconLightClient.SyncCommitteeRoots(nil, uint64(period+1))
+	if err != nil {
+		log.WithError(err).Fatal("Failed to get sync committee roots")
+	}
+
+	if root == [32]byte{} {
+		r.updateSyncCommittee(period)
 	}
 }
