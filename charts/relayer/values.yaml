@@ -15,10 +15,15 @@ app:
   lightNodeEndpoint: ""
   taraxaNodeUrl: ""
   taraxaContractAddress: ""
+  beaconLightClientAddress: ""
+  ethClientOnTaraAddress: ""
+  taraBridgeAddress: ""
+  taraClientOnEthAddress: ""
+  ethBridgeAddress: ""
 
 secrets:
   enabled: true
-  key: ""
+  privateKey: ""
 
 imagePullSecrets: []
 nameOverride: ""
