@@ -130,7 +130,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
 			log.WithField("epoch", epoch).Info("Processing new block for epoch")
-			if r.currentSyncPeriod != common.GetPeriodFromEpoch(epoch) {
+			if r.currentSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
 			if finalizedBlockNumber != 0 {
