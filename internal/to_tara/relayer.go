@@ -26,13 +26,11 @@ type Config struct {
 	TaraxaBridgeAddr      eth_common.Address
 	EthBridgeAddr         eth_common.Address
 	Key                   *ecdsa.PrivateKey
-	LightNodeEndpoint     string
 }
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
 	beaconNodeEndpoint     string
-	lightNodeEndpoint      string
 	taraxaClient           *ethclient.Client
 	taraAuth               *bind.TransactOpts
 	ethClient              *ethclient.Client
@@ -90,7 +88,6 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		ethClientContract:  ethClientContract,
 		ethBridge:          ethBridge,
 		taraBridge:         taraBridge,
-		lightNodeEndpoint:  cfg.LightNodeEndpoint,
 		bridgeContractAddr: cfg.EthBridgeAddr,
 	}, nil
 }

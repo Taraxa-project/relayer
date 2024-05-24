@@ -29,9 +29,9 @@ type Config struct {
 	TaraClientOnEthAddress string
 	EthBridgeAddress       string
 
-	TaraxaNodeURL     string
-	PrivateKey        string
-	LightNodeEndpoint string
+	TaraxaNodeURL      string
+	PrivateKey         string
+	BeaconNodeEndpoint string
 }
 
 func main() {
@@ -50,7 +50,7 @@ func main() {
 	pflag.StringVar(&config.EthBridgeAddress, "eth_bridge_address", os.Getenv("ETH_BRIDGE_ADDRESS"), "Address of the Eth bridge contract on Ethereum chain")
 	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", os.Getenv("TARAXA_NODE_URL"), "Taraxa node URL")
 	pflag.StringVar(&config.PrivateKey, "private_key", os.Getenv("PRIVATE_KEY"), "Private key")
-	pflag.StringVar(&config.LightNodeEndpoint, "light_node_endpoint", os.Getenv("LIGHT_NODE_ENDPOINT"), "Light node endpoint")
+	pflag.StringVar(&config.BeaconNodeEndpoint, "beacon_node_endpoint", os.Getenv("BEACON_NODE_ENDPOINT"), "Beacon node endpoint")
 	log_level_env := os.Getenv("LOG_LEVEL")
 	if log_level_env == "" {
 		log_level_env = "debug"
@@ -71,7 +71,7 @@ func main() {
 	}
 
 	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
-		BeaconNodeEndpoint:    config.EthereumAPIEndpoint,
+		BeaconNodeEndpoint:    config.BeaconNodeEndpoint,
 		EthRPCURL:             config.EthereumAPIEndpoint,
 		TaraxaRPCURL:          config.TaraxaNodeURL,
 		BeaconLightClientAddr: common.HexToAddress(config.BeaconLightClientAddress),
@@ -79,7 +79,6 @@ func main() {
 		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
 		EthClientOnTaraAddr:   common.HexToAddress(config.EthClientOnTaraAddress),
 		Key:                   privateKey,
-		LightNodeEndpoint:     config.LightNodeEndpoint,
 	})
 	if err != nil {
 		panic(err)
@@ -92,7 +91,6 @@ func main() {
 		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
 		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
 		Key:                   privateKey,
-		LightNodeEndpoint:     config.LightNodeEndpoint,
 	})
 
 	if err != nil {
