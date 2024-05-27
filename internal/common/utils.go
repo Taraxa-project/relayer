@@ -48,3 +48,28 @@ func ConnectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*et
 
 	return client, auth, nil
 }
+
+type Clients struct {
+	TaraxaClient *ethclient.Client
+	TaraxaAuth   *bind.TransactOpts
+	EthClient    *ethclient.Client
+	EthAuth      *bind.TransactOpts
+}
+
+func CreateClients(ctx context.Context, taraUrl, ethUrl string, key *ecdsa.PrivateKey) (*Clients, error) {
+	taraxaClient, taraAuth, err := ConnectToChain(ctx, taraUrl, key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to Taraxa network: %v", err)
+	}
+
+	ethClient, ethAuth, err := ConnectToChain(ctx, ethUrl, key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to ETH network: %v", err)
+	}
+	return &Clients{
+		TaraxaClient: taraxaClient,
+		TaraxaAuth:   taraAuth,
+		EthClient:    ethClient,
+		EthAuth:      ethAuth,
+	}, nil
+}
