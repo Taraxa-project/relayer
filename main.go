@@ -6,12 +6,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"relayer/internal/common"
 	"relayer/internal/logging"
 	"relayer/internal/to_eth"
 	"relayer/internal/to_tara"
 	"syscall"
 
-	"github.com/ethereum/go-ethereum/common"
+	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
@@ -41,6 +42,7 @@ func main() {
 	if err != nil {
 		log.WithError(err).Warn("Error loading .env file")
 	}
+
 	var log_level string
 	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", os.Getenv("ETHEREUM_API_ENDPOINT"), "Ethereum API endpoint")
 	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", os.Getenv("BEACON_LIGHT_CLIENT_ADDRESS"), "Address of the BeaconLightClient contract on Taraxa chain")
@@ -51,6 +53,7 @@ func main() {
 	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", os.Getenv("TARAXA_NODE_URL"), "Taraxa node URL")
 	pflag.StringVar(&config.PrivateKey, "private_key", os.Getenv("PRIVATE_KEY"), "Private key")
 	pflag.StringVar(&config.BeaconNodeEndpoint, "beacon_node_endpoint", os.Getenv("BEACON_NODE_ENDPOINT"), "Beacon node endpoint")
+
 	log_level_env := os.Getenv("LOG_LEVEL")
 	if log_level_env == "" {
 		log_level_env = "debug"
@@ -70,32 +73,35 @@ func main() {
 		log.Fatalf("Failed to convert private key: %v", err)
 	}
 
+	clients, err := common.CreateClients(ctx, config.TaraxaNodeURL, config.EthereumAPIEndpoint, privateKey)
+	if err != nil {
+		log.Fatalf("Failed to create clients: %v", err)
+	}
+
 	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
 		BeaconNodeEndpoint:    config.BeaconNodeEndpoint,
-		EthRPCURL:             config.EthereumAPIEndpoint,
-		TaraxaRPCURL:          config.TaraxaNodeURL,
-		BeaconLightClientAddr: common.HexToAddress(config.BeaconLightClientAddress),
-		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
-		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
-		EthClientOnTaraAddr:   common.HexToAddress(config.EthClientOnTaraAddress),
-		Key:                   privateKey,
+		BeaconLightClientAddr: eth_common.HexToAddress(config.BeaconLightClientAddress),
+		EthBridgeAddr:         eth_common.HexToAddress(config.EthBridgeAddress),
+		TaraxaBridgeAddr:      eth_common.HexToAddress(config.TaraBridgeAddress),
+		EthClientOnTaraAddr:   eth_common.HexToAddress(config.EthClientOnTaraAddress),
+		Clients:               clients,
 	})
+
 	if err != nil {
 		panic(err)
 	}
 
 	ethRelayer, err := to_eth.NewRelayer(&to_eth.Config{
-		TaraxaRPCURL:          config.TaraxaNodeURL,
-		EthRPCURL:             config.EthereumAPIEndpoint,
-		TaraxaClientOnEthAddr: common.HexToAddress(config.TaraClientOnEthAddress),
-		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
-		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
-		Key:                   privateKey,
+		TaraxaClientOnEthAddr: eth_common.HexToAddress(config.TaraClientOnEthAddress),
+		TaraxaBridgeAddr:      eth_common.HexToAddress(config.TaraBridgeAddress),
+		EthBridgeAddr:         eth_common.HexToAddress(config.EthBridgeAddress),
+		Clients:               clients,
 	})
 
 	if err != nil {
 		panic(err)
 	}
+
 	// Handle interrupt signals
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)

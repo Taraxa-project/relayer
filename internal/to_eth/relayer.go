@@ -2,7 +2,6 @@ package to_eth
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"fmt"
 	"relayer/internal/common"
 
@@ -17,18 +16,14 @@ import (
 )
 
 type Config struct {
-	BeaconNodeEndpoint    string
-	TaraxaRPCURL          string
-	EthRPCURL             string
 	TaraxaClientOnEthAddr eth_common.Address
 	TaraxaBridgeAddr      eth_common.Address
 	EthBridgeAddr         eth_common.Address
-	Key                   *ecdsa.PrivateKey
+	Clients               *common.Clients
 }
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	beaconNodeEndpoint    string
 	taraxaClient          *TaraxaClientWrapper
 	taraxaNodeConfig      *tara_rpc_types.TaraConfig
 	taraAuth              *bind.TransactOpts
@@ -44,22 +39,13 @@ type Relayer struct {
 
 // NewRelayer creates a new Relayer instance
 func NewRelayer(cfg *Config) (*Relayer, error) {
-	tcl, taraAuth, err := common.ConnectToChain(context.Background(), cfg.TaraxaRPCURL, cfg.Key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to Taraxa network: %v", err)
-	}
-	taraxaClient := NewClient(tcl)
+	taraxaClient := NewClient(cfg.Clients.TaraxaClient)
 	taraConfig, err := taraxaClient.GetTaraConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Taraxa Config: %v", err)
 	}
 
-	ethClient, ethAuth, err := common.ConnectToChain(context.Background(), cfg.EthRPCURL, cfg.Key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to ETH network: %v", err)
-	}
-
-	taraClientOnEth, err := tara_client_interface.NewTaraClientContractInterface(cfg.TaraxaClientOnEthAddr, ethClient)
+	taraClientOnEth, err := tara_client_interface.NewTaraClientContractInterface(cfg.TaraxaClientOnEthAddr, cfg.Clients.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
@@ -69,18 +55,17 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
 	}
 
-	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, ethClient)
+	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, cfg.Clients.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}
 
 	return &Relayer{
-		beaconNodeEndpoint: cfg.BeaconNodeEndpoint,
 		taraxaClient:       taraxaClient,
 		taraxaNodeConfig:   taraConfig,
-		taraAuth:           taraAuth,
-		ethClient:          ethClient,
-		ethAuth:            ethAuth,
+		taraAuth:           cfg.Clients.TaraxaAuth,
+		ethClient:          cfg.Clients.EthClient,
+		ethAuth:            cfg.Clients.EthAuth,
 		taraClientOnEth:    taraClientOnEth,
 		ethBridge:          ethBridge,
 		taraBridge:         taraBridge,
