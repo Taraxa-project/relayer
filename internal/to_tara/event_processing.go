@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (r *Relayer) startEventProcessing(ctx context.Context) {
@@ -19,19 +17,19 @@ func (r *Relayer) startEventProcessing(ctx context.Context) {
 	// Construct the request to the Ethereum 2.0 node's event stream
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/eth/v1/events?topics=finalized_checkpoint", r.beaconNodeEndpoint), nil)
 	if err != nil {
-		log.Fatalf("Failed to create request: %v", err)
+		r.log.Fatalf("Failed to create request: %v", err)
 	}
 	req.Header.Add("accept", "text/event-stream")
 
 	// Make the request and receive the response
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatalf("Failed to connect to event stream: %v", err)
+		r.log.Fatalf("Failed to connect to event stream: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("Failed to subscribe to events, status code: %d", resp.StatusCode)
+		r.log.Fatalf("Failed to subscribe to events, status code: %d", resp.StatusCode)
 	}
 
 	// Assuming the use of a generic SSE client to parse the stream.
@@ -49,7 +47,7 @@ func (r *Relayer) processSSEStream(stream io.ReadCloser) {
 
 			var subscriptionData map[string]interface{}
 			if err := json.Unmarshal([]byte(dataLine), &subscriptionData); err != nil {
-				log.WithError(err).Error("Error parsing JSON")
+				r.log.WithError(err).Error("Error parsing JSON")
 				continue
 			}
 
@@ -64,16 +62,16 @@ func (r *Relayer) processSSEStream(stream io.ReadCloser) {
 				// If "epoch" is provided as a string, parse it to an integer
 				if epochVal, err := strconv.ParseUint(epoch, 10, 64); err == nil {
 					r.onFinalizedEpoch <- int64(epochVal)
-					log.WithField("epoch", epochVal).Debug("Epoch value")
+					r.log.WithField("epoch", epochVal).Debug("Epoch value")
 				} else {
-					log.WithError(err).Error("Error converting epoch from string to uint64")
+					r.log.WithError(err).Error("Error converting epoch from string to uint64")
 				}
 			default:
-				log.WithField("data", subscriptionData).Warn("Epoch value is of an unrecognized type")
+				r.log.WithField("data", subscriptionData).Warn("Epoch value is of an unrecognized type")
 			}
 		}
 		if err := scanner.Err(); err != nil {
-			log.WithError(err).Error("Error reading stream")
+			r.log.WithError(err).Error("Error reading stream")
 		}
 	}
 }

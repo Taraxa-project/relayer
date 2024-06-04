@@ -35,10 +35,13 @@ type Relayer struct {
 	onFinalizedEpoch      chan int64
 	bridgeContractAddr    eth_common.Address
 	lastAppliedBridgeRoot eth_common.Hash
+	log                   *log.Entry
 }
 
 // NewRelayer creates a new Relayer instance
 func NewRelayer(cfg *Config) (*Relayer, error) {
+	relayerLogger := log.WithField("relayer", "to_eth")
+
 	taraxaClient := NewClient(cfg.Clients.TaraxaClient)
 	taraConfig, err := taraxaClient.GetTaraConfig()
 	if err != nil {
@@ -70,6 +73,7 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		ethBridge:          ethBridge,
 		taraBridge:         taraBridge,
 		bridgeContractAddr: cfg.EthBridgeAddr,
+		log:                relayerLogger,
 	}, nil
 }
 
@@ -77,7 +81,7 @@ func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
 	br, err := r.taraClientOnEth.GetFinalizedBridgeRoot(nil)
 	if err != nil {
-		log.WithError(err).Error("Failed to get last applied bridge root")
+		r.log.WithError(err).Error("Failed to get last applied bridge root")
 	}
 	r.lastAppliedBridgeRoot = br
 	// sync

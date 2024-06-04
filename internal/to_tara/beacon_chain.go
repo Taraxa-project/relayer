@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
@@ -15,8 +13,7 @@ func (r *Relayer) GetBlockHeader(blockType string) (*BeaconBlock, error) {
 	var beaconBlockHeader *BeaconBlock
 	beaconBlockHeader, err := FetchAndParseData[BeaconBlock](url)
 	if err != nil {
-		log.Fatalf("Error fetching and parsing beacon block header: %v", err)
-		return nil, err
+		r.log.Fatalf("Error fetching and parsing beacon block header: %v", err)
 	}
 
 	return beaconBlockHeader, nil
@@ -28,8 +25,7 @@ func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
 	var beaconBlockHeader *BeaconBlock
 	beaconBlockHeader, err := FetchAndParseData[BeaconBlock](url)
 	if err != nil {
-		log.Fatalf("Error fetching and parsing beacon block header: %v", err)
-		return nil, err
+		r.log.Fatalf("Error fetching and parsing beacon block header: %v", err)
 	}
 
 	return beaconBlockHeader, nil
@@ -40,8 +36,7 @@ func (r *Relayer) GetForkVersion(state string) ([4]byte, error) {
 	var forkVersion *ForkVersion
 	forkVersion, err := FetchAndParseData[ForkVersion](url)
 	if err != nil {
-		log.Fatalf("Error fetching and parsing fork version: %v", err)
-		return [4]byte{}, err
+		r.log.Fatalf("Error fetching and parsing fork version: %v", err)
 	}
 
 	var forkVersionBytes [4]byte
@@ -59,8 +54,7 @@ func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, er
 	var finalityUpdate *LightClientFinalityUpdate
 	finalityUpdate, err := FetchAndParseData[LightClientFinalityUpdate](url)
 	if err != nil {
-		log.Fatalf("Error fetching and parsing finality header: %v", err)
-		return nil, err
+		r.log.Fatalf("Error fetching and parsing finality header: %v", err)
 	}
 
 	return finalityUpdate, nil
@@ -71,8 +65,7 @@ func (r *Relayer) GetSyncCommitteeUpdate(startPeriod, count int64) (*SyncCommitt
 	var syncUpdates *[]SyncCommitteeUpdate
 	syncUpdates, err := FetchAndParseData[[]SyncCommitteeUpdate](url)
 	if err != nil {
-		log.Fatalf("Error fetching and parsing sync committee updates: %v", err)
-		return nil, err
+		r.log.Fatalf("Error fetching and parsing sync committee updates: %v", err)
 	}
 
 	return &(*syncUpdates)[0], nil
