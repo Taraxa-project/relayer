@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -15,13 +16,17 @@ type Formatter struct {
 	log.TextFormatter
 }
 
-func MakeFormatter() (formatter *Formatter) {
+func MakeFormatter(identifier string) (formatter *Formatter) {
 	formatter = new(Formatter)
 	formatter.TextFormatter = log.TextFormatter{
 		ForceColors:      true,
 		DisableTimestamp: false,
 		FullTimestamp:    true,
-		TimestampFormat:  "2006-01-02T15:04:05",
+		TimestampFormat:  "Jan02T15:04:05",
+		// Use it to add identifier to the log message
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			return identifier + "|", ""
+		},
 	}
 
 	return
@@ -29,6 +34,7 @@ func MakeFormatter() (formatter *Formatter) {
 
 // Whole this thing is needed to convert fields that are structs to json format
 func (f *Formatter) Format(entry *log.Entry) ([]byte, error) {
+	entry.Caller = &runtime.Frame{}
 	for k, v := range entry.Data {
 		// skip error field
 		if k == "error" {
@@ -70,14 +76,17 @@ func levelFromString(l string) log.Level {
 	return log.InfoLevel
 }
 
-func Config(path, level string) {
+func MakeLogger(identifier, path, level string) (logger *log.Logger) {
+	logger = log.New()
 	mw := io.MultiWriter(os.Stdout, &lumberjack.Logger{
-		Filename:   filepath.Join(path, "main.log"),
+		Filename:   filepath.Join(path, ""),
 		MaxSize:    100, // megabytes
 		MaxBackups: 5,
 		MaxAge:     2, //days
 	})
-	log.SetOutput(mw)
-	log.SetLevel(levelFromString(level))
-	log.SetFormatter(MakeFormatter())
+	logger.SetOutput(mw)
+	logger.SetLevel(levelFromString(level))
+	logger.SetFormatter(MakeFormatter(identifier))
+	logger.SetReportCaller(true)
+	return logger
 }

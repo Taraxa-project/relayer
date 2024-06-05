@@ -3,17 +3,18 @@ package to_tara
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"relayer/bindings/BeaconLightClient"
 	"relayer/bindings/EthClient"
 	"relayer/internal/common"
+	"relayer/internal/logging"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -23,6 +24,8 @@ type Config struct {
 	TaraxaBridgeAddr      eth_common.Address
 	EthBridgeAddr         eth_common.Address
 	Clients               *common.Clients
+	DataDir               string
+	LogLevel              string
 }
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
@@ -41,12 +44,12 @@ type Relayer struct {
 	onSyncCommitteeUpdate  chan int64
 	currentSyncPeriod      int64
 	bridgeContractAddr     eth_common.Address
-	log                    *log.Entry
+	log                    *log.Logger
 }
 
 // NewRelayer creates a new Relayer instance
 func NewRelayer(cfg *Config) (*Relayer, error) {
-	relayerLogger := log.WithField("relayer", "to_tara")
+	relayerLogger := logging.MakeLogger("to_tara", filepath.Join(cfg.DataDir, "logs", "to_tara.log"), cfg.LogLevel)
 
 	beaconLightClient, err := BeaconLightClient.NewBeaconLightClient(cfg.BeaconLightClientAddr, cfg.Clients.TaraxaClient)
 	if err != nil {

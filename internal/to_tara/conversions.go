@@ -44,7 +44,7 @@ func stringToByteArr(hexStrings []string) ([][32]byte, error) {
 }
 
 // convertToBeaconChainLightClientHeader converts a BeaconBlockHeader to a BeaconChainLightClientHeader.
-func convertToBeaconChainLightClientHeader(log *log.Entry, blockHeader BeaconBlockHeader) BeaconLightClient.BeaconChainLightClientHeader {
+func convertToBeaconChainLightClientHeader(log *log.Logger, blockHeader BeaconBlockHeader) BeaconLightClient.BeaconChainLightClientHeader {
 	beaconBlockHeader := BeaconLightClient.BeaconChainBeaconBlockHeader{
 		Slot:          uint64(blockHeader.Beacon.Slot),
 		ProposerIndex: uint64(blockHeader.Beacon.ProposerIndex),
@@ -120,7 +120,7 @@ func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate altair.SyncAggr
 }
 
 // ConvertToSyncCommittee converts a NextSyncCommittee to BeaconChainSyncCommittee.
-func ConvertToSyncCommittee(log *log.Entry, sc NextSyncCommittee) BeaconLightClient.BeaconChainSyncCommittee {
+func ConvertToSyncCommittee(log *log.Logger, sc NextSyncCommittee) BeaconLightClient.BeaconChainSyncCommittee {
 	var pubkeys [512][]byte
 
 	for i, pubkey := range sc.Pubkeys {
@@ -146,7 +146,7 @@ func ConvertToSyncCommittee(log *log.Entry, sc NextSyncCommittee) BeaconLightCli
 }
 
 // ConvertNextSyncCommitteeBranch converts a slice of hexadecimal strings to a slice of [32]byte arrays.
-func ConvertNextSyncCommitteeBranch(log *log.Entry, input []string) [][32]byte {
+func ConvertNextSyncCommitteeBranch(log *log.Logger, input []string) [][32]byte {
 	var result [][32]byte
 
 	for _, hexStr := range input {
