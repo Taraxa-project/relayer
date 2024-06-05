@@ -22,7 +22,7 @@ func MakeFormatter(identifier string) (formatter *Formatter) {
 		ForceColors:      true,
 		DisableTimestamp: false,
 		FullTimestamp:    true,
-		TimestampFormat:  "02-JanT15:04:05",
+		TimestampFormat:  "Jan02T15:04:05",
 		// Use it to add identifier to the log message
 		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
 			return identifier + "|", ""
