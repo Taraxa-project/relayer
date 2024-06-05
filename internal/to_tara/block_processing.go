@@ -6,8 +6,6 @@ import (
 	"math/big"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
-
 	"relayer/bindings/BeaconLightClient"
 	"relayer/internal/common"
 
@@ -39,9 +37,9 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	// Fetch data from a Beacon Node API (you need to implement this based on your data source)
 	// This is a placeholder for the actual implementation
 	return &BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
-		AttestedHeader:         convertToBeaconChainLightClientHeader(finalityUpdate.Data.AttestedHeader),
-		SignatureSyncCommittee: ConvertToSyncCommittee(syncUpdate.Data.NextSyncCommittee),
-		FinalizedHeader:        convertToBeaconChainLightClientHeader(finalityUpdate.Data.FinalizedHeader),
+		AttestedHeader:         convertToBeaconChainLightClientHeader(r.log, finalityUpdate.Data.AttestedHeader),
+		SignatureSyncCommittee: ConvertToSyncCommittee(r.log, syncUpdate.Data.NextSyncCommittee),
+		FinalizedHeader:        convertToBeaconChainLightClientHeader(r.log, finalityUpdate.Data.FinalizedHeader),
 		FinalityBranch:         finalityUpdate.Data.FinalityBranch,
 		SyncAggregate:          ConvertSyncAggregateToBeaconLightClientUpdate(finalityUpdate.Data.SyncAggregate),
 		ForkVersion:            forkVersion,
@@ -50,7 +48,7 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 }
 
 func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, error) {
-	log.WithField("epoch", epoch).Info("Attempting to update new header for epoch")
+	r.log.WithField("epoch", epoch).Info("Attempting to update new header for epoch")
 
 	// Fetch beacon block data for the given slot
 	updateData, err := r.GetBeaconBlockData(epoch)
@@ -62,7 +60,7 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, 
 		return nil, fmt.Errorf("failed to get beacon block data: %v", err)
 	}
 
-	log.WithField("blockNumber", blockNumber).Info("Updating light client")
+	r.log.WithField("blockNumber", blockNumber).Info("Updating light client")
 
 	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
 	tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
@@ -70,7 +68,7 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, 
 		return nil, fmt.Errorf("failed to import finalized header: %v", err)
 	}
 
-	log.WithField("trx", tx.Hash().Hex()).Info("Submitted next finalized header")
+	r.log.WithField("trx", tx.Hash().Hex()).Info("Submitted next finalized header")
 
 	receipt, err := bind.WaitMined(context.Background(), r.taraxaClient, tx)
 
@@ -78,50 +76,50 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, 
 		return nil, fmt.Errorf("failed to UpdateLightClient: %v", err)
 	}
 
-	log.WithField("blockNumber", receipt.BlockNumber.Uint64()).Info("Beacon chain light client updated")
+	r.log.WithField("blockNumber", receipt.BlockNumber.Uint64()).Info("Beacon chain light client updated")
 
 	return big.NewInt(int64(updateData.FinalizedHeader.Execution.BlockNumber)), nil
 }
 
 func (r *Relayer) updateSyncCommittee(period int64) {
 	go func() {
-		log.WithField("period", period+1).Info("Updating next sync committee")
+		r.log.WithField("period", period+1).Info("Updating next sync committee")
 
 		syncUpdate, err := r.GetSyncCommitteeUpdate(period, 1)
 		if err != nil {
-			log.WithError(err).Error("Failed to get sync committee update")
+			r.log.WithError(err).Error("Failed to get sync committee update")
 			return
 		}
 
 		oldsyncUpdate, err := r.GetSyncCommitteeUpdate(period-1, 1)
 		if err != nil {
-			log.WithError(err).Error("Failed to get previous sync committee update")
+			r.log.WithError(err).Error("Failed to get previous sync committee update")
 			return
 		}
 
 		forkVersion, err := r.GetForkVersion("head")
 		if err != nil {
-			log.WithError(err).Error("Failed to get fork version")
+			r.log.WithError(err).Error("Failed to get fork version")
 			return
 		}
 
 		finalityBranch, err := stringToByteArr(syncUpdate.Data.FinalityBranch)
 		if err != nil {
-			log.WithError(err).Error("Failed to convert fork version to bytes")
+			r.log.WithError(err).Error("Failed to convert fork version to bytes")
 			return
 		}
 
 		signatureSlot, err := strconv.ParseUint(syncUpdate.Data.SignatureSlot, 10, 64)
 		if err != nil {
-			log.WithError(err).Error("Failed to parse signature slot")
+			r.log.WithError(err).Error("Failed to parse signature slot")
 			return
 		}
 
 		// Fetch beacon block data for the given slot
 		updateData := BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
-			AttestedHeader:         convertToBeaconChainLightClientHeader(syncUpdate.Data.AttestedHeader),
-			SignatureSyncCommittee: ConvertToSyncCommittee(oldsyncUpdate.Data.NextSyncCommittee),
-			FinalizedHeader:        convertToBeaconChainLightClientHeader(syncUpdate.Data.FinalizedHeader),
+			AttestedHeader:         convertToBeaconChainLightClientHeader(r.log, syncUpdate.Data.AttestedHeader),
+			SignatureSyncCommittee: ConvertToSyncCommittee(r.log, oldsyncUpdate.Data.NextSyncCommittee),
+			FinalizedHeader:        convertToBeaconChainLightClientHeader(r.log, syncUpdate.Data.FinalizedHeader),
 			FinalityBranch:         finalityBranch,
 			SyncAggregate:          ConvertSyncAggregateToBeaconLightClientUpdate(syncUpdate.Data.SyncAggregate),
 			ForkVersion:            forkVersion,
@@ -131,22 +129,22 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 		// print(updateData)
 
 		syncCommitteeData := BeaconLightClient.BeaconLightClientUpdateSyncCommitteePeriodUpdate{
-			NextSyncCommittee:       ConvertToSyncCommittee(syncUpdate.Data.NextSyncCommittee),
-			NextSyncCommitteeBranch: ConvertNextSyncCommitteeBranch(syncUpdate.Data.NextSyncCommitteeBranch),
+			NextSyncCommittee:       ConvertToSyncCommittee(r.log, syncUpdate.Data.NextSyncCommittee),
+			NextSyncCommitteeBranch: ConvertNextSyncCommitteeBranch(r.log, syncUpdate.Data.NextSyncCommitteeBranch),
 		}
 
 		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, updateData, syncCommitteeData)
 		if err != nil {
-			log.WithError(err).Warn("Failed to import next sync committee")
+			r.log.WithError(err).Warn("Failed to import next sync committee")
 			return
 		}
 
-		log.WithField("trx", tx.Hash().Hex()).Info("Submitted next sync committee")
+		r.log.WithField("trx", tx.Hash().Hex()).Info("Submitted next sync committee")
 
 		_, err = bind.WaitMined(context.Background(), r.taraxaClient, tx)
 
 		if err != nil {
-			log.WithError(err).Warn("Failed to update next sync committee")
+			r.log.WithError(err).Warn("Failed to update next sync committee")
 		}
 		r.onSyncCommitteeUpdate <- period + 1
 	}()

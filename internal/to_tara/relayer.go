@@ -41,10 +41,13 @@ type Relayer struct {
 	onSyncCommitteeUpdate  chan int64
 	currentSyncPeriod      int64
 	bridgeContractAddr     eth_common.Address
+	log                    *log.Entry
 }
 
 // NewRelayer creates a new Relayer instance
 func NewRelayer(cfg *Config) (*Relayer, error) {
+	relayerLogger := log.WithField("relayer", "to_tara")
+
 	beaconLightClient, err := BeaconLightClient.NewBeaconLightClient(cfg.BeaconLightClientAddr, cfg.Clients.TaraxaClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
@@ -76,6 +79,7 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		ethBridge:          ethBridge,
 		taraBridge:         taraBridge,
 		bridgeContractAddr: cfg.EthBridgeAddr,
+		log:                relayerLogger,
 	}, nil
 }
 
@@ -86,11 +90,11 @@ func (r *Relayer) Start(ctx context.Context) {
 
 	slot, err := r.beaconLightClient.Slot(nil)
 	if err != nil {
-		log.WithError(err).Fatal("Failed to get current slot from contract")
+		r.log.WithError(err).Fatal("Failed to get current slot from contract")
 	}
 
 	r.currentSyncPeriod = common.GetPeriodFromSlot(int64(slot))
-	log.WithField("current period", r.currentSyncPeriod).Info("Beacon light client deployed, starting relayer")
+	r.log.WithField("current period", r.currentSyncPeriod).Info("Beacon light client deployed, starting relayer")
 
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
@@ -113,15 +117,15 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
-			log.WithField("epoch", epoch).Info("Processing new block for epoch")
+			r.log.WithField("epoch", epoch).Info("Processing new block for epoch")
 			if r.currentSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
 			if finalizedBlockNumber != 0 {
-				log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
+				r.log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
 				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
-					log.WithError(err).Error("Did not to update light client")
+					r.log.WithError(err).Error("Did not to update light client")
 				} else {
 					r.getProof(blockNum)
 					r.applyState(blockNum)
@@ -129,22 +133,22 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				}
 			}
 		case blockNumber := <-r.onFinalizedBlockNumber:
-			log.WithField("blockNumber", blockNumber).Info("Received finalized block number")
+			r.log.WithField("blockNumber", blockNumber).Info("Received finalized block number")
 			if finalizedBlockNumber != 0 {
-				log.WithFields(log.Fields{"finalizedBlockNumber": finalizedBlockNumber, "current": blockNumber}).Info("Finalized block number was not processed yet")
+				r.log.WithFields(log.Fields{"finalizedBlockNumber": finalizedBlockNumber, "current": blockNumber}).Info("Finalized block number was not processed yet")
 				continue
 			}
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
-			log.Info("Checking for if we need to finalize")
+			r.log.Info("Checking for if we need to finalize")
 			if finalizedBlockNumber == 0 {
 				go r.checkAndFinalize()
 			}
 		case period := <-r.onSyncCommitteeUpdate:
-			log.WithField("period", period).Info("Next sync committee updated")
+			r.log.WithField("period", period).Info("Next sync committee updated")
 			r.currentSyncPeriod = period - 1
 		case <-ctx.Done():
-			log.Info("Stopping new block processing")
+			r.log.Info("Stopping new block processing")
 			return
 		}
 	}
@@ -154,20 +158,20 @@ func (r *Relayer) checkAndFinalize() {
 	r.finalize()
 	finalizedEpoch, err := r.ethBridge.FinalizedEpoch(nil)
 	if err != nil {
-		log.Warningf("Failed to get finalized epoch from ETH contract: %v", err)
+		r.log.Warningf("Failed to get finalized epoch from ETH contract: %v", err)
 		return
 	}
 	appliedEpoch, err := r.taraBridge.AppliedEpoch(nil)
 	if err != nil {
-		log.Warningf("Failed to get finalized epoch from TARA contract: %v", err)
+		r.log.Warningf("Failed to get finalized epoch from TARA contract: %v", err)
 		return
 	}
 	if finalizedEpoch.Cmp(appliedEpoch) > 0 {
-		log.Printf("Finalizing ETH epoch %d on TARA epoch %d", finalizedEpoch, appliedEpoch)
+		r.log.Printf("Finalizing ETH epoch %d on TARA epoch %d", finalizedEpoch, appliedEpoch)
 
 		lastFinalizedBlock, err := r.ethBridge.LastFinalizedBlock(nil)
 		if err != nil {
-			log.Fatalf("Failed to get last finalized block: %v", err)
+			r.log.Fatalf("Failed to get last finalized block: %v", err)
 		}
 		r.onFinalizedBlockNumber <- lastFinalizedBlock.Uint64()
 	}
@@ -176,7 +180,7 @@ func (r *Relayer) checkAndFinalize() {
 func (r *Relayer) checkAndUpdateNextSyncCommittee(period int64) {
 	root, err := r.beaconLightClient.SyncCommitteeRoots(nil, uint64(period+1))
 	if err != nil {
-		log.WithError(err).Fatal("Failed to get sync committee roots")
+		r.log.WithError(err).Fatal("Failed to get sync committee roots")
 	}
 
 	if root == [32]byte{} {
