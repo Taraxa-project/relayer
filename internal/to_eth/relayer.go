@@ -3,7 +3,9 @@ package to_eth
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"relayer/internal/common"
+	"relayer/internal/logging"
 
 	log "github.com/sirupsen/logrus"
 
@@ -20,6 +22,8 @@ type Config struct {
 	TaraxaBridgeAddr      eth_common.Address
 	EthBridgeAddr         eth_common.Address
 	Clients               *common.Clients
+	DataDir               string
+	LogLevel              string
 }
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
@@ -35,12 +39,12 @@ type Relayer struct {
 	onFinalizedEpoch      chan int64
 	bridgeContractAddr    eth_common.Address
 	lastAppliedBridgeRoot eth_common.Hash
-	log                   *log.Entry
+	log                   *log.Logger
 }
 
 // NewRelayer creates a new Relayer instance
 func NewRelayer(cfg *Config) (*Relayer, error) {
-	relayerLogger := log.WithField("relayer", "to_eth")
+	relayerLogger := logging.MakeLogger("to_eth", filepath.Join(cfg.DataDir, "logs", "to_eth.log"), cfg.LogLevel)
 
 	taraxaClient := NewClient(cfg.Clients.TaraxaClient)
 	taraConfig, err := taraxaClient.GetTaraConfig()

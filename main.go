@@ -16,8 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -40,7 +38,7 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.WithError(err).Warn("Error loading .env file")
+		fmt.Println("Error loading .env file", err)
 	}
 
 	var log_level string
@@ -62,9 +60,9 @@ func main() {
 	pflag.Parse()
 
 	data_dir := "./"
-	logging.Config(filepath.Join(data_dir, "logs"), log_level)
+	log := logging.MakeLogger("main", filepath.Join(data_dir, "logs", "main.log"), log_level)
 
-	log.Printf("Starting relayer with config: %+v", config)
+	log.WithField("config", config).Info("Starting relayer with config")
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -85,6 +83,8 @@ func main() {
 		TaraxaBridgeAddr:      eth_common.HexToAddress(config.TaraBridgeAddress),
 		EthClientOnTaraAddr:   eth_common.HexToAddress(config.EthClientOnTaraAddress),
 		Clients:               clients,
+		DataDir:               data_dir,
+		LogLevel:              log_level,
 	})
 
 	if err != nil {
@@ -96,6 +96,8 @@ func main() {
 		TaraxaBridgeAddr:      eth_common.HexToAddress(config.TaraBridgeAddress),
 		EthBridgeAddr:         eth_common.HexToAddress(config.EthBridgeAddress),
 		Clients:               clients,
+		DataDir:               data_dir,
+		LogLevel:              log_level,
 	})
 
 	if err != nil {
