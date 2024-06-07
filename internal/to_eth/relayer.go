@@ -3,6 +3,7 @@ package to_eth
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"path/filepath"
 	"relayer/internal/common"
 	"relayer/internal/logging"
@@ -28,18 +29,20 @@ type Config struct {
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	taraxaClient          *TaraxaClientWrapper
-	taraxaNodeConfig      *tara_rpc_types.TaraConfig
-	taraAuth              *bind.TransactOpts
-	ethClient             *ethclient.Client
-	ethAuth               *bind.TransactOpts
-	ethBridge             *bridge_contract_interface.BridgeContractInterface
-	taraBridge            *bridge_contract_interface.BridgeContractInterface
-	taraClientOnEth       *tara_client_interface.TaraClientContractInterface
-	onFinalizedEpoch      chan int64
-	bridgeContractAddr    eth_common.Address
-	lastAppliedBridgeRoot eth_common.Hash
-	log                   *log.Logger
+	taraxaClient       *TaraxaClientWrapper
+	taraxaNodeConfig   *tara_rpc_types.TaraConfig
+	taraAuth           *bind.TransactOpts
+	ethClient          *ethclient.Client
+	ethAuth            *bind.TransactOpts
+	ethBridge          *bridge_contract_interface.BridgeContractInterface
+	taraBridge         *bridge_contract_interface.BridgeContractInterface
+	taraClientOnEth    *tara_client_interface.TaraClientContractInterface
+	onFinalizedEpoch   chan int64
+	bridgeContractAddr eth_common.Address
+	latestBridgeRoot   eth_common.Hash
+	latestClientEpoch  *big.Int
+	latestAppliedEpoch *big.Int
+	log                *log.Logger
 }
 
 // NewRelayer creates a new Relayer instance
@@ -83,11 +86,17 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
-	br, err := r.taraClientOnEth.GetFinalizedBridgeRoot(nil)
+	finalized_block, err := r.taraClientOnEth.GetFinalized(nil)
 	if err != nil {
-		r.log.WithError(err).Error("Failed to get last applied bridge root")
+		r.log.WithError(err).Error("Failed to get finalized block")
 	}
-	r.lastAppliedBridgeRoot = br
+	r.latestBridgeRoot = finalized_block.Block.BridgeRoot
+	r.latestClientEpoch = finalized_block.Block.Epoch
+
+	r.latestAppliedEpoch, err = r.ethBridge.AppliedEpoch(nil)
+	if err != nil {
+		r.log.WithError(err).Error("Failed to get last applied epoch")
+	}
 	// sync
 	r.processPillarBlocks()
 

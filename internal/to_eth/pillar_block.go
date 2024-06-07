@@ -64,15 +64,22 @@ func (r *Relayer) bridgeState() {
 	if err != nil {
 		r.log.WithError(err).Fatal("lastFinalizedEpoch")
 	}
-	lastAppliedEpoch, err := r.ethBridge.AppliedEpoch(nil)
+	r.latestAppliedEpoch, err = r.ethBridge.AppliedEpoch(nil)
 	if err != nil {
 		r.log.WithError(err).Fatal("lastAppliedEpoch")
 	}
-	if lastFinalizedEpoch.Cmp(lastAppliedEpoch) == 0 {
-		r.log.WithFields(log.Fields{"lastFinalizedEpoch": lastFinalizedEpoch, "lastAppliedEpoch": lastAppliedEpoch}).Info("No new state to pass")
+	if lastFinalizedEpoch.Cmp(r.latestAppliedEpoch) == 0 {
+		r.log.WithFields(log.Fields{"lastFinalizedEpoch": lastFinalizedEpoch, "latestAppliedEpoch": r.latestAppliedEpoch}).Info("No new state to pass")
 		return
 	}
-	epoch := lastAppliedEpoch.Add(lastAppliedEpoch, big.NewInt(1))
+	if r.latestAppliedEpoch.Cmp(r.latestClientEpoch) == 0 {
+		r.log.WithFields(log.Fields{"r.latestAppliedEpoch": r.latestAppliedEpoch, "r.latestClientEpoch": r.latestClientEpoch}).Info("We don't have a pillar block with this epoch in the client")
+		return
+	}
+
+	var epoch *big.Int
+	epoch.Add(r.latestAppliedEpoch, big.NewInt(1))
+
 	for ; epoch.Cmp(lastFinalizedEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
 		r.log.WithField("epoch", epoch).Info("Applying state")
 		taraStateWithProof, err := r.getStateWithProof(epoch, nil)
@@ -128,7 +135,8 @@ func (r *Relayer) processPillarBlocks() {
 	var blocksSignatures [][]tara_client_contract_interface.CompactSignature
 
 	// Process all missing pillar blocks between latestFinalizedPillarBlockPeriod + pillarBlocksInterval and expectedLatestPillarBlockPeriod
-	pendingBridgeRoot := r.lastAppliedBridgeRoot
+	pendingBridgeRoot := r.latestBridgeRoot
+	pendingEpoch := r.latestClientEpoch
 	period := latestFinalizedPillarBlockPeriod + pillarBlocksInterval
 	for ; period <= expectedLatestPillarBlockPeriod; period += pillarBlocksInterval {
 		tmpPillarBlockData, err := r.taraxaClient.GetPillarBlockData(period, true)
@@ -145,6 +153,7 @@ func (r *Relayer) processPillarBlocks() {
 
 			if pendingBridgeRoot != block.Block.BridgeRoot {
 				pendingBridgeRoot = block.Block.BridgeRoot
+				pendingEpoch = block.Block.Epoch
 			}
 
 			blocks = append(blocks, block)
@@ -156,10 +165,9 @@ func (r *Relayer) processPillarBlocks() {
 			break
 		}
 	}
-	// TODO: don't process without blocks of if bridgeRoot wasn't change
-	if len(blocks) == 0 { // || (len(blocks) == maxNumOfBlocksInBatch && pendingBridgeRoot == r.lastAppliedBridgeRoot) {
+	// TODO: don't process without blocks of if bridgeRoot wasn't changed, but send it if we have maxNumOfBlocksInBatch
+	if len(blocks) == 0 || (pendingBridgeRoot == r.latestBridgeRoot && len(blocks) != maxNumOfBlocksInBatch) {
 		r.log.WithField("blocks", len(blocks)).Info("No new pillar blocks to process")
-		r.bridgeState()
 		return
 	}
 	finalizeBlocksTx, err := r.taraClientOnEth.FinalizeBlocks(r.ethAuth, blocks, blocksSignatures[len(blocksSignatures)-1])
@@ -176,15 +184,18 @@ func (r *Relayer) processPillarBlocks() {
 	if finalizeBlocksTxReceipt.Status == 0 {
 		r.log.Fatal("Finalize blocks tx failed execution. Tx hash: ", finalizeBlocksTx.Hash())
 	}
-	r.lastAppliedBridgeRoot = pendingBridgeRoot
+
+	r.latestBridgeRoot = pendingBridgeRoot
+	r.latestClientEpoch = pendingEpoch
+
 	// This means that we have more blocks to process
 	if period != expectedLatestPillarBlockPeriod {
 		r.log.WithField("period", period).WithField("expectedLatest", expectedLatestPillarBlockPeriod).Info("We have more pillar blocks, processing next batch")
 		r.processPillarBlocks()
-	} else {
-		r.log.Info("All pillar blocks processed, syncing bridge state")
-		r.bridgeState()
 	}
+
+	r.bridgeState()
+	r.log.Info("All pillar blocks processed, syncing bridge state")
 }
 
 func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
