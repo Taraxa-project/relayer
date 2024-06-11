@@ -14,11 +14,12 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
-func transformPillarBlockData(pillarBlockData *tara_rpc_types.PillarBlockData) (block tara_client_interface.PillarBlockWithChanges, signatures []tara_client_interface.CompactSignature) {
+func transformPillarBlockData(pillarBlockData *PillarBlockData) (block tara_client_interface.PillarBlockWithChanges, signatures []tara_client_interface.CompactSignature) {
 	block.Block.Period = big.NewInt(int64(pillarBlockData.PillarBlock.PbftPeriod))
 	block.Block.BridgeRoot = pillarBlockData.PillarBlock.BridgeRoot
 	block.Block.StateRoot = pillarBlockData.PillarBlock.StateRoot
 	block.Block.PrevHash = pillarBlockData.PillarBlock.PreviousBlockHash
+	block.Block.Epoch = big.NewInt(int64(pillarBlockData.PillarBlock.Epoch))
 	for _, votesCountChange := range pillarBlockData.PillarBlock.VoteCountsChanges {
 		block.ValidatorChanges = append(block.ValidatorChanges, tara_client_interface.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
 	}

@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"math/big"
 	"path/filepath"
-	"relayer/bindings/TaraClient"
+	tara_client_interface "relayer/bindings/TaraClient"
 	"relayer/internal/common"
 	"relayer/internal/logging"
 
 	log "github.com/sirupsen/logrus"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
-	tara_rpc_types "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/tara/rpc_client/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -30,7 +29,7 @@ type Config struct {
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
 	taraxaClient       *TaraxaClientWrapper
-	taraxaNodeConfig   *tara_rpc_types.TaraConfig
+	taraxaNodeConfig   *TaraConfig
 	taraAuth           *bind.TransactOpts
 	ethClient          *ethclient.Client
 	ethAuth            *bind.TransactOpts
