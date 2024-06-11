@@ -79,7 +79,7 @@ func (r *Relayer) bridgeState() {
 		return
 	}
 
-	var epoch *big.Int
+	epoch := big.NewInt(0)
 	epoch.Add(r.latestAppliedEpoch, big.NewInt(1))
 
 	for ; epoch.Cmp(lastFinalizedEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
