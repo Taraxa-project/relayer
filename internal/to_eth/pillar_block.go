@@ -4,26 +4,27 @@ import (
 	"context"
 	"math/big"
 
+	tara_client_interface "relayer/bindings/TaraClient"
+
 	log "github.com/sirupsen/logrus"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
-	tara_client_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/eth/tara_client_contract_client/contract_interface"
 	tara_rpc_types "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/tara/rpc_client/types"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
-func transformPillarBlockData(pillarBlockData *tara_rpc_types.PillarBlockData) (block tara_client_contract_interface.PillarBlockWithChanges, signatures []tara_client_contract_interface.CompactSignature) {
+func transformPillarBlockData(pillarBlockData *tara_rpc_types.PillarBlockData) (block tara_client_interface.PillarBlockWithChanges, signatures []tara_client_interface.CompactSignature) {
 	block.Block.Period = big.NewInt(int64(pillarBlockData.PillarBlock.PbftPeriod))
 	block.Block.BridgeRoot = pillarBlockData.PillarBlock.BridgeRoot
 	block.Block.StateRoot = pillarBlockData.PillarBlock.StateRoot
 	block.Block.PrevHash = pillarBlockData.PillarBlock.PreviousBlockHash
 	for _, votesCountChange := range pillarBlockData.PillarBlock.VoteCountsChanges {
-		block.ValidatorChanges = append(block.ValidatorChanges, tara_client_contract_interface.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
+		block.ValidatorChanges = append(block.ValidatorChanges, tara_client_interface.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
 	}
 
 	for _, signature := range pillarBlockData.Signatures {
-		signatures = append(signatures, tara_client_contract_interface.CompactSignature{R: signature.R, Vs: signature.Vs})
+		signatures = append(signatures, tara_client_interface.CompactSignature{R: signature.R, Vs: signature.Vs})
 	}
 
 	return
@@ -131,8 +132,8 @@ func (r *Relayer) processPillarBlocks() {
 		maxNumOfBlocksInBatch = 1
 	}
 
-	var blocks []tara_client_contract_interface.PillarBlockWithChanges
-	var blocksSignatures [][]tara_client_contract_interface.CompactSignature
+	var blocks []tara_client_interface.PillarBlockWithChanges
+	var blocksSignatures [][]tara_client_interface.CompactSignature
 
 	// Process all missing pillar blocks between latestFinalizedPillarBlockPeriod + pillarBlocksInterval and expectedLatestPillarBlockPeriod
 	pendingBridgeRoot := r.latestBridgeRoot
