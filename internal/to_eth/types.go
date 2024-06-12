@@ -17,7 +17,7 @@ type CompactSignature struct {
 
 // PillarBlock represents a pillar block in the taraxa blockchain.
 type PillarBlock struct {
-	PbftPeriod        uint64            `json:"pbft_period"`
+	PbftPeriod        hexutil.Uint      `json:"pbft_period"`
 	StateRoot         common.Hash       `json:"state_root"`
 	PreviousBlockHash common.Hash       `json:"previous_pillar_block_hash"`
 	BridgeRoot        common.Hash       `json:"bridge_root"`
