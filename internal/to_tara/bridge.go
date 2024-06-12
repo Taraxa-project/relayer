@@ -57,7 +57,7 @@ func (r *Relayer) getProof(finalizedBlock *big.Int) {
 		r.log.Fatalf("Failed to decode storage proof: %v", err)
 	}
 
-	trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, accountProof, storageProof)
+	trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, finalizedBlock, accountProof, storageProof)
 	if err != nil {
 		r.log.Fatalf("Failed to call ProcessBridgeRoot: %v", err)
 	}
