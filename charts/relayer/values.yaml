@@ -12,7 +12,7 @@ image:
 
 app:
   ethereumApiEndpoint: ""
-  lightNodeEndpoint: ""
+  beaconNodeEndpoint: ""
   taraxaNodeUrl: ""
   beaconLightClientAddress: ""
   ethClientOnTaraAddress: ""

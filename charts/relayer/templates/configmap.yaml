@@ -6,7 +6,7 @@ metadata:
     {{- include "relayer.labels" . | nindent 4 }}
 data:
   ETHEREUM_API_ENDPOINT: {{ .Values.app.ethereumApiEndpoint | quote }}
-  LIGHT_NODE_ENDPOINT: {{ .Values.app.lightNodeEndpoint | quote }}
+  BEACON_NODE_ENDPOINT: {{ .Values.app.beaconNodeEndpoint | quote }}
   TARAXA_NODE_URL: {{ .Values.app.taraxaNodeUrl | quote }}
   BEACON_LIGHT_CLIENT_ADDRESS: {{ .Values.app.beaconLightClientAddress | quote }}
   ETH_CLIENT_ON_TARA_ADDRESS: {{ .Values.app.ethClientOnTaraAddress | quote }}
