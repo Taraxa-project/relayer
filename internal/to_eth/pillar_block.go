@@ -206,13 +206,13 @@ func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
 	newPillarBlockData := make(chan *PillarBlockData)
 	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", "includeSignatures")
 	if err != nil {
-		r.log.Fatal(err)
+		r.log.WithError(err).Fatal("Failed to subscribe to new pillar block data")
 	}
 
 	for {
 		select {
 		case err := <-sub.Err():
-			r.log.Fatal(err)
+			r.log.WithError(err).Fatal("Subscription error")
 		case <-newPillarBlockData:
 			r.processPillarBlocks()
 		}
