@@ -9,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
-	tara_rpc_types "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/tara/rpc_client/types"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
@@ -204,7 +203,7 @@ func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
 	// sync pillar blocks to tara client contract on ethereum
 	r.processPillarBlocks()
 	// Listen to new pillar block data
-	newPillarBlockData := make(chan *tara_rpc_types.PillarBlockData)
+	newPillarBlockData := make(chan *PillarBlockData)
 	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", "includeSignatures")
 	if err != nil {
 		r.log.Fatal(err)
