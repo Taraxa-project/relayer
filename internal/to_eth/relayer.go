@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"math/big"
 	"path/filepath"
-	tara_client_interface "relayer/bindings/TaraClient"
+	"relayer/bindings/BridgeBase"
+	"relayer/bindings/TaraClient"
 	"relayer/internal/common"
 	"relayer/internal/logging"
 
 	log "github.com/sirupsen/logrus"
 
-	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -33,9 +33,9 @@ type Relayer struct {
 	taraAuth           *bind.TransactOpts
 	ethClient          *ethclient.Client
 	ethAuth            *bind.TransactOpts
-	ethBridge          *bridge_contract_interface.BridgeContractInterface
-	taraBridge         *bridge_contract_interface.BridgeContractInterface
-	taraClientOnEth    *tara_client_interface.TaraClientInterface
+	ethBridge          *BridgeBase.BridgeBase
+	taraBridge         *BridgeBase.BridgeBase
+	taraClientOnEth    *TaraClient.TaraClient
 	onFinalizedEpoch   chan int64
 	bridgeContractAddr eth_common.Address
 	latestBridgeRoot   eth_common.Hash
@@ -54,17 +54,17 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to get Taraxa Config: %v", err)
 	}
 
-	taraClientOnEth, err := tara_client_interface.NewTaraClientInterface(cfg.TaraxaClientOnEthAddr, cfg.Clients.EthClient)
+	taraClientOnEth, err := TaraClient.NewTaraClient(cfg.TaraxaClientOnEthAddr, cfg.Clients.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
 
-	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, taraxaClient)
+	taraBridge, err := BridgeBase.NewBridgeBase(cfg.TaraxaBridgeAddr, taraxaClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
 	}
 
-	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, cfg.Clients.EthClient)
+	ethBridge, err := BridgeBase.NewBridgeBase(cfg.EthBridgeAddr, cfg.Clients.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}

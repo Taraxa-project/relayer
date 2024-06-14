@@ -5,7 +5,6 @@ go 1.21.6
 toolchain go1.21.10
 
 require (
-	github.com/Taraxa-project/taraxa-contracts-go-clients v0.0.9
 	github.com/attestantio/go-eth2-client v0.19.10
 	github.com/ethereum/go-ethereum v1.13.14
 	github.com/joho/godotenv v1.5.1
