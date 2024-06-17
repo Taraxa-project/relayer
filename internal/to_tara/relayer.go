@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"path/filepath"
 	"relayer/bindings/BeaconLightClient"
+	"relayer/bindings/BridgeBase"
 	"relayer/bindings/EthClient"
 	"relayer/internal/common"
 	"relayer/internal/logging"
 	"time"
 
-	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -37,8 +37,8 @@ type Relayer struct {
 	ethAuth                *bind.TransactOpts
 	beaconLightClient      *BeaconLightClient.BeaconLightClient
 	ethClientContract      *EthClient.EthClient
-	ethBridge              *bridge_contract_interface.BridgeContractInterface
-	taraBridge             *bridge_contract_interface.BridgeContractInterface
+	ethBridge              *BridgeBase.BridgeBase
+	taraBridge             *BridgeBase.BridgeBase
 	onFinalizedEpoch       chan int64
 	onFinalizedBlockNumber chan uint64
 	onSyncCommitteeUpdate  chan int64
@@ -56,12 +56,12 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
 	}
 
-	taraBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.TaraxaBridgeAddr, cfg.Clients.TaraxaClient)
+	taraBridge, err := BridgeBase.NewBridgeBase(cfg.TaraxaBridgeAddr, cfg.Clients.TaraxaClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the TaraBridge contract: %v", err)
 	}
 
-	ethBridge, err := bridge_contract_interface.NewBridgeContractInterface(cfg.EthBridgeAddr, cfg.Clients.EthClient)
+	ethBridge, err := BridgeBase.NewBridgeBase(cfg.EthBridgeAddr, cfg.Clients.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}

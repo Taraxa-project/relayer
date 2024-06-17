@@ -4,33 +4,33 @@ import (
 	"context"
 	"math/big"
 
-	tara_client_interface "relayer/bindings/TaraClient"
+	"relayer/bindings/BridgeBase"
+	"relayer/bindings/TaraClient"
 
 	log "github.com/sirupsen/logrus"
 
-	bridge_contract_interface "github.com/Taraxa-project/taraxa-contracts-go-clients/clients/bridge_contract_client/contract_interface"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
-func transformPillarBlockData(pillarBlockData *PillarBlockData) (block tara_client_interface.PillarBlockWithChanges, signatures []tara_client_interface.CompactSignature) {
+func transformPillarBlockData(pillarBlockData *PillarBlockData) (block TaraClient.PillarBlockWithChanges, signatures []TaraClient.CompactSignature) {
 	block.Block.Period = big.NewInt(int64(pillarBlockData.PillarBlock.PbftPeriod))
 	block.Block.BridgeRoot = pillarBlockData.PillarBlock.BridgeRoot
 	block.Block.StateRoot = pillarBlockData.PillarBlock.StateRoot
 	block.Block.PrevHash = pillarBlockData.PillarBlock.PreviousBlockHash
 	block.Block.Epoch = big.NewInt(int64(pillarBlockData.PillarBlock.Epoch))
 	for _, votesCountChange := range pillarBlockData.PillarBlock.VoteCountsChanges {
-		block.ValidatorChanges = append(block.ValidatorChanges, tara_client_interface.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
+		block.ValidatorChanges = append(block.ValidatorChanges, TaraClient.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
 	}
 
 	for _, signature := range pillarBlockData.Signatures {
-		signatures = append(signatures, tara_client_interface.CompactSignature{R: signature.R, Vs: signature.Vs})
+		signatures = append(signatures, TaraClient.CompactSignature{R: signature.R, Vs: signature.Vs})
 	}
 
 	return
 }
 
-func (r *Relayer) getStateWithProof(epoch *big.Int, block_num *big.Int) (*bridge_contract_interface.SharedStructsStateWithProof, error) {
+func (r *Relayer) getStateWithProof(epoch *big.Int, block_num *big.Int) (*BridgeBase.SharedStructsStateWithProof, error) {
 	if block_num == nil {
 		block, err := r.taraxaClient.Client.BlockByNumber(context.Background(), nil)
 		if err != nil || block == nil {
@@ -132,8 +132,8 @@ func (r *Relayer) processPillarBlocks() {
 		maxNumOfBlocksInBatch = 1
 	}
 
-	var blocks []tara_client_interface.PillarBlockWithChanges
-	var blocksSignatures [][]tara_client_interface.CompactSignature
+	var blocks []TaraClient.PillarBlockWithChanges
+	var blocksSignatures [][]TaraClient.CompactSignature
 
 	// Process all missing pillar blocks between latestFinalizedPillarBlockPeriod + pillarBlocksInterval and expectedLatestPillarBlockPeriod
 	pendingBridgeRoot := r.latestBridgeRoot
