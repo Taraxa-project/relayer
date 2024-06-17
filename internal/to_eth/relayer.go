@@ -96,8 +96,10 @@ func (r *Relayer) Start(ctx context.Context) {
 	if err != nil {
 		r.log.WithError(err).Error("Failed to get last applied epoch")
 	}
-	// sync
+	// sync client with pillar blocks
 	r.processPillarBlocks()
+	// check it in case we missed a state bridging and don't have a new pillar blocks to bridge
+	r.bridgeState()
 
 	go r.ListenForPillarBlockUpdates(ctx)
 }

@@ -141,7 +141,7 @@ func (r *Relayer) processPillarBlocks() {
 	period := latestFinalizedPillarBlockPeriod + pillarBlocksInterval
 	for ; period <= expectedLatestPillarBlockPeriod; period += pillarBlocksInterval {
 		tmpPillarBlockData, err := r.taraxaClient.GetPillarBlockData(period, true)
-		r.log.WithFields(log.Fields{"block": tmpPillarBlockData, "period": period}).Println("GetPillarBlockData")
+		r.log.WithFields(log.Fields{"block": tmpPillarBlockData, "period": period}).Info("GetPillarBlockData")
 		if err == ethereum.NotFound {
 			r.log.WithField("period", period).Info("Pillar block not found, probably not finalized yet")
 			break
@@ -200,8 +200,6 @@ func (r *Relayer) processPillarBlocks() {
 }
 
 func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
-	// sync pillar blocks to tara client contract on ethereum
-	r.processPillarBlocks()
 	// Listen to new pillar block data
 	newPillarBlockData := make(chan *PillarBlockData)
 	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", "includeSignatures")
