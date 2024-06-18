@@ -23,6 +23,8 @@ go.work
 # Editor directories and files
 .vscode
 
+bridge/
+
 # Binaries for programs and plugins
 bin/
 build/

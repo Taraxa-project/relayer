@@ -29,9 +29,75 @@ var (
 	_ = abi.ConvertType
 )
 
+// BeaconChainBeaconBlockHeader is an auto generated low-level Go binding around an user-defined struct.
+type BeaconChainBeaconBlockHeader struct {
+	Slot          uint64
+	ProposerIndex uint64
+	ParentRoot    [32]byte
+	StateRoot     [32]byte
+	BodyRoot      [32]byte
+}
+
+// BeaconChainExecutionPayloadHeader is an auto generated low-level Go binding around an user-defined struct.
+type BeaconChainExecutionPayloadHeader struct {
+	ParentHash       [32]byte
+	FeeRecipient     common.Address
+	StateRoot        [32]byte
+	ReceiptsRoot     [32]byte
+	LogsBloom        [32]byte
+	PrevRandao       [32]byte
+	BlockNumber      uint64
+	GasLimit         uint64
+	GasUsed          uint64
+	Timestamp        uint64
+	ExtraData        [32]byte
+	BaseFeePerGas    *big.Int
+	BlockHash        [32]byte
+	TransactionsRoot [32]byte
+	WithdrawalsRoot  [32]byte
+	BlobGasUsed      uint64
+	ExcessBlobGas    uint64
+}
+
+// BeaconChainLightClientHeader is an auto generated low-level Go binding around an user-defined struct.
+type BeaconChainLightClientHeader struct {
+	Beacon          BeaconChainBeaconBlockHeader
+	Execution       BeaconChainExecutionPayloadHeader
+	ExecutionBranch [][32]byte
+}
+
+// BeaconChainSyncCommittee is an auto generated low-level Go binding around an user-defined struct.
+type BeaconChainSyncCommittee struct {
+	Pubkeys         [512][]byte
+	AggregatePubkey []byte
+}
+
+// BeaconLightClientUpdateFinalizedHeaderUpdate is an auto generated low-level Go binding around an user-defined struct.
+type BeaconLightClientUpdateFinalizedHeaderUpdate struct {
+	AttestedHeader         BeaconChainLightClientHeader
+	SignatureSyncCommittee BeaconChainSyncCommittee
+	FinalizedHeader        BeaconChainLightClientHeader
+	FinalityBranch         [][32]byte
+	SyncAggregate          BeaconLightClientUpdateSyncAggregate
+	ForkVersion            [4]byte
+	SignatureSlot          uint64
+}
+
+// BeaconLightClientUpdateSyncAggregate is an auto generated low-level Go binding around an user-defined struct.
+type BeaconLightClientUpdateSyncAggregate struct {
+	SyncCommitteeBits      [2][32]byte
+	SyncCommitteeSignature []byte
+}
+
+// BeaconLightClientUpdateSyncCommitteePeriodUpdate is an auto generated low-level Go binding around an user-defined struct.
+type BeaconLightClientUpdateSyncCommitteePeriodUpdate struct {
+	NextSyncCommittee       BeaconChainSyncCommittee
+	NextSyncCommitteeBranch [][32]byte
+}
+
 // EthClientMetaData contains all meta data concerning the EthClient contract.
 var EthClientMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"bridgeRootKey\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"client\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ethBridgeAddress\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getFinalizedBridgeRoot\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getMerkleRoot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"_client\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"},{\"name\":\"_eth_bridge_address\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"processBridgeRoot\",\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"account_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"storage_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"BridgeRootProcessed\",\"inputs\":[{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false,\"internalType\":\"uint64\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"InvalidBridgeRoot\",\"inputs\":[{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"InvalidInitialization\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotInitializing\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]}]",
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"bridgeRootKey\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"client\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"epochKey\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ethBridgeAddress\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getFinalizedBridgeRoot\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getMerkleRoot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"import_next_sync_committee\",\"inputs\":[{\"name\":\"header\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.FinalizedHeaderUpdate\",\"components\":[{\"name\":\"attested_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"signature_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"finalized_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"finality_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"sync_aggregate\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncAggregate\",\"components\":[{\"name\":\"sync_committee_bits\",\"type\":\"bytes32[2]\",\"internalType\":\"bytes32[2]\"},{\"name\":\"sync_committee_signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"fork_version\",\"type\":\"bytes4\",\"internalType\":\"bytes4\"},{\"name\":\"signature_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"sc_update\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncCommitteePeriodUpdate\",\"components\":[{\"name\":\"next_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"next_sync_committee_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"_client\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"},{\"name\":\"_eth_bridge_address\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"lastEpoch\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"processHeaderWithProofs\",\"inputs\":[{\"name\":\"header\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.FinalizedHeaderUpdate\",\"components\":[{\"name\":\"attested_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"signature_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"finalized_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"finality_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"sync_aggregate\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncAggregate\",\"components\":[{\"name\":\"sync_committee_bits\",\"type\":\"bytes32[2]\",\"internalType\":\"bytes32[2]\"},{\"name\":\"sync_committee_signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"fork_version\",\"type\":\"bytes4\",\"internalType\":\"bytes4\"},{\"name\":\"signature_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"account_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"epoch_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"root_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeBeaconClient\",\"inputs\":[{\"name\":\"_client\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"BridgeRootProcessed\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false,\"internalType\":\"uint64\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"InvalidInitialization\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotInitializing\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotSuccessiveEpochs\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"nextEpoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]}]",
 }
 
 // EthClientABI is the input ABI used to generate the binding from.
@@ -242,6 +308,37 @@ func (_EthClient *EthClientCallerSession) Client() (common.Address, error) {
 	return _EthClient.Contract.Client(&_EthClient.CallOpts)
 }
 
+// EpochKey is a free data retrieval call binding the contract method 0xf6c029b3.
+//
+// Solidity: function epochKey() view returns(bytes32)
+func (_EthClient *EthClientCaller) EpochKey(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _EthClient.contract.Call(opts, &out, "epochKey")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// EpochKey is a free data retrieval call binding the contract method 0xf6c029b3.
+//
+// Solidity: function epochKey() view returns(bytes32)
+func (_EthClient *EthClientSession) EpochKey() ([32]byte, error) {
+	return _EthClient.Contract.EpochKey(&_EthClient.CallOpts)
+}
+
+// EpochKey is a free data retrieval call binding the contract method 0xf6c029b3.
+//
+// Solidity: function epochKey() view returns(bytes32)
+func (_EthClient *EthClientCallerSession) EpochKey() ([32]byte, error) {
+	return _EthClient.Contract.EpochKey(&_EthClient.CallOpts)
+}
+
 // EthBridgeAddress is a free data retrieval call binding the contract method 0xf7b4fb57.
 //
 // Solidity: function ethBridgeAddress() view returns(address)
@@ -335,6 +432,37 @@ func (_EthClient *EthClientCallerSession) GetMerkleRoot() ([32]byte, error) {
 	return _EthClient.Contract.GetMerkleRoot(&_EthClient.CallOpts)
 }
 
+// LastEpoch is a free data retrieval call binding the contract method 0x06a4c983.
+//
+// Solidity: function lastEpoch() view returns(uint256)
+func (_EthClient *EthClientCaller) LastEpoch(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _EthClient.contract.Call(opts, &out, "lastEpoch")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// LastEpoch is a free data retrieval call binding the contract method 0x06a4c983.
+//
+// Solidity: function lastEpoch() view returns(uint256)
+func (_EthClient *EthClientSession) LastEpoch() (*big.Int, error) {
+	return _EthClient.Contract.LastEpoch(&_EthClient.CallOpts)
+}
+
+// LastEpoch is a free data retrieval call binding the contract method 0x06a4c983.
+//
+// Solidity: function lastEpoch() view returns(uint256)
+func (_EthClient *EthClientCallerSession) LastEpoch() (*big.Int, error) {
+	return _EthClient.Contract.LastEpoch(&_EthClient.CallOpts)
+}
+
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
 // Solidity: function owner() view returns(address)
@@ -366,6 +494,27 @@ func (_EthClient *EthClientCallerSession) Owner() (common.Address, error) {
 	return _EthClient.Contract.Owner(&_EthClient.CallOpts)
 }
 
+// ImportNextSyncCommittee is a paid mutator transaction binding the contract method 0x474f6535.
+//
+// Solidity: function import_next_sync_committee((((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),(bytes[512],bytes),((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),bytes32[],(bytes32[2],bytes),bytes4,uint64) header, ((bytes[512],bytes),bytes32[]) sc_update) returns()
+func (_EthClient *EthClientTransactor) ImportNextSyncCommittee(opts *bind.TransactOpts, header BeaconLightClientUpdateFinalizedHeaderUpdate, sc_update BeaconLightClientUpdateSyncCommitteePeriodUpdate) (*types.Transaction, error) {
+	return _EthClient.contract.Transact(opts, "import_next_sync_committee", header, sc_update)
+}
+
+// ImportNextSyncCommittee is a paid mutator transaction binding the contract method 0x474f6535.
+//
+// Solidity: function import_next_sync_committee((((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),(bytes[512],bytes),((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),bytes32[],(bytes32[2],bytes),bytes4,uint64) header, ((bytes[512],bytes),bytes32[]) sc_update) returns()
+func (_EthClient *EthClientSession) ImportNextSyncCommittee(header BeaconLightClientUpdateFinalizedHeaderUpdate, sc_update BeaconLightClientUpdateSyncCommitteePeriodUpdate) (*types.Transaction, error) {
+	return _EthClient.Contract.ImportNextSyncCommittee(&_EthClient.TransactOpts, header, sc_update)
+}
+
+// ImportNextSyncCommittee is a paid mutator transaction binding the contract method 0x474f6535.
+//
+// Solidity: function import_next_sync_committee((((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),(bytes[512],bytes),((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),bytes32[],(bytes32[2],bytes),bytes4,uint64) header, ((bytes[512],bytes),bytes32[]) sc_update) returns()
+func (_EthClient *EthClientTransactorSession) ImportNextSyncCommittee(header BeaconLightClientUpdateFinalizedHeaderUpdate, sc_update BeaconLightClientUpdateSyncCommitteePeriodUpdate) (*types.Transaction, error) {
+	return _EthClient.Contract.ImportNextSyncCommittee(&_EthClient.TransactOpts, header, sc_update)
+}
+
 // Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
 // Solidity: function initialize(address _client, address _eth_bridge_address) returns()
@@ -387,25 +536,25 @@ func (_EthClient *EthClientTransactorSession) Initialize(_client common.Address,
 	return _EthClient.Contract.Initialize(&_EthClient.TransactOpts, _client, _eth_bridge_address)
 }
 
-// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x736ba07d.
+// ProcessHeaderWithProofs is a paid mutator transaction binding the contract method 0x94620bc0.
 //
-// Solidity: function processBridgeRoot(uint256 block_number, bytes[] account_proof, bytes[] storage_proof) returns()
-func (_EthClient *EthClientTransactor) ProcessBridgeRoot(opts *bind.TransactOpts, block_number *big.Int, account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
-	return _EthClient.contract.Transact(opts, "processBridgeRoot", block_number, account_proof, storage_proof)
+// Solidity: function processHeaderWithProofs((((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),(bytes[512],bytes),((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),bytes32[],(bytes32[2],bytes),bytes4,uint64) header, bytes[] account_proof, bytes[] epoch_proof, bytes[] root_proof) returns()
+func (_EthClient *EthClientTransactor) ProcessHeaderWithProofs(opts *bind.TransactOpts, header BeaconLightClientUpdateFinalizedHeaderUpdate, account_proof [][]byte, epoch_proof [][]byte, root_proof [][]byte) (*types.Transaction, error) {
+	return _EthClient.contract.Transact(opts, "processHeaderWithProofs", header, account_proof, epoch_proof, root_proof)
 }
 
-// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x736ba07d.
+// ProcessHeaderWithProofs is a paid mutator transaction binding the contract method 0x94620bc0.
 //
-// Solidity: function processBridgeRoot(uint256 block_number, bytes[] account_proof, bytes[] storage_proof) returns()
-func (_EthClient *EthClientSession) ProcessBridgeRoot(block_number *big.Int, account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
-	return _EthClient.Contract.ProcessBridgeRoot(&_EthClient.TransactOpts, block_number, account_proof, storage_proof)
+// Solidity: function processHeaderWithProofs((((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),(bytes[512],bytes),((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),bytes32[],(bytes32[2],bytes),bytes4,uint64) header, bytes[] account_proof, bytes[] epoch_proof, bytes[] root_proof) returns()
+func (_EthClient *EthClientSession) ProcessHeaderWithProofs(header BeaconLightClientUpdateFinalizedHeaderUpdate, account_proof [][]byte, epoch_proof [][]byte, root_proof [][]byte) (*types.Transaction, error) {
+	return _EthClient.Contract.ProcessHeaderWithProofs(&_EthClient.TransactOpts, header, account_proof, epoch_proof, root_proof)
 }
 
-// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x736ba07d.
+// ProcessHeaderWithProofs is a paid mutator transaction binding the contract method 0x94620bc0.
 //
-// Solidity: function processBridgeRoot(uint256 block_number, bytes[] account_proof, bytes[] storage_proof) returns()
-func (_EthClient *EthClientTransactorSession) ProcessBridgeRoot(block_number *big.Int, account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
-	return _EthClient.Contract.ProcessBridgeRoot(&_EthClient.TransactOpts, block_number, account_proof, storage_proof)
+// Solidity: function processHeaderWithProofs((((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),(bytes[512],bytes),((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),bytes32[],(bytes32[2],bytes),bytes4,uint64) header, bytes[] account_proof, bytes[] epoch_proof, bytes[] root_proof) returns()
+func (_EthClient *EthClientTransactorSession) ProcessHeaderWithProofs(header BeaconLightClientUpdateFinalizedHeaderUpdate, account_proof [][]byte, epoch_proof [][]byte, root_proof [][]byte) (*types.Transaction, error) {
+	return _EthClient.Contract.ProcessHeaderWithProofs(&_EthClient.TransactOpts, header, account_proof, epoch_proof, root_proof)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -448,6 +597,27 @@ func (_EthClient *EthClientSession) TransferOwnership(newOwner common.Address) (
 // Solidity: function transferOwnership(address newOwner) returns()
 func (_EthClient *EthClientTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
 	return _EthClient.Contract.TransferOwnership(&_EthClient.TransactOpts, newOwner)
+}
+
+// UpgradeBeaconClient is a paid mutator transaction binding the contract method 0xb88ebb1f.
+//
+// Solidity: function upgradeBeaconClient(address _client) returns()
+func (_EthClient *EthClientTransactor) UpgradeBeaconClient(opts *bind.TransactOpts, _client common.Address) (*types.Transaction, error) {
+	return _EthClient.contract.Transact(opts, "upgradeBeaconClient", _client)
+}
+
+// UpgradeBeaconClient is a paid mutator transaction binding the contract method 0xb88ebb1f.
+//
+// Solidity: function upgradeBeaconClient(address _client) returns()
+func (_EthClient *EthClientSession) UpgradeBeaconClient(_client common.Address) (*types.Transaction, error) {
+	return _EthClient.Contract.UpgradeBeaconClient(&_EthClient.TransactOpts, _client)
+}
+
+// UpgradeBeaconClient is a paid mutator transaction binding the contract method 0xb88ebb1f.
+//
+// Solidity: function upgradeBeaconClient(address _client) returns()
+func (_EthClient *EthClientTransactorSession) UpgradeBeaconClient(_client common.Address) (*types.Transaction, error) {
+	return _EthClient.Contract.UpgradeBeaconClient(&_EthClient.TransactOpts, _client)
 }
 
 // EthClientBridgeRootProcessedIterator is returned from FilterBridgeRootProcessed and is used to iterate over the raw logs and unpacked data for BridgeRootProcessed events raised by the EthClient contract.
@@ -519,38 +689,47 @@ func (it *EthClientBridgeRootProcessedIterator) Close() error {
 
 // EthClientBridgeRootProcessed represents a BridgeRootProcessed event raised by the EthClient contract.
 type EthClientBridgeRootProcessed struct {
+	Epoch      *big.Int
 	BridgeRoot [32]byte
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterBridgeRootProcessed is a free log retrieval operation binding the contract event 0xa7b0442eda88383df55bc140c0db1af8e39d1ad2c5183a7e44aae7bbf91842a3.
+// FilterBridgeRootProcessed is a free log retrieval operation binding the contract event 0xe8e1c85b1ad1942881c66620874e433d51385c12cb4833318b8d13af7370a9b7.
 //
-// Solidity: event BridgeRootProcessed(bytes32 indexed bridgeRoot)
-func (_EthClient *EthClientFilterer) FilterBridgeRootProcessed(opts *bind.FilterOpts, bridgeRoot [][32]byte) (*EthClientBridgeRootProcessedIterator, error) {
+// Solidity: event BridgeRootProcessed(uint256 indexed epoch, bytes32 indexed bridgeRoot)
+func (_EthClient *EthClientFilterer) FilterBridgeRootProcessed(opts *bind.FilterOpts, epoch []*big.Int, bridgeRoot [][32]byte) (*EthClientBridgeRootProcessedIterator, error) {
 
+	var epochRule []interface{}
+	for _, epochItem := range epoch {
+		epochRule = append(epochRule, epochItem)
+	}
 	var bridgeRootRule []interface{}
 	for _, bridgeRootItem := range bridgeRoot {
 		bridgeRootRule = append(bridgeRootRule, bridgeRootItem)
 	}
 
-	logs, sub, err := _EthClient.contract.FilterLogs(opts, "BridgeRootProcessed", bridgeRootRule)
+	logs, sub, err := _EthClient.contract.FilterLogs(opts, "BridgeRootProcessed", epochRule, bridgeRootRule)
 	if err != nil {
 		return nil, err
 	}
 	return &EthClientBridgeRootProcessedIterator{contract: _EthClient.contract, event: "BridgeRootProcessed", logs: logs, sub: sub}, nil
 }
 
-// WatchBridgeRootProcessed is a free log subscription operation binding the contract event 0xa7b0442eda88383df55bc140c0db1af8e39d1ad2c5183a7e44aae7bbf91842a3.
+// WatchBridgeRootProcessed is a free log subscription operation binding the contract event 0xe8e1c85b1ad1942881c66620874e433d51385c12cb4833318b8d13af7370a9b7.
 //
-// Solidity: event BridgeRootProcessed(bytes32 indexed bridgeRoot)
-func (_EthClient *EthClientFilterer) WatchBridgeRootProcessed(opts *bind.WatchOpts, sink chan<- *EthClientBridgeRootProcessed, bridgeRoot [][32]byte) (event.Subscription, error) {
+// Solidity: event BridgeRootProcessed(uint256 indexed epoch, bytes32 indexed bridgeRoot)
+func (_EthClient *EthClientFilterer) WatchBridgeRootProcessed(opts *bind.WatchOpts, sink chan<- *EthClientBridgeRootProcessed, epoch []*big.Int, bridgeRoot [][32]byte) (event.Subscription, error) {
 
+	var epochRule []interface{}
+	for _, epochItem := range epoch {
+		epochRule = append(epochRule, epochItem)
+	}
 	var bridgeRootRule []interface{}
 	for _, bridgeRootItem := range bridgeRoot {
 		bridgeRootRule = append(bridgeRootRule, bridgeRootItem)
 	}
 
-	logs, sub, err := _EthClient.contract.WatchLogs(opts, "BridgeRootProcessed", bridgeRootRule)
+	logs, sub, err := _EthClient.contract.WatchLogs(opts, "BridgeRootProcessed", epochRule, bridgeRootRule)
 	if err != nil {
 		return nil, err
 	}
@@ -582,9 +761,9 @@ func (_EthClient *EthClientFilterer) WatchBridgeRootProcessed(opts *bind.WatchOp
 	}), nil
 }
 
-// ParseBridgeRootProcessed is a log parse operation binding the contract event 0xa7b0442eda88383df55bc140c0db1af8e39d1ad2c5183a7e44aae7bbf91842a3.
+// ParseBridgeRootProcessed is a log parse operation binding the contract event 0xe8e1c85b1ad1942881c66620874e433d51385c12cb4833318b8d13af7370a9b7.
 //
-// Solidity: event BridgeRootProcessed(bytes32 indexed bridgeRoot)
+// Solidity: event BridgeRootProcessed(uint256 indexed epoch, bytes32 indexed bridgeRoot)
 func (_EthClient *EthClientFilterer) ParseBridgeRootProcessed(log types.Log) (*EthClientBridgeRootProcessed, error) {
 	event := new(EthClientBridgeRootProcessed)
 	if err := _EthClient.contract.UnpackLog(event, "BridgeRootProcessed", log); err != nil {

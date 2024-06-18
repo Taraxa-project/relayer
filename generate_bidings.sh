@@ -8,10 +8,22 @@ REPO_DIR="bridge"
 CONTRACTS=("TaraClient" "EthClient" "BeaconLightClient" "BridgeBase")  # Add more contract names here as needed
 BINDINGS_DIR="./bindings"
 
+if [ -z ${BRANCH+x} ]; then 
+    echo "BRANCH is unset. Using the default branch 'master', you can set it using 'export BRANCH=your_branch'";
+    BRANCH="master"
+fi
+
+echo "Generating bindings from the branch '$BRANCH'"; 
+
 # Clone the repository
 echo "Cloning the repository..."
 git clone --recursive $REPO_URL $REPO_DIR
 cd $REPO_DIR || exit
+
+git fetch
+git checkout $BRANCH
+git reset --hard origin/$BRANCH
+git submodule update --init --recursive
 
 # Compile the smart contracts
 echo "Compiling the smart contracts..."
@@ -74,7 +86,7 @@ done
 
 # Remove the cloned repository
 cd ..
-echo "Removing the repository directory: $REPO_DIR"
-rm -rf $REPO_DIR
+# echo "Removing the repository directory: $REPO_DIR"
+# rm -rf $REPO_DIR
 
 echo "All Go bindings have been generated and copied to $BINDINGS_DIR."
