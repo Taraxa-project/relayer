@@ -21,9 +21,8 @@ import (
 type Config struct {
 	EthereumAPIEndpoint string
 
-	BeaconLightClientAddress string
-	EthClientOnTaraAddress   string
-	TaraBridgeAddress        string
+	EthClientOnTaraAddress string
+	TaraBridgeAddress      string
 
 	TaraClientOnEthAddress string
 	EthBridgeAddress       string
@@ -43,7 +42,6 @@ func main() {
 
 	var log_level string
 	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", os.Getenv("ETHEREUM_API_ENDPOINT"), "Ethereum API endpoint")
-	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", os.Getenv("BEACON_LIGHT_CLIENT_ADDRESS"), "Address of the BeaconLightClient contract on Taraxa chain")
 	pflag.StringVar(&config.EthClientOnTaraAddress, "eth_client_on_tara_address", os.Getenv("ETH_CLIENT_ON_TARA_ADDRESS"), "Address of the EthClient contract on Taraxa chain")
 	pflag.StringVar(&config.TaraBridgeAddress, "tara_bridge_address", os.Getenv("TARA_BRIDGE_ADDRESS"), "Address of the Tara bridge contract on Taraxa chain")
 	pflag.StringVar(&config.TaraClientOnEthAddress, "tara_client_on_eth_address", os.Getenv("TARA_CLIENT_ON_ETH_ADDRESS"), "Address of the TaraClient contract on Ethereum chain")
@@ -77,14 +75,13 @@ func main() {
 	}
 
 	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
-		BeaconNodeEndpoint:    config.BeaconNodeEndpoint,
-		BeaconLightClientAddr: eth_common.HexToAddress(config.BeaconLightClientAddress),
-		EthBridgeAddr:         eth_common.HexToAddress(config.EthBridgeAddress),
-		TaraxaBridgeAddr:      eth_common.HexToAddress(config.TaraBridgeAddress),
-		EthClientOnTaraAddr:   eth_common.HexToAddress(config.EthClientOnTaraAddress),
-		Clients:               clients,
-		DataDir:               data_dir,
-		LogLevel:              log_level,
+		BeaconNodeEndpoint:  config.BeaconNodeEndpoint,
+		EthBridgeAddr:       eth_common.HexToAddress(config.EthBridgeAddress),
+		TaraxaBridgeAddr:    eth_common.HexToAddress(config.TaraBridgeAddress),
+		EthClientOnTaraAddr: eth_common.HexToAddress(config.EthClientOnTaraAddress),
+		Clients:             clients,
+		DataDir:             data_dir,
+		LogLevel:            log_level,
 	})
 
 	if err != nil {

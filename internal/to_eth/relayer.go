@@ -36,7 +36,6 @@ type Relayer struct {
 	ethBridge          *BridgeBase.BridgeBase
 	taraBridge         *BridgeBase.BridgeBase
 	taraClientOnEth    *TaraClient.TaraClient
-	onFinalizedEpoch   chan int64
 	bridgeContractAddr eth_common.Address
 	latestBridgeRoot   eth_common.Hash
 	latestClientEpoch  *big.Int
@@ -56,7 +55,7 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 
 	taraClientOnEth, err := TaraClient.NewTaraClient(cfg.TaraxaClientOnEthAddr, cfg.Clients.EthClient)
 	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
+		return nil, fmt.Errorf("failed to instantiate the TaraClient contract: %v", err)
 	}
 
 	taraBridge, err := BridgeBase.NewBridgeBase(cfg.TaraxaBridgeAddr, taraxaClient)
@@ -84,7 +83,6 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 }
 
 func (r *Relayer) Start(ctx context.Context) {
-	r.onFinalizedEpoch = make(chan int64)
 	finalized_block, err := r.taraClientOnEth.GetFinalized(nil)
 	if err != nil {
 		r.log.WithError(err).Error("Failed to get finalized block")
@@ -105,5 +103,4 @@ func (r *Relayer) Start(ctx context.Context) {
 }
 
 func (r *Relayer) Close() {
-	close(r.onFinalizedEpoch)
 }

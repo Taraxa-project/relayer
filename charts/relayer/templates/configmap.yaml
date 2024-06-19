@@ -1,15 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "relayer.fullname" . }}
-  labels:
-    {{- include "relayer.labels" . | nindent 4 }}
+  name: { { include "relayer.fullname" . } }
+  labels: { { - include "relayer.labels" . | nindent 4 } }
 data:
-  ETHEREUM_API_ENDPOINT: {{ .Values.app.ethereumApiEndpoint | quote }}
-  BEACON_NODE_ENDPOINT: {{ .Values.app.beaconNodeEndpoint | quote }}
-  TARAXA_NODE_URL: {{ .Values.app.taraxaNodeUrl | quote }}
-  BEACON_LIGHT_CLIENT_ADDRESS: {{ .Values.app.beaconLightClientAddress | quote }}
-  ETH_CLIENT_ON_TARA_ADDRESS: {{ .Values.app.ethClientOnTaraAddress | quote }}
-  TARA_BRIDGE_ADDRESS: {{ .Values.app.taraBridgeAddress | quote }}
-  TARA_CLIENT_ON_ETH_ADDRESS: {{ .Values.app.taraClientOnEthAddress | quote }}
-  ETH_BRIDGE_ADDRESS: {{ .Values.app.ethBridgeAddress | quote }}
+  ETHEREUM_API_ENDPOINT: { { .Values.app.ethereumApiEndpoint | quote } }
+  BEACON_NODE_ENDPOINT: { { .Values.app.beaconNodeEndpoint | quote } }
+  TARAXA_NODE_URL: { { .Values.app.taraxaNodeUrl | quote } }
+  ETH_CLIENT_ON_TARA_ADDRESS: { { .Values.app.ethClientOnTaraAddress | quote } }
+  TARA_BRIDGE_ADDRESS: { { .Values.app.taraBridgeAddress | quote } }
+  TARA_CLIENT_ON_ETH_ADDRESS: { { .Values.app.taraClientOnEthAddress | quote } }
+  ETH_BRIDGE_ADDRESS: { { .Values.app.ethBridgeAddress | quote } }

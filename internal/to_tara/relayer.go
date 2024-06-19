@@ -2,9 +2,9 @@ package to_tara
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"path/filepath"
-	"relayer/bindings/BeaconLightClient"
 	"relayer/bindings/BridgeBase"
 	"relayer/bindings/EthClient"
 	"relayer/internal/common"
@@ -18,14 +18,13 @@ import (
 )
 
 type Config struct {
-	BeaconNodeEndpoint    string
-	BeaconLightClientAddr eth_common.Address
-	EthClientOnTaraAddr   eth_common.Address
-	TaraxaBridgeAddr      eth_common.Address
-	EthBridgeAddr         eth_common.Address
-	Clients               *common.Clients
-	DataDir               string
-	LogLevel              string
+	BeaconNodeEndpoint  string
+	EthClientOnTaraAddr eth_common.Address
+	TaraxaBridgeAddr    eth_common.Address
+	EthBridgeAddr       eth_common.Address
+	Clients             *common.Clients
+	DataDir             string
+	LogLevel            string
 }
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
@@ -35,7 +34,6 @@ type Relayer struct {
 	taraAuth               *bind.TransactOpts
 	ethClient              *ethclient.Client
 	ethAuth                *bind.TransactOpts
-	beaconLightClient      *BeaconLightClient.BeaconLightClient
 	ethClientContract      *EthClient.EthClient
 	ethBridge              *BridgeBase.BridgeBase
 	taraBridge             *BridgeBase.BridgeBase
@@ -45,16 +43,13 @@ type Relayer struct {
 	currentSyncPeriod      int64
 	bridgeContractAddr     eth_common.Address
 	log                    *log.Logger
+	bridgeRootKey          string
+	epochKey               string
 }
 
 // NewRelayer creates a new Relayer instance
 func NewRelayer(cfg *Config) (*Relayer, error) {
 	relayerLogger := logging.MakeLogger("to_tara", filepath.Join(cfg.DataDir, "logs", "to_tara.log"), cfg.LogLevel)
-
-	beaconLightClient, err := BeaconLightClient.NewBeaconLightClient(cfg.BeaconLightClientAddr, cfg.Clients.TaraxaClient)
-	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate the BeaconLightClient contract: %v", err)
-	}
 
 	taraBridge, err := BridgeBase.NewBridgeBase(cfg.TaraxaBridgeAddr, cfg.Clients.TaraxaClient)
 	if err != nil {
@@ -71,18 +66,31 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the ethClientContract contract: %v", err)
 	}
 
+	bridgeRootKeyRaw, err := ethClientContract.BridgeRootKey(nil)
+	if err != nil {
+		log.Fatalf("Failed to get bridge root key: %v", err)
+	}
+	bridgeRootKey := "0x" + hex.EncodeToString(bridgeRootKeyRaw[:])
+
+	epochKeyRaw, err := ethClientContract.EpochKey(nil)
+	if err != nil {
+		log.Fatalf("Failed to get epoch key: %v", err)
+	}
+	epochKey := "0x" + hex.EncodeToString(epochKeyRaw[:])
+
 	return &Relayer{
 		beaconNodeEndpoint: cfg.BeaconNodeEndpoint,
 		taraxaClient:       cfg.Clients.TaraxaClient,
 		taraAuth:           cfg.Clients.TaraxaAuth,
 		ethClient:          cfg.Clients.EthClient,
 		ethAuth:            cfg.Clients.EthAuth,
-		beaconLightClient:  beaconLightClient,
 		ethClientContract:  ethClientContract,
 		ethBridge:          ethBridge,
 		taraBridge:         taraBridge,
 		bridgeContractAddr: cfg.EthBridgeAddr,
 		log:                relayerLogger,
+		bridgeRootKey:      bridgeRootKey,
+		epochKey:           epochKey,
 	}, nil
 }
 
@@ -91,7 +99,7 @@ func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedBlockNumber = make(chan uint64)
 	r.onSyncCommitteeUpdate = make(chan int64)
 
-	slot, err := r.beaconLightClient.Slot(nil)
+	slot, err := r.ethClientContract.Slot(nil)
 	if err != nil {
 		r.log.WithError(err).Fatal("Failed to get current slot from contract")
 	}
@@ -124,16 +132,14 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			if r.currentSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
+			// TODO: finalizedBlockNumber should be array of finalized blocks?
 			if finalizedBlockNumber != 0 {
-				r.log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
-				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
+				err := r.ProcessHeaderWithProofs(epoch, finalizedBlockNumber)
 				if err != nil {
-					r.log.WithError(err).Error("Did not to update light client")
-				} else {
-					r.getProof(blockNum)
-					r.applyState(blockNum)
-					finalizedBlockNumber = 0
+					r.log.WithError(err).Error("Failed to get proof")
 				}
+				r.applyState(finalizedBlockNumber)
+				finalizedBlockNumber = 0
 			}
 		case blockNumber := <-r.onFinalizedBlockNumber:
 			r.log.WithField("blockNumber", blockNumber).Info("Received finalized block number")
@@ -181,7 +187,7 @@ func (r *Relayer) checkAndFinalize() {
 }
 
 func (r *Relayer) checkAndUpdateNextSyncCommittee(period int64) {
-	root, err := r.beaconLightClient.SyncCommitteeRoots(nil, uint64(period+1))
+	root, err := r.ethClientContract.SyncCommitteeRoots(nil, uint64(period+1))
 	if err != nil {
 		r.log.WithError(err).Fatal("Failed to get sync committee roots")
 	}

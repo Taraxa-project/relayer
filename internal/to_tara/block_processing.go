@@ -2,11 +2,9 @@ package to_tara
 
 import (
 	"context"
-	"fmt"
-	"math/big"
 	"strconv"
 
-	"relayer/bindings/BeaconLightClient"
+	"relayer/bindings/EthClient"
 	"relayer/internal/common"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -19,7 +17,7 @@ func init() {
 }
 
 // Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
-func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate, error) {
+func (r *Relayer) GetBeaconBlockData(epoch int64) (*EthClient.BeaconLightClientUpdateFinalizedHeaderUpdate, error) {
 	finalityUpdate, err := r.GetLightClientFinalityUpdate()
 	if err != nil {
 		return nil, err
@@ -36,7 +34,7 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 
 	// Fetch data from a Beacon Node API (you need to implement this based on your data source)
 	// This is a placeholder for the actual implementation
-	return &BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
+	return &EthClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
 		AttestedHeader:         convertToBeaconChainLightClientHeader(r.log, finalityUpdate.Data.AttestedHeader),
 		SignatureSyncCommittee: ConvertToSyncCommittee(r.log, syncUpdate.Data.NextSyncCommittee),
 		FinalizedHeader:        convertToBeaconChainLightClientHeader(r.log, finalityUpdate.Data.FinalizedHeader),
@@ -45,40 +43,6 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 		ForkVersion:            forkVersion,
 		SignatureSlot:          finalityUpdate.Data.SignatureSlot,
 	}, nil
-}
-
-func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, error) {
-	r.log.WithField("epoch", epoch).Info("Attempting to update new header for epoch")
-
-	// Fetch beacon block data for the given slot
-	updateData, err := r.GetBeaconBlockData(epoch)
-	if blockNumber > updateData.FinalizedHeader.Execution.BlockNumber {
-		return nil, fmt.Errorf("block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
-	}
-	// print(*updateData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get beacon block data: %v", err)
-	}
-
-	r.log.WithField("blockNumber", blockNumber).Info("Updating light client")
-
-	// Call the ImportFinalizedHeader method of the BeaconLightClient contract
-	tx, err := r.beaconLightClient.ImportFinalizedHeader(r.taraAuth, *updateData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to import finalized header: %v", err)
-	}
-
-	r.log.WithField("trx", tx.Hash().Hex()).Info("Submitted next finalized header")
-
-	receipt, err := bind.WaitMined(context.Background(), r.taraxaClient, tx)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to UpdateLightClient: %v", err)
-	}
-
-	r.log.WithField("blockNumber", receipt.BlockNumber.Uint64()).Info("Beacon chain light client updated")
-
-	return big.NewInt(int64(updateData.FinalizedHeader.Execution.BlockNumber)), nil
 }
 
 func (r *Relayer) updateSyncCommittee(period int64) {
@@ -116,7 +80,7 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 		}
 
 		// Fetch beacon block data for the given slot
-		updateData := BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
+		updateData := EthClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
 			AttestedHeader:         convertToBeaconChainLightClientHeader(r.log, syncUpdate.Data.AttestedHeader),
 			SignatureSyncCommittee: ConvertToSyncCommittee(r.log, oldsyncUpdate.Data.NextSyncCommittee),
 			FinalizedHeader:        convertToBeaconChainLightClientHeader(r.log, syncUpdate.Data.FinalizedHeader),
@@ -128,12 +92,12 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 
 		// print(updateData)
 
-		syncCommitteeData := BeaconLightClient.BeaconLightClientUpdateSyncCommitteePeriodUpdate{
+		syncCommitteeData := EthClient.BeaconLightClientUpdateSyncCommitteePeriodUpdate{
 			NextSyncCommittee:       ConvertToSyncCommittee(r.log, syncUpdate.Data.NextSyncCommittee),
 			NextSyncCommitteeBranch: ConvertNextSyncCommitteeBranch(r.log, syncUpdate.Data.NextSyncCommitteeBranch),
 		}
 
-		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, updateData, syncCommitteeData)
+		tx, err := r.ethClientContract.ImportNextSyncCommittee(r.taraAuth, updateData, syncCommitteeData)
 		if err != nil {
 			r.log.WithError(err).Warn("Failed to import next sync committee")
 			return
@@ -149,89 +113,3 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 		r.onSyncCommitteeUpdate <- period + 1
 	}()
 }
-
-// func bytesToHex(bytes []byte) string {
-// 	return hex.EncodeToString(bytes)
-// }
-
-// func print(update BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate) {
-// 	// Print AttestedHeader fields
-// 	fmt.Println("AttestedHeader:")
-// 	printLightClientHeader(update.AttestedHeader)
-
-// 	// Print SignatureSyncCommittee fields
-// 	fmt.Println("SignatureSyncCommittee:")
-// 	printSyncCommittee(update.SignatureSyncCommittee)
-
-// 	// Print FinalizedHeader fields
-// 	fmt.Println("FinalizedHeader:")
-// 	printLightClientHeader(update.FinalizedHeader)
-
-// 	// Print FinalityBranch
-// 	fmt.Println("FinalityBranch:")
-// 	for i, branch := range update.FinalityBranch {
-// 		fmt.Printf("\tBranch[%d]: 0x%s\n", i, bytesToHex(branch[:]))
-// 	}
-
-// 	// Print SyncAggregate fields
-// 	fmt.Println("SyncAggregate:")
-// 	printSyncAggregate(update.SyncAggregate)
-
-// 	// Print ForkVersion
-// 	fmt.Printf("ForkVersion: 0x%s\n", bytesToHex(update.ForkVersion[:]))
-
-// 	// Print SignatureSlot
-// 	fmt.Printf("SignatureSlot: %d\n", update.SignatureSlot)
-// }
-
-// func printLightClientHeader(header BeaconLightClient.BeaconChainLightClientHeader) {
-// 	fmt.Println("\tBeacon (BeaconChainBeaconBlockHeader):")
-// 	fmt.Printf("\t\tSlot: %d\n", header.Beacon.Slot)
-// 	fmt.Printf("\t\tProposerIndex: %d\n", header.Beacon.ProposerIndex)
-// 	fmt.Printf("\t\tParentRoot: 0x%s\n", bytesToHex(header.Beacon.ParentRoot[:]))
-// 	fmt.Printf("\t\tStateRoot: 0x%s\n", bytesToHex(header.Beacon.StateRoot[:]))
-// 	fmt.Printf("\t\tBodyRoot: 0x%s\n", bytesToHex(header.Beacon.BodyRoot[:]))
-
-// 	fmt.Println("\tExecution (BeaconChainExecutionPayloadHeader):")
-// 	fmt.Printf("\t\tParentHash: 0x%s\n", bytesToHex(header.Execution.ParentHash[:]))
-// 	fmt.Printf("\t\tFeeRecipient: %s\n", header.Execution.FeeRecipient.Hex()) // Assuming common.Address has Hex() method
-// 	fmt.Printf("\t\tStateRoot: 0x%s\n", bytesToHex(header.Execution.StateRoot[:]))
-// 	fmt.Printf("\t\tReceiptsRoot: 0x%s\n", bytesToHex(header.Execution.ReceiptsRoot[:]))
-// 	fmt.Printf("\t\tLogsBloom: 0x%s\n", bytesToHex(header.Execution.LogsBloom[:]))
-// 	fmt.Printf("\t\tPrevRandao: 0x%s\n", bytesToHex(header.Execution.PrevRandao[:]))
-// 	fmt.Printf("\t\tBlockNumber: %d\n", header.Execution.BlockNumber)
-// 	fmt.Printf("\t\tGasLimit: %d\n", header.Execution.GasLimit)
-// 	fmt.Printf("\t\tGasUsed: %d\n", header.Execution.GasUsed)
-// 	fmt.Printf("\t\tTimestamp: %d\n", header.Execution.Timestamp)
-// 	fmt.Printf("\t\tExtraData: 0x%s\n", bytesToHex(header.Execution.ExtraData[:]))
-// 	if header.Execution.BaseFeePerGas != nil {
-// 		fmt.Printf("\t\tBaseFeePerGas: %s\n", header.Execution.BaseFeePerGas.Text(10)) // Print as hexadecimal
-// 	} else {
-// 		fmt.Printf("\t\tBaseFeePerGas: nil\n")
-// 	}
-// 	fmt.Printf("\t\tBlockHash: 0x%s\n", bytesToHex(header.Execution.BlockHash[:]))
-// 	fmt.Printf("\t\tTransactionsRoot: 0x%s\n", bytesToHex(header.Execution.TransactionsRoot[:]))
-// 	fmt.Printf("\t\tWithdrawalsRoot: 0x%s\n", bytesToHex(header.Execution.WithdrawalsRoot[:]))
-// 	fmt.Printf("\t\tBlobGasUsed: %d\n", header.Execution.BlobGasUsed)
-// 	fmt.Printf("\t\tExcessBlobGas: %d\n", header.Execution.ExcessBlobGas)
-
-// 	fmt.Println("\tExecutionBranch:")
-// 	for i, branch := range header.ExecutionBranch {
-// 		fmt.Printf("\t\tBranch[%d]: 0x%s\n", i, bytesToHex(branch[:]))
-// 	}
-// }
-
-// func printSyncCommittee(committee BeaconLightClient.BeaconChainSyncCommittee) {
-// 	fmt.Println("\tPubkeys:")
-// 	for i, pubkey := range committee.Pubkeys {
-// 		fmt.Printf("\t\tpubkeys[%d]= hex\"%s\";\n", i, bytesToHex(pubkey))
-// 	}
-// 	fmt.Printf("\tAggregatePubkey: %s\n", bytesToHex(committee.AggregatePubkey))
-// }
-
-// func printSyncAggregate(aggregate BeaconLightClient.BeaconLightClientUpdateSyncAggregate) {
-// 	fmt.Printf("\tSyncCommitteeBits: [First Array Slice]: %s\n", bytesToHex(aggregate.SyncCommitteeBits[0][:]))
-// 	fmt.Printf("\tSyncCommitteeBits: [Second Array Slice]: %s\n", bytesToHex(aggregate.SyncCommitteeBits[1][:]))
-// 	// Add similar for the second array slice if needed
-// 	fmt.Printf("\tSyncCommitteeSignature: %s\n", bytesToHex(aggregate.SyncCommitteeSignature))
-// }

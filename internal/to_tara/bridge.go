@@ -26,18 +26,13 @@ func (r *Relayer) finalize() {
 	r.log.WithField("block", receipt.BlockNumber.Uint64()).Info("Finalized bridge on block")
 }
 
-func (r *Relayer) getProof(finalizedBlock *big.Int) {
-	key, err := r.ethClientContract.BridgeRootKey(nil)
-	if err != nil {
-		r.log.Fatalf("Failed to get bridge root key: %v", err)
-	}
-	strKey := "0x" + hex.EncodeToString(key[:])
-
-	r.log.Printf("Bridge root key: %s and block %s", strKey, finalizedBlock.String())
-
+func (r *Relayer) getProofs(finalizedBlock *big.Int) (accountProof, epochProof, bridgeRootProof [][]byte) {
 	client := gethclient.New(r.ethClient.Client())
 
-	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, finalizedBlock)
+	bridgeRootIdx := 0
+	epochIdx := 1
+	keys := []string{r.epochKey, r.bridgeRootKey}
+	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, keys, finalizedBlock)
 	if err != nil {
 		r.log.Fatalf("Failed to get proof: %v", err)
 	}
@@ -45,36 +40,55 @@ func (r *Relayer) getProof(finalizedBlock *big.Int) {
 		r.log.Fatalf("Invalid storage proof length: %d", len(root.StorageProof))
 	}
 
-	// r.log.Printf("Root: %v", root)
-
-	accountProof, err := decodeProofs(root.AccountProof)
+	accountProof, err = decodeProofs(root.AccountProof)
 	if err != nil {
 		r.log.Fatalf("Failed to decode account proof: %v", err)
 	}
 
-	storageProof, err := decodeProofs(root.StorageProof[0].Proof)
+	epochProof, err = decodeProofs(root.StorageProof[epochIdx].Proof)
 	if err != nil {
-		r.log.Fatalf("Failed to decode storage proof: %v", err)
+		r.log.Fatalf("Failed to decode epoch proof: %v", err)
 	}
 
-	trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, finalizedBlock, accountProof, storageProof)
+	bridgeRootProof, err = decodeProofs(root.StorageProof[bridgeRootIdx].Proof)
 	if err != nil {
-		r.log.Fatalf("Failed to call ProcessBridgeRoot: %v", err)
+		r.log.Fatalf("Failed to decode bridgeRoot proof: %v", err)
 	}
 
-	r.log.Println("ProcessBridgeRoot trx: ", trx.Hash().Hex())
+	return
+}
+
+func (r *Relayer) ProcessHeaderWithProofs(epoch int64, blockNumber uint64) error {
+	updateData, err := r.GetBeaconBlockData(epoch)
+	if blockNumber > updateData.FinalizedHeader.Execution.BlockNumber {
+		return fmt.Errorf("block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
+	}
+	// print(*updateData)
+	if err != nil {
+		return fmt.Errorf("failed to get beacon block data: %v", err)
+	}
+	finalizedBlock := big.NewInt(0).SetUint64(updateData.FinalizedHeader.Execution.BlockNumber)
+
+	accountProof, epochProof, storageProof := r.getProofs(finalizedBlock)
+
+	trx, err := r.ethClientContract.ProcessHeaderWithProofs(r.taraAuth, *updateData, accountProof, epochProof, storageProof)
+	if err != nil {
+		r.log.Fatalf("Failed to call ProcessHeaderWithProofs: %v", err)
+	}
+
+	r.log.Println("ProcessHeaderWithProofs trx: ", trx.Hash().Hex())
 
 	_, err = bind.WaitMined(context.Background(), r.taraxaClient, trx)
 	if err != nil {
-		r.log.Fatalf("Failed to wait for ProcessBridgeRoot: %v", err)
+		r.log.Fatalf("Failed to wait for ProcessHeaderWithProofs: %v", err)
 	}
+	return nil
 }
 
-func (r *Relayer) applyState(finalizedBlock *big.Int) {
+func (r *Relayer) applyState(finalizedBlock uint64) {
 	opts := bind.CallOpts{}
-	if finalizedBlock != nil {
-		opts.BlockNumber = finalizedBlock
-	}
+	opts.BlockNumber.SetUint64(finalizedBlock)
+
 	proof, err := r.ethBridge.GetStateWithProof(&opts)
 	if err != nil {
 		r.log.Fatalf("Failed to get state with proof: %v", err)

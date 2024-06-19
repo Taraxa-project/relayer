@@ -141,7 +141,6 @@ func (r *Relayer) processPillarBlocks() {
 	period := latestFinalizedPillarBlockPeriod + pillarBlocksInterval
 	for ; period <= expectedLatestPillarBlockPeriod; period += pillarBlocksInterval {
 		tmpPillarBlockData, err := r.taraxaClient.GetPillarBlockData(period, true)
-		r.log.WithFields(log.Fields{"block": tmpPillarBlockData, "period": period}).Info("GetPillarBlockData")
 		if err == ethereum.NotFound {
 			r.log.WithField("period", period).Info("Pillar block not found, probably not finalized yet")
 			break

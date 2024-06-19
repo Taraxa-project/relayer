@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"relayer/bindings/BeaconLightClient"
+	"relayer/bindings/EthClient"
 	"strings"
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
@@ -44,8 +44,8 @@ func stringToByteArr(hexStrings []string) ([][32]byte, error) {
 }
 
 // convertToBeaconChainLightClientHeader converts a BeaconBlockHeader to a BeaconChainLightClientHeader.
-func convertToBeaconChainLightClientHeader(log *log.Logger, blockHeader BeaconBlockHeader) BeaconLightClient.BeaconChainLightClientHeader {
-	beaconBlockHeader := BeaconLightClient.BeaconChainBeaconBlockHeader{
+func convertToBeaconChainLightClientHeader(log *log.Logger, blockHeader BeaconBlockHeader) EthClient.BeaconChainLightClientHeader {
+	beaconBlockHeader := EthClient.BeaconChainBeaconBlockHeader{
 		Slot:          uint64(blockHeader.Beacon.Slot),
 		ProposerIndex: uint64(blockHeader.Beacon.ProposerIndex),
 		ParentRoot:    blockHeader.Beacon.ParentRoot,
@@ -53,7 +53,7 @@ func convertToBeaconChainLightClientHeader(log *log.Logger, blockHeader BeaconBl
 		BodyRoot:      blockHeader.Beacon.BodyRoot,
 	}
 
-	executionPayloadHeader := BeaconLightClient.BeaconChainExecutionPayloadHeader{
+	executionPayloadHeader := EthClient.BeaconChainExecutionPayloadHeader{
 		ParentHash:       blockHeader.Execution.ParentHash,
 		FeeRecipient:     eth_common.Address(blockHeader.Execution.FeeRecipient),
 		StateRoot:        blockHeader.Execution.StateRoot,
@@ -91,7 +91,7 @@ func convertToBeaconChainLightClientHeader(log *log.Logger, blockHeader BeaconBl
 		executionPayloadHeader.LogsBloom = logBloom
 	}
 
-	return BeaconLightClient.BeaconChainLightClientHeader{
+	return EthClient.BeaconChainLightClientHeader{
 		Beacon:          beaconBlockHeader,
 		Execution:       executionPayloadHeader,
 		ExecutionBranch: blockHeader.ExecutionBranch,
@@ -99,7 +99,7 @@ func convertToBeaconChainLightClientHeader(log *log.Logger, blockHeader BeaconBl
 }
 
 // ConvertSyncAggregateToBeaconLightClientUpdate converts a SyncAggregate to BeaconLightClientUpdateSyncAggregate.
-func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate altair.SyncAggregate) BeaconLightClient.BeaconLightClientUpdateSyncAggregate {
+func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate altair.SyncAggregate) EthClient.BeaconLightClientUpdateSyncAggregate {
 	var newSyncCommitteeBits [2][32]byte
 	for i := 0; i < 64; i++ {
 		newSyncCommitteeBits[i/32][i%32] = syncAggregate.SyncCommitteeBits[i]
@@ -113,14 +113,14 @@ func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate altair.SyncAggr
 		log.Fatalf("Failed to deserialize signature: %v", err)
 	}
 
-	return BeaconLightClient.BeaconLightClientUpdateSyncAggregate{
+	return EthClient.BeaconLightClientUpdateSyncAggregate{
 		SyncCommitteeBits:      newSyncCommitteeBits,
 		SyncCommitteeSignature: signature.SerializeUncompressed(),
 	}
 }
 
 // ConvertToSyncCommittee converts a NextSyncCommittee to BeaconChainSyncCommittee.
-func ConvertToSyncCommittee(log *log.Logger, sc NextSyncCommittee) BeaconLightClient.BeaconChainSyncCommittee {
+func ConvertToSyncCommittee(log *log.Logger, sc NextSyncCommittee) EthClient.BeaconChainSyncCommittee {
 	var pubkeys [512][]byte
 
 	for i, pubkey := range sc.Pubkeys {
@@ -139,7 +139,7 @@ func ConvertToSyncCommittee(log *log.Logger, sc NextSyncCommittee) BeaconLightCl
 		log.Fatalf("Failed to deserialize aggregate pubkey: %v", err)
 	}
 
-	return BeaconLightClient.BeaconChainSyncCommittee{
+	return EthClient.BeaconChainSyncCommittee{
 		Pubkeys:         pubkeys,
 		AggregatePubkey: aggregatePubkey,
 	}

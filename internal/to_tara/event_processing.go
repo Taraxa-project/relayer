@@ -12,6 +12,7 @@ import (
 )
 
 func (r *Relayer) startEventProcessing(ctx context.Context) {
+	r.log.Info("startEventProcessing")
 	client := &http.Client{}
 
 	// Construct the request to the Ethereum 2.0 node's event stream
@@ -39,9 +40,11 @@ func (r *Relayer) startEventProcessing(ctx context.Context) {
 }
 
 func (r *Relayer) processSSEStream(stream io.ReadCloser) {
+	r.log.Info("Processing SSE stream")
 	scanner := bufio.NewScanner(stream)
 	for scanner.Scan() {
 		line := scanner.Text()
+		r.log.Info("Received line", line)
 		if strings.HasPrefix(line, "data:") {
 			dataLine := line[5:] // Skip "data:" prefix
 
