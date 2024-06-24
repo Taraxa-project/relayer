@@ -54,7 +54,7 @@ func main() {
 
 	log_level_env := os.Getenv("LOG_LEVEL")
 	if log_level_env == "" {
-		log_level_env = "debug"
+		log_level_env = "info"
 	}
 	pflag.StringVar(&log_level, "log_level", log_level_env, "log level. could be only [trace, debug, info, warn, error, fatal]")
 	pflag.Parse()

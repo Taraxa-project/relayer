@@ -3,10 +3,12 @@ package to_eth
 import (
 	"context"
 	"math/big"
+	"time"
 
 	"relayer/bindings/BridgeBase"
 	"relayer/bindings/TaraClient"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ethereum/go-ethereum"
@@ -32,7 +34,7 @@ func transformPillarBlockData(pillarBlockData *PillarBlockData) (block TaraClien
 
 func (r *Relayer) getStateWithProof(epoch *big.Int, block_num *big.Int) (*BridgeBase.SharedStructsStateWithProof, error) {
 	if block_num == nil {
-		block, err := r.taraxaClient.Client.BlockByNumber(context.Background(), nil)
+		block, err := r.taraxaClient.BlockByNumber(context.Background(), nil)
 		if err != nil || block == nil {
 			r.log.WithField("block", block).WithError(err).Fatal("BlockByNumber")
 		}
@@ -94,13 +96,13 @@ func (r *Relayer) bridgeState() {
 		if err != nil {
 			r.log.WithError(err).Fatal("ApplyState")
 		}
-		r.log.WithFields(log.Fields{"tx_hash": applyStateTx.Hash, "state": taraStateWithProof}).Println("Apply state tx sent to eth bridge contracts")
+		r.log.WithFields(log.Fields{"tx_hash": applyStateTx.Hash()}).Info("Apply state tx sent to eth bridge contract")
 
-		r.log.WithField("hash", applyStateTx.Hash()).Info("Waiting for apply state tx to be mined")
+		r.log.WithField("hash", applyStateTx.Hash()).Debug("Waiting for apply state tx to be mined")
 		applyStateTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, applyStateTx)
 
 		if err != nil {
-			r.log.WithError(err).Fatal("WaitMined apply state tx failed")
+			r.log.WithError(err).WithField("hash", applyStateTx.Hash()).Fatal("WaitMined apply state tx failed")
 		}
 		// Tx failed -> status == 0
 		if applyStateTxReceipt.Status == 0 {
@@ -141,7 +143,7 @@ func (r *Relayer) processPillarBlocks() {
 	period := latestFinalizedPillarBlockPeriod + pillarBlocksInterval
 	for ; period <= expectedLatestPillarBlockPeriod; period += pillarBlocksInterval {
 		tmpPillarBlockData, err := r.taraxaClient.GetPillarBlockData(period, true)
-		r.log.WithFields(log.Fields{"block": tmpPillarBlockData, "period": period}).Info("GetPillarBlockData")
+		r.log.WithFields(log.Fields{"block": tmpPillarBlockData, "period": period}).Debug("GetPillarBlockData")
 		if err == ethereum.NotFound {
 			r.log.WithField("period", period).Info("Pillar block not found, probably not finalized yet")
 			break
@@ -171,12 +173,13 @@ func (r *Relayer) processPillarBlocks() {
 		r.log.WithField("blocks", len(blocks)).Info("No new pillar blocks to process")
 		return
 	}
+
+	time.Sleep(30 * time.Second)
 	finalizeBlocksTx, err := r.taraClientOnEth.FinalizeBlocks(r.ethAuth, blocks, blocksSignatures[len(blocksSignatures)-1])
 	if err != nil {
 		r.log.Fatal("FinalizeBlocks tx failed: ", err)
 	}
-	r.log.Println("Finalize blocks tx sent. Tx hash: ", finalizeBlocksTx.Hash(), ". Blocks: ", blocks, ", last block signatures: ", blocksSignatures)
-	r.log.Println("Waiting for finalize blocks tx to be mined. Tx hash: ", finalizeBlocksTx.Hash())
+	r.log.WithFields(logrus.Fields{"hash": finalizeBlocksTx.Hash(), "blocks_count": len(blocks)}).Info("Waiting for finalize blocks tx to be mined")
 	finalizeBlocksTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, finalizeBlocksTx)
 	if err != nil {
 		r.log.Fatal("WaitMined finalize blocks tx failed. Err: ", err)
@@ -191,12 +194,12 @@ func (r *Relayer) processPillarBlocks() {
 
 	// This means that we have more blocks to process
 	if period != expectedLatestPillarBlockPeriod {
-		r.log.WithField("period", period).WithField("expectedLatest", expectedLatestPillarBlockPeriod).Info("We have more pillar blocks, processing next batch")
+		r.log.WithFields(logrus.Fields{"period": period, "expectedLatest": expectedLatestPillarBlockPeriod}).Info("Processing next batch")
 		r.processPillarBlocks()
 	}
 
-	r.bridgeState()
 	r.log.Info("All pillar blocks processed, syncing bridge state")
+	r.bridgeState()
 }
 
 func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {

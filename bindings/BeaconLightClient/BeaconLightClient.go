@@ -97,7 +97,7 @@ type BeaconLightClientUpdateSyncCommitteePeriodUpdate struct {
 
 // BeaconLightClientMetaData contains all meta data concerning the BeaconLightClient contract.
 var BeaconLightClientMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"_proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"_parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_block_number\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"_merkle_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_current_sync_committee_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_genesis_validators_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"GENESIS_VALIDATORS_ROOT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"block_number\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"import_finalized_header\",\"inputs\":[{\"name\":\"update\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.FinalizedHeaderUpdate\",\"components\":[{\"name\":\"attested_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"signature_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"finalized_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"finality_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"sync_aggregate\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncAggregate\",\"components\":[{\"name\":\"sync_committee_bits\",\"type\":\"bytes32[2]\",\"internalType\":\"bytes32[2]\"},{\"name\":\"sync_committee_signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"fork_version\",\"type\":\"bytes4\",\"internalType\":\"bytes4\"},{\"name\":\"signature_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"import_next_sync_committee\",\"inputs\":[{\"name\":\"header_update\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.FinalizedHeaderUpdate\",\"components\":[{\"name\":\"attested_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"signature_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"finalized_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"finality_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"sync_aggregate\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncAggregate\",\"components\":[{\"name\":\"sync_committee_bits\",\"type\":\"bytes32[2]\",\"internalType\":\"bytes32[2]\"},{\"name\":\"sync_committee_signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"fork_version\",\"type\":\"bytes4\",\"internalType\":\"bytes4\"},{\"name\":\"signature_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"sc_update\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncCommitteePeriodUpdate\",\"components\":[{\"name\":\"next_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"next_sync_committee_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"merkle_root\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"slot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"sync_committee_roots\",\"inputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"FinalizedExecutionPayloadHeaderImported\",\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"indexed\":false,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"FinalizedHeaderImported\",\"inputs\":[{\"name\":\"finalized_header\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"NextSyncCommitteeImported\",\"inputs\":[{\"name\":\"period\",\"type\":\"uint64\",\"indexed\":true,\"internalType\":\"uint64\"},{\"name\":\"sync_committee_root\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]}]",
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"_proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"_parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_block_number\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"_merkle_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_current_sync_committee_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_genesis_validators_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"GENESIS_VALIDATORS_ROOT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"block_number\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"finalized_state_roots\",\"inputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"import_finalized_header\",\"inputs\":[{\"name\":\"update\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.FinalizedHeaderUpdate\",\"components\":[{\"name\":\"attested_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"signature_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"finalized_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"finality_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"sync_aggregate\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncAggregate\",\"components\":[{\"name\":\"sync_committee_bits\",\"type\":\"bytes32[2]\",\"internalType\":\"bytes32[2]\"},{\"name\":\"sync_committee_signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"fork_version\",\"type\":\"bytes4\",\"internalType\":\"bytes4\"},{\"name\":\"signature_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"import_next_sync_committee\",\"inputs\":[{\"name\":\"header_update\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.FinalizedHeaderUpdate\",\"components\":[{\"name\":\"attested_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"signature_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"finalized_header\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.LightClientHeader\",\"components\":[{\"name\":\"beacon\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"execution\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.ExecutionPayloadHeader\",\"components\":[{\"name\":\"parent_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"fee_recipient\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"receipts_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"logs_bloom\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"prev_randao\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"block_number\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_limit\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"extra_data\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"base_fee_per_gas\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"transactions_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"withdrawals_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blob_gas_used\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"excess_blob_gas\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"execution_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]},{\"name\":\"finality_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"sync_aggregate\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncAggregate\",\"components\":[{\"name\":\"sync_committee_bits\",\"type\":\"bytes32[2]\",\"internalType\":\"bytes32[2]\"},{\"name\":\"sync_committee_signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"fork_version\",\"type\":\"bytes4\",\"internalType\":\"bytes4\"},{\"name\":\"signature_slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"sc_update\",\"type\":\"tuple\",\"internalType\":\"structBeaconLightClientUpdate.SyncCommitteePeriodUpdate\",\"components\":[{\"name\":\"next_sync_committee\",\"type\":\"tuple\",\"internalType\":\"structBeaconChain.SyncCommittee\",\"components\":[{\"name\":\"pubkeys\",\"type\":\"bytes[512]\",\"internalType\":\"bytes[512]\"},{\"name\":\"aggregate_pubkey\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"next_sync_committee_branch\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"merkle_root\",\"inputs\":[{\"name\":\"blockNumber\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"merkle_root\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"slot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"sync_committee_roots\",\"inputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"event\",\"name\":\"FinalizedExecutionPayloadHeaderImported\",\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"indexed\":false,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"FinalizedHeaderImported\",\"inputs\":[{\"name\":\"finalized_header\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structBeaconChain.BeaconBlockHeader\",\"components\":[{\"name\":\"slot\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"proposer_index\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"parent_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"state_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"body_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"NextSyncCommitteeImported\",\"inputs\":[{\"name\":\"period\",\"type\":\"uint64\",\"indexed\":true,\"internalType\":\"uint64\"},{\"name\":\"sync_committee_root\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"}],\"anonymous\":false}]",
 }
 
 // BeaconLightClientABI is the input ABI used to generate the binding from.
@@ -308,12 +308,12 @@ func (_BeaconLightClient *BeaconLightClientCallerSession) BlockNumber() (*big.In
 	return _BeaconLightClient.Contract.BlockNumber(&_BeaconLightClient.CallOpts)
 }
 
-// MerkleRoot is a free data retrieval call binding the contract method 0xfd5e8efe.
+// FinalizedStateRoots is a free data retrieval call binding the contract method 0xd1317ace.
 //
-// Solidity: function merkle_root() view returns(bytes32)
-func (_BeaconLightClient *BeaconLightClientCaller) MerkleRoot(opts *bind.CallOpts) ([32]byte, error) {
+// Solidity: function finalized_state_roots(uint256 ) view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientCaller) FinalizedStateRoots(opts *bind.CallOpts, arg0 *big.Int) ([32]byte, error) {
 	var out []interface{}
-	err := _BeaconLightClient.contract.Call(opts, &out, "merkle_root")
+	err := _BeaconLightClient.contract.Call(opts, &out, "finalized_state_roots", arg0)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -325,49 +325,80 @@ func (_BeaconLightClient *BeaconLightClientCaller) MerkleRoot(opts *bind.CallOpt
 
 }
 
-// MerkleRoot is a free data retrieval call binding the contract method 0xfd5e8efe.
+// FinalizedStateRoots is a free data retrieval call binding the contract method 0xd1317ace.
 //
-// Solidity: function merkle_root() view returns(bytes32)
-func (_BeaconLightClient *BeaconLightClientSession) MerkleRoot() ([32]byte, error) {
-	return _BeaconLightClient.Contract.MerkleRoot(&_BeaconLightClient.CallOpts)
+// Solidity: function finalized_state_roots(uint256 ) view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientSession) FinalizedStateRoots(arg0 *big.Int) ([32]byte, error) {
+	return _BeaconLightClient.Contract.FinalizedStateRoots(&_BeaconLightClient.CallOpts, arg0)
 }
 
-// MerkleRoot is a free data retrieval call binding the contract method 0xfd5e8efe.
+// FinalizedStateRoots is a free data retrieval call binding the contract method 0xd1317ace.
 //
-// Solidity: function merkle_root() view returns(bytes32)
-func (_BeaconLightClient *BeaconLightClientCallerSession) MerkleRoot() ([32]byte, error) {
-	return _BeaconLightClient.Contract.MerkleRoot(&_BeaconLightClient.CallOpts)
+// Solidity: function finalized_state_roots(uint256 ) view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientCallerSession) FinalizedStateRoots(arg0 *big.Int) ([32]byte, error) {
+	return _BeaconLightClient.Contract.FinalizedStateRoots(&_BeaconLightClient.CallOpts, arg0)
 }
 
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
+// MerkleRoot is a free data retrieval call binding the contract method 0x50957580.
 //
-// Solidity: function owner() view returns(address)
-func (_BeaconLightClient *BeaconLightClientCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
+// Solidity: function merkle_root(uint256 blockNumber) view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientCaller) MerkleRoot(opts *bind.CallOpts, blockNumber *big.Int) ([32]byte, error) {
 	var out []interface{}
-	err := _BeaconLightClient.contract.Call(opts, &out, "owner")
+	err := _BeaconLightClient.contract.Call(opts, &out, "merkle_root", blockNumber)
 
 	if err != nil {
-		return *new(common.Address), err
+		return *new([32]byte), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
 
 	return out0, err
 
 }
 
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
+// MerkleRoot is a free data retrieval call binding the contract method 0x50957580.
 //
-// Solidity: function owner() view returns(address)
-func (_BeaconLightClient *BeaconLightClientSession) Owner() (common.Address, error) {
-	return _BeaconLightClient.Contract.Owner(&_BeaconLightClient.CallOpts)
+// Solidity: function merkle_root(uint256 blockNumber) view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientSession) MerkleRoot(blockNumber *big.Int) ([32]byte, error) {
+	return _BeaconLightClient.Contract.MerkleRoot(&_BeaconLightClient.CallOpts, blockNumber)
 }
 
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
+// MerkleRoot is a free data retrieval call binding the contract method 0x50957580.
 //
-// Solidity: function owner() view returns(address)
-func (_BeaconLightClient *BeaconLightClientCallerSession) Owner() (common.Address, error) {
-	return _BeaconLightClient.Contract.Owner(&_BeaconLightClient.CallOpts)
+// Solidity: function merkle_root(uint256 blockNumber) view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientCallerSession) MerkleRoot(blockNumber *big.Int) ([32]byte, error) {
+	return _BeaconLightClient.Contract.MerkleRoot(&_BeaconLightClient.CallOpts, blockNumber)
+}
+
+// MerkleRoot0 is a free data retrieval call binding the contract method 0xfd5e8efe.
+//
+// Solidity: function merkle_root() view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientCaller) MerkleRoot0(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _BeaconLightClient.contract.Call(opts, &out, "merkle_root0")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// MerkleRoot0 is a free data retrieval call binding the contract method 0xfd5e8efe.
+//
+// Solidity: function merkle_root() view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientSession) MerkleRoot0() ([32]byte, error) {
+	return _BeaconLightClient.Contract.MerkleRoot0(&_BeaconLightClient.CallOpts)
+}
+
+// MerkleRoot0 is a free data retrieval call binding the contract method 0xfd5e8efe.
+//
+// Solidity: function merkle_root() view returns(bytes32)
+func (_BeaconLightClient *BeaconLightClientCallerSession) MerkleRoot0() ([32]byte, error) {
+	return _BeaconLightClient.Contract.MerkleRoot0(&_BeaconLightClient.CallOpts)
 }
 
 // Slot is a free data retrieval call binding the contract method 0x1a88bc66.
@@ -472,48 +503,6 @@ func (_BeaconLightClient *BeaconLightClientSession) ImportNextSyncCommittee(head
 // Solidity: function import_next_sync_committee((((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),(bytes[512],bytes),((uint64,uint64,bytes32,bytes32,bytes32),(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,uint256,bytes32,bytes32,bytes32,uint64,uint64),bytes32[]),bytes32[],(bytes32[2],bytes),bytes4,uint64) header_update, ((bytes[512],bytes),bytes32[]) sc_update) returns()
 func (_BeaconLightClient *BeaconLightClientTransactorSession) ImportNextSyncCommittee(header_update BeaconLightClientUpdateFinalizedHeaderUpdate, sc_update BeaconLightClientUpdateSyncCommitteePeriodUpdate) (*types.Transaction, error) {
 	return _BeaconLightClient.Contract.ImportNextSyncCommittee(&_BeaconLightClient.TransactOpts, header_update, sc_update)
-}
-
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
-//
-// Solidity: function renounceOwnership() returns()
-func (_BeaconLightClient *BeaconLightClientTransactor) RenounceOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _BeaconLightClient.contract.Transact(opts, "renounceOwnership")
-}
-
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
-//
-// Solidity: function renounceOwnership() returns()
-func (_BeaconLightClient *BeaconLightClientSession) RenounceOwnership() (*types.Transaction, error) {
-	return _BeaconLightClient.Contract.RenounceOwnership(&_BeaconLightClient.TransactOpts)
-}
-
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
-//
-// Solidity: function renounceOwnership() returns()
-func (_BeaconLightClient *BeaconLightClientTransactorSession) RenounceOwnership() (*types.Transaction, error) {
-	return _BeaconLightClient.Contract.RenounceOwnership(&_BeaconLightClient.TransactOpts)
-}
-
-// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
-//
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_BeaconLightClient *BeaconLightClientTransactor) TransferOwnership(opts *bind.TransactOpts, newOwner common.Address) (*types.Transaction, error) {
-	return _BeaconLightClient.contract.Transact(opts, "transferOwnership", newOwner)
-}
-
-// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
-//
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_BeaconLightClient *BeaconLightClientSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
-	return _BeaconLightClient.Contract.TransferOwnership(&_BeaconLightClient.TransactOpts, newOwner)
-}
-
-// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
-//
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_BeaconLightClient *BeaconLightClientTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
-	return _BeaconLightClient.Contract.TransferOwnership(&_BeaconLightClient.TransactOpts, newOwner)
 }
 
 // BeaconLightClientFinalizedExecutionPayloadHeaderImportedIterator is returned from FilterFinalizedExecutionPayloadHeaderImported and is used to iterate over the raw logs and unpacked data for FinalizedExecutionPayloadHeaderImported events raised by the BeaconLightClient contract.
@@ -932,159 +921,6 @@ func (_BeaconLightClient *BeaconLightClientFilterer) WatchNextSyncCommitteeImpor
 func (_BeaconLightClient *BeaconLightClientFilterer) ParseNextSyncCommitteeImported(log types.Log) (*BeaconLightClientNextSyncCommitteeImported, error) {
 	event := new(BeaconLightClientNextSyncCommitteeImported)
 	if err := _BeaconLightClient.contract.UnpackLog(event, "NextSyncCommitteeImported", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// BeaconLightClientOwnershipTransferredIterator is returned from FilterOwnershipTransferred and is used to iterate over the raw logs and unpacked data for OwnershipTransferred events raised by the BeaconLightClient contract.
-type BeaconLightClientOwnershipTransferredIterator struct {
-	Event *BeaconLightClientOwnershipTransferred // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *BeaconLightClientOwnershipTransferredIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(BeaconLightClientOwnershipTransferred)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(BeaconLightClientOwnershipTransferred)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *BeaconLightClientOwnershipTransferredIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *BeaconLightClientOwnershipTransferredIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// BeaconLightClientOwnershipTransferred represents a OwnershipTransferred event raised by the BeaconLightClient contract.
-type BeaconLightClientOwnershipTransferred struct {
-	PreviousOwner common.Address
-	NewOwner      common.Address
-	Raw           types.Log // Blockchain specific contextual infos
-}
-
-// FilterOwnershipTransferred is a free log retrieval operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_BeaconLightClient *BeaconLightClientFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*BeaconLightClientOwnershipTransferredIterator, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _BeaconLightClient.contract.FilterLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &BeaconLightClientOwnershipTransferredIterator{contract: _BeaconLightClient.contract, event: "OwnershipTransferred", logs: logs, sub: sub}, nil
-}
-
-// WatchOwnershipTransferred is a free log subscription operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_BeaconLightClient *BeaconLightClientFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, sink chan<- *BeaconLightClientOwnershipTransferred, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _BeaconLightClient.contract.WatchLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(BeaconLightClientOwnershipTransferred)
-				if err := _BeaconLightClient.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseOwnershipTransferred is a log parse operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_BeaconLightClient *BeaconLightClientFilterer) ParseOwnershipTransferred(log types.Log) (*BeaconLightClientOwnershipTransferred, error) {
-	event := new(BeaconLightClientOwnershipTransferred)
-	if err := _BeaconLightClient.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
