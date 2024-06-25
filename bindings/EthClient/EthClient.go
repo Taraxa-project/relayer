@@ -31,7 +31,7 @@ var (
 
 // EthClientMetaData contains all meta data concerning the EthClient contract.
 var EthClientMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"bridgeRootKey\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"client\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ethBridgeAddress\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getFinalizedBridgeRoot\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getMerkleRoot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"_client\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"},{\"name\":\"_eth_bridge_address\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"processBridgeRoot\",\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"account_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"storage_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"BridgeRootProcessed\",\"inputs\":[{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false,\"internalType\":\"uint64\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"InvalidBridgeRoot\",\"inputs\":[{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"InvalidInitialization\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotInitializing\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]}]",
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"bridgeRootKeyByEpoch\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"bridgeRootsMappingPosition\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"client\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ethBridgeAddress\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getFinalizedBridgeRoot\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getMerkleRoot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"_client\",\"type\":\"address\",\"internalType\":\"contractBeaconLightClient\"},{\"name\":\"_eth_bridge_address\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"lastEpoch\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"processBridgeRoot\",\"inputs\":[{\"name\":\"account_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"storage_proof\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"BridgeRootProcessed\",\"inputs\":[{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false,\"internalType\":\"uint64\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"InvalidBridgeRoot\",\"inputs\":[{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"InvalidInitialization\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotInitializing\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]}]",
 }
 
 // EthClientABI is the input ABI used to generate the binding from.
@@ -180,12 +180,12 @@ func (_EthClient *EthClientTransactorRaw) Transact(opts *bind.TransactOpts, meth
 	return _EthClient.Contract.contract.Transact(opts, method, params...)
 }
 
-// BridgeRootKey is a free data retrieval call binding the contract method 0x9760948a.
+// BridgeRootKeyByEpoch is a free data retrieval call binding the contract method 0xbdac44d1.
 //
-// Solidity: function bridgeRootKey() view returns(bytes32)
-func (_EthClient *EthClientCaller) BridgeRootKey(opts *bind.CallOpts) ([32]byte, error) {
+// Solidity: function bridgeRootKeyByEpoch(uint256 epoch) view returns(bytes32)
+func (_EthClient *EthClientCaller) BridgeRootKeyByEpoch(opts *bind.CallOpts, epoch *big.Int) ([32]byte, error) {
 	var out []interface{}
-	err := _EthClient.contract.Call(opts, &out, "bridgeRootKey")
+	err := _EthClient.contract.Call(opts, &out, "bridgeRootKeyByEpoch", epoch)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -197,18 +197,49 @@ func (_EthClient *EthClientCaller) BridgeRootKey(opts *bind.CallOpts) ([32]byte,
 
 }
 
-// BridgeRootKey is a free data retrieval call binding the contract method 0x9760948a.
+// BridgeRootKeyByEpoch is a free data retrieval call binding the contract method 0xbdac44d1.
 //
-// Solidity: function bridgeRootKey() view returns(bytes32)
-func (_EthClient *EthClientSession) BridgeRootKey() ([32]byte, error) {
-	return _EthClient.Contract.BridgeRootKey(&_EthClient.CallOpts)
+// Solidity: function bridgeRootKeyByEpoch(uint256 epoch) view returns(bytes32)
+func (_EthClient *EthClientSession) BridgeRootKeyByEpoch(epoch *big.Int) ([32]byte, error) {
+	return _EthClient.Contract.BridgeRootKeyByEpoch(&_EthClient.CallOpts, epoch)
 }
 
-// BridgeRootKey is a free data retrieval call binding the contract method 0x9760948a.
+// BridgeRootKeyByEpoch is a free data retrieval call binding the contract method 0xbdac44d1.
 //
-// Solidity: function bridgeRootKey() view returns(bytes32)
-func (_EthClient *EthClientCallerSession) BridgeRootKey() ([32]byte, error) {
-	return _EthClient.Contract.BridgeRootKey(&_EthClient.CallOpts)
+// Solidity: function bridgeRootKeyByEpoch(uint256 epoch) view returns(bytes32)
+func (_EthClient *EthClientCallerSession) BridgeRootKeyByEpoch(epoch *big.Int) ([32]byte, error) {
+	return _EthClient.Contract.BridgeRootKeyByEpoch(&_EthClient.CallOpts, epoch)
+}
+
+// BridgeRootsMappingPosition is a free data retrieval call binding the contract method 0xd4544d91.
+//
+// Solidity: function bridgeRootsMappingPosition() view returns(bytes32)
+func (_EthClient *EthClientCaller) BridgeRootsMappingPosition(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _EthClient.contract.Call(opts, &out, "bridgeRootsMappingPosition")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// BridgeRootsMappingPosition is a free data retrieval call binding the contract method 0xd4544d91.
+//
+// Solidity: function bridgeRootsMappingPosition() view returns(bytes32)
+func (_EthClient *EthClientSession) BridgeRootsMappingPosition() ([32]byte, error) {
+	return _EthClient.Contract.BridgeRootsMappingPosition(&_EthClient.CallOpts)
+}
+
+// BridgeRootsMappingPosition is a free data retrieval call binding the contract method 0xd4544d91.
+//
+// Solidity: function bridgeRootsMappingPosition() view returns(bytes32)
+func (_EthClient *EthClientCallerSession) BridgeRootsMappingPosition() ([32]byte, error) {
+	return _EthClient.Contract.BridgeRootsMappingPosition(&_EthClient.CallOpts)
 }
 
 // Client is a free data retrieval call binding the contract method 0x109e94cf.
@@ -335,6 +366,37 @@ func (_EthClient *EthClientCallerSession) GetMerkleRoot() ([32]byte, error) {
 	return _EthClient.Contract.GetMerkleRoot(&_EthClient.CallOpts)
 }
 
+// LastEpoch is a free data retrieval call binding the contract method 0x06a4c983.
+//
+// Solidity: function lastEpoch() view returns(uint256)
+func (_EthClient *EthClientCaller) LastEpoch(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _EthClient.contract.Call(opts, &out, "lastEpoch")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// LastEpoch is a free data retrieval call binding the contract method 0x06a4c983.
+//
+// Solidity: function lastEpoch() view returns(uint256)
+func (_EthClient *EthClientSession) LastEpoch() (*big.Int, error) {
+	return _EthClient.Contract.LastEpoch(&_EthClient.CallOpts)
+}
+
+// LastEpoch is a free data retrieval call binding the contract method 0x06a4c983.
+//
+// Solidity: function lastEpoch() view returns(uint256)
+func (_EthClient *EthClientCallerSession) LastEpoch() (*big.Int, error) {
+	return _EthClient.Contract.LastEpoch(&_EthClient.CallOpts)
+}
+
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
 // Solidity: function owner() view returns(address)
@@ -387,25 +449,25 @@ func (_EthClient *EthClientTransactorSession) Initialize(_client common.Address,
 	return _EthClient.Contract.Initialize(&_EthClient.TransactOpts, _client, _eth_bridge_address)
 }
 
-// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x736ba07d.
+// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x99b7ff1b.
 //
-// Solidity: function processBridgeRoot(uint256 block_number, bytes[] account_proof, bytes[] storage_proof) returns()
-func (_EthClient *EthClientTransactor) ProcessBridgeRoot(opts *bind.TransactOpts, block_number *big.Int, account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
-	return _EthClient.contract.Transact(opts, "processBridgeRoot", block_number, account_proof, storage_proof)
+// Solidity: function processBridgeRoot(bytes[] account_proof, bytes[] storage_proof) returns()
+func (_EthClient *EthClientTransactor) ProcessBridgeRoot(opts *bind.TransactOpts, account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
+	return _EthClient.contract.Transact(opts, "processBridgeRoot", account_proof, storage_proof)
 }
 
-// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x736ba07d.
+// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x99b7ff1b.
 //
-// Solidity: function processBridgeRoot(uint256 block_number, bytes[] account_proof, bytes[] storage_proof) returns()
-func (_EthClient *EthClientSession) ProcessBridgeRoot(block_number *big.Int, account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
-	return _EthClient.Contract.ProcessBridgeRoot(&_EthClient.TransactOpts, block_number, account_proof, storage_proof)
+// Solidity: function processBridgeRoot(bytes[] account_proof, bytes[] storage_proof) returns()
+func (_EthClient *EthClientSession) ProcessBridgeRoot(account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
+	return _EthClient.Contract.ProcessBridgeRoot(&_EthClient.TransactOpts, account_proof, storage_proof)
 }
 
-// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x736ba07d.
+// ProcessBridgeRoot is a paid mutator transaction binding the contract method 0x99b7ff1b.
 //
-// Solidity: function processBridgeRoot(uint256 block_number, bytes[] account_proof, bytes[] storage_proof) returns()
-func (_EthClient *EthClientTransactorSession) ProcessBridgeRoot(block_number *big.Int, account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
-	return _EthClient.Contract.ProcessBridgeRoot(&_EthClient.TransactOpts, block_number, account_proof, storage_proof)
+// Solidity: function processBridgeRoot(bytes[] account_proof, bytes[] storage_proof) returns()
+func (_EthClient *EthClientTransactorSession) ProcessBridgeRoot(account_proof [][]byte, storage_proof [][]byte) (*types.Transaction, error) {
+	return _EthClient.Contract.ProcessBridgeRoot(&_EthClient.TransactOpts, account_proof, storage_proof)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.

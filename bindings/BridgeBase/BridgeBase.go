@@ -55,7 +55,7 @@ type SharedStructsStateWithProof struct {
 
 // BridgeBaseMetaData contains all meta data concerning the BridgeBase contract.
 var BridgeBaseMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"function\",\"name\":\"UPGRADE_INTERFACE_VERSION\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"appliedEpoch\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"applyState\",\"inputs\":[{\"name\":\"state_with_proof\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.StateWithProof\",\"components\":[{\"name\":\"state\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.BridgeState\",\"components\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"states\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.StateWithAddress[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"state_hashes\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.ContractStateHash[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"stateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"bridgeRoot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"connectors\",\"inputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIBridgeConnector\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"finalizationInterval\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"finalizeEpoch\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"finalizedEpoch\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getBridgeRoot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getStateWithProof\",\"inputs\":[],\"outputs\":[{\"name\":\"ret\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.StateWithProof\",\"components\":[{\"name\":\"state\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.BridgeState\",\"components\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"states\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.StateWithAddress[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"state_hashes\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.ContractStateHash[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"stateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastFinalizedBlock\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lightClient\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIBridgeLightClient\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"localAddress\",\"inputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"proxiableUUID\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"registerContract\",\"inputs\":[{\"name\":\"connector\",\"type\":\"address\",\"internalType\":\"contractIBridgeConnector\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"registeredTokens\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address[]\",\"internalType\":\"address[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"setFinalizationInterval\",\"inputs\":[{\"name\":\"_finalizationInterval\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"tokenAddresses\",\"inputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeToAndCall\",\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"payable\"},{\"type\":\"event\",\"name\":\"ConnectorRegistered\",\"inputs\":[{\"name\":\"connector\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"token_source\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"token_destination\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Finalized\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"indexed\":false,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false,\"internalType\":\"uint64\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Upgraded\",\"inputs\":[{\"name\":\"implementation\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"AddressEmptyCode\",\"inputs\":[{\"name\":\"target\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"ConnectorAlreadyRegistered\",\"inputs\":[{\"name\":\"connector\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"token\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"ERC1967InvalidImplementation\",\"inputs\":[{\"name\":\"implementation\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"ERC1967NonPayable\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"FailedInnerCall\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"InvalidInitialization\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NoStateToFinalize\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotAllStatesApplied\",\"inputs\":[{\"name\":\"processed\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"NotEnoughBlocksPassed\",\"inputs\":[{\"name\":\"lastFinalizedBlock\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"currentInterval\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"requiredInterval\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"NotInitializing\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotSuccessiveEpochs\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"nextEpoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"StateNotMatchingBridgeRoot\",\"inputs\":[{\"name\":\"stateRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"UUPSUnauthorizedCallContext\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"UUPSUnsupportedProxiableUUID\",\"inputs\":[{\"name\":\"slot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"ZeroAddressCannotBeRegistered\",\"inputs\":[]}]",
+	ABI: "[{\"type\":\"function\",\"name\":\"UPGRADE_INTERFACE_VERSION\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"appliedEpoch\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"applyState\",\"inputs\":[{\"name\":\"state_with_proof\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.StateWithProof\",\"components\":[{\"name\":\"state\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.BridgeState\",\"components\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"states\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.StateWithAddress[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"state_hashes\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.ContractStateHash[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"stateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"bridgeRoots\",\"inputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"connectors\",\"inputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIBridgeConnector\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"finalizationInterval\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"finalizeEpoch\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"finalizedEpoch\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getBridgeRoot\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getLatestBridgeRoot\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getStateWithProof\",\"inputs\":[],\"outputs\":[{\"name\":\"ret\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.StateWithProof\",\"components\":[{\"name\":\"state\",\"type\":\"tuple\",\"internalType\":\"structSharedStructs.BridgeState\",\"components\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"states\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.StateWithAddress[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"state\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"state_hashes\",\"type\":\"tuple[]\",\"internalType\":\"structSharedStructs.ContractStateHash[]\",\"components\":[{\"name\":\"contractAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"stateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastFinalizedBlock\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lightClient\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIBridgeLightClient\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"localAddress\",\"inputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"proxiableUUID\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"registerContract\",\"inputs\":[{\"name\":\"connector\",\"type\":\"address\",\"internalType\":\"contractIBridgeConnector\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"registeredTokens\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address[]\",\"internalType\":\"address[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"setFinalizationInterval\",\"inputs\":[{\"name\":\"_finalizationInterval\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"shouldFinalizeEpoch\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"tokenAddresses\",\"inputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeToAndCall\",\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"payable\"},{\"type\":\"event\",\"name\":\"ConnectorRegistered\",\"inputs\":[{\"name\":\"connector\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"token_source\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"token_destination\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Finalized\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"indexed\":false,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false,\"internalType\":\"uint64\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Upgraded\",\"inputs\":[{\"name\":\"implementation\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"AddressEmptyCode\",\"inputs\":[{\"name\":\"target\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"ConnectorAlreadyRegistered\",\"inputs\":[{\"name\":\"connector\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"token\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"ERC1967InvalidImplementation\",\"inputs\":[{\"name\":\"implementation\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"ERC1967NonPayable\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"FailedInnerCall\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"InvalidInitialization\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NoStateToFinalize\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotAllStatesApplied\",\"inputs\":[{\"name\":\"processed\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"NotEnoughBlocksPassed\",\"inputs\":[{\"name\":\"lastFinalizedBlock\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"currentInterval\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"requiredInterval\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"NotInitializing\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"NotSuccessiveEpochs\",\"inputs\":[{\"name\":\"epoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"nextEpoch\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"StateNotMatchingBridgeRoot\",\"inputs\":[{\"name\":\"stateRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"bridgeRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"UUPSUnauthorizedCallContext\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"UUPSUnsupportedProxiableUUID\",\"inputs\":[{\"name\":\"slot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"ZeroAddressCannotBeRegistered\",\"inputs\":[]}]",
 }
 
 // BridgeBaseABI is the input ABI used to generate the binding from.
@@ -266,12 +266,12 @@ func (_BridgeBase *BridgeBaseCallerSession) AppliedEpoch() (*big.Int, error) {
 	return _BridgeBase.Contract.AppliedEpoch(&_BridgeBase.CallOpts)
 }
 
-// BridgeRoot is a free data retrieval call binding the contract method 0x177a0c2c.
+// BridgeRoots is a free data retrieval call binding the contract method 0x4bc7eecc.
 //
-// Solidity: function bridgeRoot() view returns(bytes32)
-func (_BridgeBase *BridgeBaseCaller) BridgeRoot(opts *bind.CallOpts) ([32]byte, error) {
+// Solidity: function bridgeRoots(uint256 ) view returns(bytes32)
+func (_BridgeBase *BridgeBaseCaller) BridgeRoots(opts *bind.CallOpts, arg0 *big.Int) ([32]byte, error) {
 	var out []interface{}
-	err := _BridgeBase.contract.Call(opts, &out, "bridgeRoot")
+	err := _BridgeBase.contract.Call(opts, &out, "bridgeRoots", arg0)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -283,18 +283,18 @@ func (_BridgeBase *BridgeBaseCaller) BridgeRoot(opts *bind.CallOpts) ([32]byte, 
 
 }
 
-// BridgeRoot is a free data retrieval call binding the contract method 0x177a0c2c.
+// BridgeRoots is a free data retrieval call binding the contract method 0x4bc7eecc.
 //
-// Solidity: function bridgeRoot() view returns(bytes32)
-func (_BridgeBase *BridgeBaseSession) BridgeRoot() ([32]byte, error) {
-	return _BridgeBase.Contract.BridgeRoot(&_BridgeBase.CallOpts)
+// Solidity: function bridgeRoots(uint256 ) view returns(bytes32)
+func (_BridgeBase *BridgeBaseSession) BridgeRoots(arg0 *big.Int) ([32]byte, error) {
+	return _BridgeBase.Contract.BridgeRoots(&_BridgeBase.CallOpts, arg0)
 }
 
-// BridgeRoot is a free data retrieval call binding the contract method 0x177a0c2c.
+// BridgeRoots is a free data retrieval call binding the contract method 0x4bc7eecc.
 //
-// Solidity: function bridgeRoot() view returns(bytes32)
-func (_BridgeBase *BridgeBaseCallerSession) BridgeRoot() ([32]byte, error) {
-	return _BridgeBase.Contract.BridgeRoot(&_BridgeBase.CallOpts)
+// Solidity: function bridgeRoots(uint256 ) view returns(bytes32)
+func (_BridgeBase *BridgeBaseCallerSession) BridgeRoots(arg0 *big.Int) ([32]byte, error) {
+	return _BridgeBase.Contract.BridgeRoots(&_BridgeBase.CallOpts, arg0)
 }
 
 // Connectors is a free data retrieval call binding the contract method 0x0e53aae9.
@@ -390,12 +390,12 @@ func (_BridgeBase *BridgeBaseCallerSession) FinalizedEpoch() (*big.Int, error) {
 	return _BridgeBase.Contract.FinalizedEpoch(&_BridgeBase.CallOpts)
 }
 
-// GetBridgeRoot is a free data retrieval call binding the contract method 0x695a253f.
+// GetBridgeRoot is a free data retrieval call binding the contract method 0x12ab9044.
 //
-// Solidity: function getBridgeRoot() view returns(bytes32)
-func (_BridgeBase *BridgeBaseCaller) GetBridgeRoot(opts *bind.CallOpts) ([32]byte, error) {
+// Solidity: function getBridgeRoot(uint256 epoch) view returns(bytes32)
+func (_BridgeBase *BridgeBaseCaller) GetBridgeRoot(opts *bind.CallOpts, epoch *big.Int) ([32]byte, error) {
 	var out []interface{}
-	err := _BridgeBase.contract.Call(opts, &out, "getBridgeRoot")
+	err := _BridgeBase.contract.Call(opts, &out, "getBridgeRoot", epoch)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -407,18 +407,49 @@ func (_BridgeBase *BridgeBaseCaller) GetBridgeRoot(opts *bind.CallOpts) ([32]byt
 
 }
 
-// GetBridgeRoot is a free data retrieval call binding the contract method 0x695a253f.
+// GetBridgeRoot is a free data retrieval call binding the contract method 0x12ab9044.
 //
-// Solidity: function getBridgeRoot() view returns(bytes32)
-func (_BridgeBase *BridgeBaseSession) GetBridgeRoot() ([32]byte, error) {
-	return _BridgeBase.Contract.GetBridgeRoot(&_BridgeBase.CallOpts)
+// Solidity: function getBridgeRoot(uint256 epoch) view returns(bytes32)
+func (_BridgeBase *BridgeBaseSession) GetBridgeRoot(epoch *big.Int) ([32]byte, error) {
+	return _BridgeBase.Contract.GetBridgeRoot(&_BridgeBase.CallOpts, epoch)
 }
 
-// GetBridgeRoot is a free data retrieval call binding the contract method 0x695a253f.
+// GetBridgeRoot is a free data retrieval call binding the contract method 0x12ab9044.
 //
-// Solidity: function getBridgeRoot() view returns(bytes32)
-func (_BridgeBase *BridgeBaseCallerSession) GetBridgeRoot() ([32]byte, error) {
-	return _BridgeBase.Contract.GetBridgeRoot(&_BridgeBase.CallOpts)
+// Solidity: function getBridgeRoot(uint256 epoch) view returns(bytes32)
+func (_BridgeBase *BridgeBaseCallerSession) GetBridgeRoot(epoch *big.Int) ([32]byte, error) {
+	return _BridgeBase.Contract.GetBridgeRoot(&_BridgeBase.CallOpts, epoch)
+}
+
+// GetLatestBridgeRoot is a free data retrieval call binding the contract method 0xd3374ff9.
+//
+// Solidity: function getLatestBridgeRoot() view returns(bytes32)
+func (_BridgeBase *BridgeBaseCaller) GetLatestBridgeRoot(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _BridgeBase.contract.Call(opts, &out, "getLatestBridgeRoot")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// GetLatestBridgeRoot is a free data retrieval call binding the contract method 0xd3374ff9.
+//
+// Solidity: function getLatestBridgeRoot() view returns(bytes32)
+func (_BridgeBase *BridgeBaseSession) GetLatestBridgeRoot() ([32]byte, error) {
+	return _BridgeBase.Contract.GetLatestBridgeRoot(&_BridgeBase.CallOpts)
+}
+
+// GetLatestBridgeRoot is a free data retrieval call binding the contract method 0xd3374ff9.
+//
+// Solidity: function getLatestBridgeRoot() view returns(bytes32)
+func (_BridgeBase *BridgeBaseCallerSession) GetLatestBridgeRoot() ([32]byte, error) {
+	return _BridgeBase.Contract.GetLatestBridgeRoot(&_BridgeBase.CallOpts)
 }
 
 // GetStateWithProof is a free data retrieval call binding the contract method 0xfe65d463.
@@ -636,6 +667,37 @@ func (_BridgeBase *BridgeBaseSession) RegisteredTokens() ([]common.Address, erro
 // Solidity: function registeredTokens() view returns(address[])
 func (_BridgeBase *BridgeBaseCallerSession) RegisteredTokens() ([]common.Address, error) {
 	return _BridgeBase.Contract.RegisteredTokens(&_BridgeBase.CallOpts)
+}
+
+// ShouldFinalizeEpoch is a free data retrieval call binding the contract method 0x567041cd.
+//
+// Solidity: function shouldFinalizeEpoch() view returns(bool)
+func (_BridgeBase *BridgeBaseCaller) ShouldFinalizeEpoch(opts *bind.CallOpts) (bool, error) {
+	var out []interface{}
+	err := _BridgeBase.contract.Call(opts, &out, "shouldFinalizeEpoch")
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// ShouldFinalizeEpoch is a free data retrieval call binding the contract method 0x567041cd.
+//
+// Solidity: function shouldFinalizeEpoch() view returns(bool)
+func (_BridgeBase *BridgeBaseSession) ShouldFinalizeEpoch() (bool, error) {
+	return _BridgeBase.Contract.ShouldFinalizeEpoch(&_BridgeBase.CallOpts)
+}
+
+// ShouldFinalizeEpoch is a free data retrieval call binding the contract method 0x567041cd.
+//
+// Solidity: function shouldFinalizeEpoch() view returns(bool)
+func (_BridgeBase *BridgeBaseCallerSession) ShouldFinalizeEpoch() (bool, error) {
+	return _BridgeBase.Contract.ShouldFinalizeEpoch(&_BridgeBase.CallOpts)
 }
 
 // TokenAddresses is a free data retrieval call binding the contract method 0xe5df8b84.

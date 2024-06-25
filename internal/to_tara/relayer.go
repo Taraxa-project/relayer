@@ -99,6 +99,9 @@ func (r *Relayer) Start(ctx context.Context) {
 	r.currentSyncPeriod = common.GetPeriodFromSlot(int64(slot))
 	r.log.WithField("current period", r.currentSyncPeriod).Info("Beacon light client deployed, starting relayer")
 
+	r.processBridgeRoots()
+	r.applyStates()
+
 	go r.startEventProcessing(ctx)
 	go r.processNewBlocks(ctx)
 
@@ -126,12 +129,12 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			}
 			if finalizedBlockNumber != 0 {
 				r.log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
-				blockNum, err := r.updateLightClient(epoch, finalizedBlockNumber)
+				_, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
 					r.log.WithError(err).Error("Did not to update light client")
 				} else {
-					r.getProof(blockNum)
-					r.applyState(blockNum)
+					r.processBridgeRoots()
+					r.applyStates()
 					finalizedBlockNumber = 0
 				}
 			}
@@ -143,8 +146,8 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			}
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
-			r.log.Info("Checking for if we need to finalize")
 			if finalizedBlockNumber == 0 {
+				r.log.Info("Checking if we need to finalize")
 				go r.checkAndFinalize()
 			}
 		case period := <-r.onSyncCommitteeUpdate:
@@ -170,7 +173,7 @@ func (r *Relayer) checkAndFinalize() {
 		return
 	}
 	if finalizedEpoch.Cmp(appliedEpoch) > 0 {
-		r.log.Printf("Finalizing ETH epoch %d on TARA epoch %d", finalizedEpoch, appliedEpoch)
+		r.log.WithFields(log.Fields{"finalized": finalizedEpoch, "applied": appliedEpoch}).Debug("Finalizing ETH epoch in TARA contract")
 
 		lastFinalizedBlock, err := r.ethBridge.LastFinalizedBlock(nil)
 		if err != nil {
