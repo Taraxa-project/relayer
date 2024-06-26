@@ -89,10 +89,7 @@ func (r *Relayer) bridgeState() {
 		if err != nil {
 			r.log.WithError(err).WithField("epoch", epoch).Fatal("getStateWithProof")
 		}
-		local := r.ethAuth
-		// TODO: fix the estimation?
-		local.GasLimit = 1000000
-		applyStateTx, err := r.ethBridge.ApplyState(local, *taraStateWithProof)
+		applyStateTx, err := r.ethBridge.ApplyState(r.ethAuth, *taraStateWithProof)
 		if err != nil {
 			r.log.WithError(err).Fatal("ApplyState")
 		}

@@ -128,7 +128,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
 			if finalizedBlockNumber != 0 {
-				r.log.Println("Updating light client with epoch", epoch, "and block number", finalizedBlockNumber)
+				r.log.WithFields(log.Fields{"epoch": epoch, "block": finalizedBlockNumber}).Println("Updating Beacon Light Client")
 				_, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
 					r.log.WithError(err).Error("Did not to update light client")
@@ -164,14 +164,16 @@ func (r *Relayer) checkAndFinalize() {
 	r.finalize()
 	finalizedEpoch, err := r.ethBridge.FinalizedEpoch(nil)
 	if err != nil {
-		r.log.Warningf("Failed to get finalized epoch from ETH contract: %v", err)
+		r.log.WithError(err).Warn("Failed to get finalized epoch from ETH contract")
 		return
 	}
 	appliedEpoch, err := r.taraBridge.AppliedEpoch(nil)
 	if err != nil {
-		r.log.Warningf("Failed to get finalized epoch from TARA contract: %v", err)
+		r.log.WithError(err).Warn("Failed to get finalized epoch from TARA contract")
 		return
 	}
+
+	r.log.WithFields(log.Fields{"finalized": finalizedEpoch, "applied": appliedEpoch}).Debug("Checking if we need to finalize")
 	if finalizedEpoch.Cmp(appliedEpoch) > 0 {
 		r.log.WithFields(log.Fields{"finalized": finalizedEpoch, "applied": appliedEpoch}).Debug("Finalizing ETH epoch in TARA contract")
 
