@@ -16,14 +16,24 @@ import (
 )
 
 func (r *Relayer) finalize() {
-	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
+	shouldFinalize, err := r.ethBridge.ShouldFinalizeEpoch(nil)
 	if err != nil {
-		r.log.WithField("trx", trx).WithError(err).Debug("Failed to call finalize")
+		r.log.WithError(err).Fatal("Failed to call ShouldFinalizeEpoch")
+	}
+	r.log.WithField("shouldFinalize", shouldFinalize).Debug("ShouldFinalizeEpoch")
+	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
+	r.log.WithField("hash", trx.Hash()).Info("FinalizeEpoch trx sent")
+	if err != nil {
+		r.log.WithField("trx", trx).WithError(err).Info("Failed to call finalize")
 		return
 	}
 	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
 	if err != nil {
 		r.log.WithError(err).Warn("Failed to wait for finalize")
+		return
+	}
+	if receipt.Status != 1 {
+		r.log.WithField("status", receipt.Status).Fatal("Finalize failed")
 		return
 	}
 	r.log.WithField("block", receipt.BlockNumber.Uint64()).Info("Finalized bridge on block")
