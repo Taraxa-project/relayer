@@ -171,7 +171,6 @@ func (r *Relayer) processPillarBlocks() {
 		return
 	}
 
-	time.Sleep(30 * time.Second)
 	finalizeBlocksTx, err := r.taraClientOnEth.FinalizeBlocks(r.ethAuth, blocks, blocksSignatures[len(blocksSignatures)-1])
 	if err != nil {
 		r.log.Fatal("FinalizeBlocks tx failed: ", err)
@@ -185,7 +184,7 @@ func (r *Relayer) processPillarBlocks() {
 	if finalizeBlocksTxReceipt.Status == 0 {
 		r.log.Fatal("Finalize blocks tx failed execution. Tx hash: ", finalizeBlocksTx.Hash())
 	}
-
+	time.Sleep(30 * time.Second)
 	r.latestBridgeRoot = pendingBridgeRoot
 	r.latestClientEpoch = pendingEpoch
 

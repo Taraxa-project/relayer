@@ -22,11 +22,12 @@ func (r *Relayer) finalize() {
 	}
 	r.log.WithField("shouldFinalize", shouldFinalize).Debug("ShouldFinalizeEpoch")
 	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
-	r.log.WithField("hash", trx.Hash()).Info("FinalizeEpoch trx sent")
 	if err != nil {
 		r.log.WithField("trx", trx).WithError(err).Info("Failed to call finalize")
 		return
 	}
+	r.log.WithField("hash", trx.Hash()).Info("FinalizeEpoch trx sent")
+
 	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
 	if err != nil {
 		r.log.WithError(err).Warn("Failed to wait for finalize")
