@@ -24,24 +24,25 @@ type Config struct {
 	Clients               *common.Clients
 	DataDir               string
 	LogLevel              string
+	PillarBlocksInBatch   int
 }
 
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
-	taraxaClient       *TaraxaClientWrapper
-	taraxaNodeConfig   *TaraConfig
-	taraAuth           *bind.TransactOpts
-	ethClient          *ethclient.Client
-	ethAuth            *bind.TransactOpts
-	ethBridge          *BridgeBase.BridgeBase
-	taraBridge         *BridgeBase.BridgeBase
-	taraClientOnEth    *TaraClient.TaraClient
-	onFinalizedEpoch   chan int64
-	bridgeContractAddr eth_common.Address
-	latestBridgeRoot   eth_common.Hash
-	latestClientEpoch  *big.Int
-	latestAppliedEpoch *big.Int
-	log                *log.Logger
+	taraxaClient        *TaraxaClientWrapper
+	taraxaNodeConfig    *TaraConfig
+	ethClient           *ethclient.Client
+	ethAuth             *bind.TransactOpts
+	ethBridge           *BridgeBase.BridgeBase
+	taraBridge          *BridgeBase.BridgeBase
+	taraClientOnEth     *TaraClient.TaraClient
+	onFinalizedEpoch    chan int64
+	bridgeContractAddr  eth_common.Address
+	latestBridgeRoot    eth_common.Hash
+	latestClientEpoch   *big.Int
+	latestAppliedEpoch  *big.Int
+	log                 *log.Logger
+	pillarBlocksInBatch int
 }
 
 // NewRelayer creates a new Relayer instance
@@ -70,16 +71,16 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 	}
 
 	return &Relayer{
-		taraxaClient:       taraxaClient,
-		taraxaNodeConfig:   taraConfig,
-		taraAuth:           cfg.Clients.TaraxaAuth,
-		ethClient:          cfg.Clients.EthClient,
-		ethAuth:            cfg.Clients.EthAuth,
-		taraClientOnEth:    taraClientOnEth,
-		ethBridge:          ethBridge,
-		taraBridge:         taraBridge,
-		bridgeContractAddr: cfg.EthBridgeAddr,
-		log:                relayerLogger,
+		taraxaClient:        taraxaClient,
+		taraxaNodeConfig:    taraConfig,
+		ethClient:           cfg.Clients.EthClient,
+		ethAuth:             cfg.Clients.EthAuth,
+		taraClientOnEth:     taraClientOnEth,
+		ethBridge:           ethBridge,
+		taraBridge:          taraBridge,
+		bridgeContractAddr:  cfg.EthBridgeAddr,
+		log:                 relayerLogger,
+		pillarBlocksInBatch: cfg.PillarBlocksInBatch,
 	}, nil
 }
 

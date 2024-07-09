@@ -147,7 +147,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 			finalizedBlockNumber = blockNumber
 		case <-ticker.C:
 			if finalizedBlockNumber == 0 {
-				r.log.Info("Checking if we need to finalize")
+				r.log.Debug("Checking if we need to finalize")
 				go r.checkAndFinalize()
 			}
 		case period := <-r.onSyncCommitteeUpdate:

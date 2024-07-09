@@ -18,9 +18,10 @@ func NewClient(sharedClient *ethclient.Client) *TaraxaClientWrapper {
 	return taraxaClientWrapper
 }
 
-func (t *TaraxaClientWrapper) GetPillarBlockData(period uint64, includeBinaryData bool) (*PillarBlockData, error) {
+func (t *TaraxaClientWrapper) GetPillarBlockData(period uint64) (*PillarBlockData, error) {
 	var pillarBlockData *PillarBlockData
-	err := t.Client.Client().CallContext(context.Background(), &pillarBlockData, "taraxa_getPillarBlockData", period, includeBinaryData)
+	includeSignatures := true
+	err := t.Client.Client().CallContext(context.Background(), &pillarBlockData, "taraxa_getPillarBlockData", period, includeSignatures)
 	if err == nil && pillarBlockData == nil {
 		err = ethereum.NotFound
 	}

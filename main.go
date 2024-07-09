@@ -31,6 +31,8 @@ type Config struct {
 	TaraxaNodeURL      string
 	PrivateKey         string
 	BeaconNodeEndpoint string
+
+	PillarBlocksInBatch int
 }
 
 func main() {
@@ -51,6 +53,7 @@ func main() {
 	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", os.Getenv("TARAXA_NODE_URL"), "Taraxa node URL")
 	pflag.StringVar(&config.PrivateKey, "private_key", os.Getenv("PRIVATE_KEY"), "Private key")
 	pflag.StringVar(&config.BeaconNodeEndpoint, "beacon_node_endpoint", os.Getenv("BEACON_NODE_ENDPOINT"), "Beacon node endpoint")
+	pflag.IntVar(&config.PillarBlocksInBatch, "pillar_blocks_in_batch", 20, "Number of pillar blocks to include in a batch")
 
 	log_level_env := os.Getenv("LOG_LEVEL")
 	if log_level_env == "" {
@@ -98,6 +101,7 @@ func main() {
 		Clients:               clients,
 		DataDir:               data_dir,
 		LogLevel:              log_level,
+		PillarBlocksInBatch:   config.PillarBlocksInBatch,
 	})
 
 	if err != nil {
