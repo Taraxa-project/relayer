@@ -63,7 +63,7 @@ func (r *Relayer) processPillarBlocks() {
 		tmpPillarBlockData, err := r.taraxaClient.GetPillarBlockData(period)
 		r.log.WithFields(log.Fields{"block": tmpPillarBlockData, "period": period}).Debug("GetPillarBlockData")
 		if err == ethereum.NotFound {
-			r.log.WithField("period", period).Info("Pillar block not found, probably not finalized yet")
+			r.log.WithField("period", period).Debug("Pillar block not found, probably not finalized yet")
 			break
 		}
 		if err != nil {
@@ -88,7 +88,7 @@ func (r *Relayer) processPillarBlocks() {
 	}
 	// TODO: don't process without blocks of if bridgeRoot wasn't changed, but send it if we have r.pillarBlocksInBatch
 	if len(blocks) == 0 || (pendingBridgeRoot == r.latestBridgeRoot && len(blocks) != r.pillarBlocksInBatch) {
-		r.log.WithField("blocks", len(blocks)).Info("No new pillar blocks to process")
+		r.log.WithField("blocks", len(blocks)).Debug("No new pillar blocks to process")
 		return
 	}
 
@@ -111,7 +111,7 @@ func (r *Relayer) processPillarBlocks() {
 
 	// This means that we have more blocks to process
 	if period != expectedLatestPillarBlockPeriod {
-		r.log.WithFields(logrus.Fields{"period": period, "expectedLatest": expectedLatestPillarBlockPeriod}).Info("Processing next batch")
+		r.log.WithFields(logrus.Fields{"period": period, "expectedLatest": expectedLatestPillarBlockPeriod}).Debug("Processing next batch")
 		r.processPillarBlocks()
 	}
 

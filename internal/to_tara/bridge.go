@@ -23,7 +23,7 @@ func (r *Relayer) finalize() {
 	r.log.WithField("shouldFinalize", shouldFinalize).Debug("ShouldFinalizeEpoch")
 	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
 	if err != nil {
-		r.log.WithField("trx", trx).WithError(err).Info("Failed to call finalize")
+		r.log.WithField("trx", trx).WithError(err).Debug("Failed to call finalize")
 		return
 	}
 	r.log.WithField("hash", trx.Hash()).Info("FinalizeEpoch trx sent")
