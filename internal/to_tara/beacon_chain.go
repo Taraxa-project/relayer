@@ -7,30 +7,6 @@ import (
 	"net/http"
 )
 
-// Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
-func (r *Relayer) GetBlockHeader(blockType string) (*BeaconBlock, error) {
-	url := fmt.Sprintf("%s/eth/v1/beacon/headers/%s", r.beaconNodeEndpoint, blockType)
-	var beaconBlockHeader *BeaconBlock
-	beaconBlockHeader, err := FetchAndParseData[BeaconBlock](url)
-	if err != nil {
-		r.log.Fatalf("Error fetching and parsing beacon block header: %v", err)
-	}
-
-	return beaconBlockHeader, nil
-}
-
-// Assume GetBeaconBlockData returns data needed to construct BeaconLightClientUpdateFinalizedHeaderUpdate
-func (r *Relayer) GetBlock(slot string) (*BeaconBlock, error) {
-	url := fmt.Sprintf("%s/eth/v2/beacon/blocks/%s", r.beaconNodeEndpoint, slot)
-	var beaconBlockHeader *BeaconBlock
-	beaconBlockHeader, err := FetchAndParseData[BeaconBlock](url)
-	if err != nil {
-		r.log.Fatalf("Error fetching and parsing beacon block header: %v", err)
-	}
-
-	return beaconBlockHeader, nil
-}
-
 func (r *Relayer) GetForkVersion(state string) ([4]byte, error) {
 	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.beaconNodeEndpoint, state)
 	var forkVersion *ForkVersion
