@@ -5,38 +5,26 @@ import (
 	"math/big"
 	"relayer/bindings/BridgeBase"
 
+	"relayer/internal/state"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	log "github.com/sirupsen/logrus"
 )
 
-func (r *Relayer) getStateWithProof(epoch *big.Int, block_num *big.Int) (*BridgeBase.SharedStructsStateWithProof, error) {
-	if block_num == nil {
-		block, err := r.taraxaClient.BlockByNumber(context.Background(), nil)
-		if err != nil || block == nil {
-			r.log.WithField("block", block).WithError(err).Fatal("BlockByNumber")
-		}
-		block_num = block.Number()
-	}
-	opts := bind.CallOpts{BlockNumber: block_num}
-
-	taraStateWithProof, err := r.taraBridge.GetStateWithProof(&opts)
-	r.log.WithField("state", taraStateWithProof).WithField("epoch", epoch).Println("GetStateWithProof")
+func (r *Relayer) BlockByNumber(ctx context.Context, blockNum *big.Int) (*big.Int, error) {
+	block, err := r.taraxaClient.BlockByNumber(ctx, blockNum)
 	if err != nil {
-		r.log.WithError(err).Error("taraBridge.GetStateWithProof")
-		return nil, err
+		return block.Number(), nil
 	}
+	return nil, err
+}
 
-	// TODO: implement some binary search?
-	bigPillarBlocksInterval := big.NewInt(0).SetUint64(uint64(r.taraxaNodeConfig.Hardforks.FicusHf.PillarBlocksInterval))
-	if epoch == nil || epoch.Cmp(taraStateWithProof.State.Epoch) == 0 {
-		return &taraStateWithProof, nil
-	}
+func (r *Relayer) GetStateWithProof(opts *bind.CallOpts) (BridgeBase.SharedStructsStateWithProof, error) {
+	return r.taraBridge.GetStateWithProof(opts)
+}
 
-	if taraStateWithProof.State.Epoch.Cmp(epoch) > 0 {
-		return r.getStateWithProof(epoch, block_num.Sub(block_num, bigPillarBlocksInterval))
-	}
-
-	return r.getStateWithProof(epoch, block_num.Add(block_num, bigPillarBlocksInterval))
+func (r *Relayer) FinalizationInterval() *big.Int {
+	return big.NewInt(0).SetUint64(uint64(r.taraxaNodeConfig.Hardforks.FicusHf.PillarBlocksInterval))
 }
 
 func (r *Relayer) bridgeState() {
@@ -62,7 +50,7 @@ func (r *Relayer) bridgeState() {
 
 	for ; epoch.Cmp(lastFinalizedEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
 		r.log.WithField("epoch", epoch).Info("Applying state")
-		taraStateWithProof, err := r.getStateWithProof(epoch, nil)
+		taraStateWithProof, err := state.GetStateWithProof(r, r.log, epoch, nil)
 		if err != nil {
 			r.log.WithError(err).WithField("epoch", epoch).Fatal("getStateWithProof")
 		}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 	"relayer/bindings/BridgeBase"
+	"relayer/internal/state"
 	"runtime/debug"
 	"strings"
 
@@ -117,37 +118,17 @@ func (r *Relayer) processBridgeRoots() {
 	}
 }
 
-// TODO: move to some common place and reuse in both relayers
-func (r *Relayer) getStateWithProof(epoch *big.Int, block_num *big.Int) (*BridgeBase.SharedStructsStateWithProof, error) {
-	if block_num == nil {
-		block, err := r.beaconLightClient.BlockNumber(nil)
-		if err != nil || block == nil {
-			r.log.WithField("block", block).WithError(err).Fatal("BlockByNumber")
-		}
-		block_num = block
-		r.log.WithField("block", block_num).Info("BlockByNumber")
-	}
-	opts := bind.CallOpts{BlockNumber: block_num}
+func (r *Relayer) BlockByNumber(ctx context.Context, blockNum *big.Int) (*big.Int, error) {
+	return r.beaconLightClient.BlockNumber(nil)
+}
 
-	stateWithProof, err := r.ethBridge.GetStateWithProof(&opts)
-	r.log.WithFields(logrus.Fields{"state": stateWithProof, "epoch": epoch, "opts": opts}).Info("GetStateWithProof")
-	if err != nil {
-		r.log.WithError(err).Error("taraBridge.GetStateWithProof")
-		return nil, err
-	}
+func (r *Relayer) GetStateWithProof(opts *bind.CallOpts) (BridgeBase.SharedStructsStateWithProof, error) {
+	return r.ethBridge.GetStateWithProof(opts)
+}
 
-	// TODO: implement some binary search?
+func (r *Relayer) FinalizationInterval() *big.Int {
 	finalizationInterval, _ := r.ethBridge.FinalizationInterval(nil)
-	if epoch == nil || epoch.Cmp(stateWithProof.State.Epoch) == 0 {
-		return &stateWithProof, nil
-	}
-
-	// no need to go to a newer blocks as we don't have a state root to prove it yet
-	if stateWithProof.State.Epoch.Cmp(epoch) < 0 {
-		return nil, nil
-	}
-
-	return r.getStateWithProof(epoch, block_num.Sub(block_num, finalizationInterval))
+	return finalizationInterval
 }
 
 func (r *Relayer) applyStates() {
@@ -166,7 +147,7 @@ func (r *Relayer) applyStates() {
 	}
 	epoch := big.NewInt(0).Add(lastAppliedEpoch, big.NewInt(1))
 	for ; epoch.Cmp(lastClientEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
-		state, err := r.getStateWithProof(epoch, nil)
+		state, err := state.GetStateWithProof(r, r.log, epoch, nil)
 		if err != nil {
 			r.log.WithError(err).Fatal("Failed to get state with proof")
 		}
