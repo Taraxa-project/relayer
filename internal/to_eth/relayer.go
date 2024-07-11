@@ -9,6 +9,7 @@ import (
 	"relayer/bindings/TaraClient"
 	"relayer/internal/common"
 	"relayer/internal/logging"
+	"relayer/internal/types"
 
 	log "github.com/sirupsen/logrus"
 
@@ -30,7 +31,7 @@ type Config struct {
 // Relayer encapsulates the functionality to relay data from Ethereum to Taraxa
 type Relayer struct {
 	taraxaClient        *TaraxaClientWrapper
-	taraxaNodeConfig    *TaraConfig
+	taraxaNodeConfig    *types.TaraConfig
 	ethClient           *ethclient.Client
 	ethAuth             *bind.TransactOpts
 	ethBridge           *BridgeBase.BridgeBase

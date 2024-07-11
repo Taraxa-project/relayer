@@ -1,20 +1,40 @@
-package to_tara
+package types
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"relayer/bindings/BeaconLightClient"
+	"relayer/bindings/TaraClient"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/herumi/bls-eth-go-binary/bls"
-	log "github.com/sirupsen/logrus"
 )
 
+func (pillarBlockData *PillarBlockData) TransformPillarBlockData() (block TaraClient.PillarBlockWithChanges, signatures []TaraClient.CompactSignature) {
+	block.Block.Period = big.NewInt(int64(pillarBlockData.PillarBlock.PbftPeriod))
+	block.Block.BridgeRoot = pillarBlockData.PillarBlock.BridgeRoot
+	block.Block.StateRoot = pillarBlockData.PillarBlock.StateRoot
+	block.Block.PrevHash = pillarBlockData.PillarBlock.PreviousBlockHash
+	block.Block.Epoch = big.NewInt(int64(pillarBlockData.PillarBlock.Epoch))
+	for _, votesCountChange := range pillarBlockData.PillarBlock.VoteCountsChanges {
+		block.ValidatorChanges = append(block.ValidatorChanges, TaraClient.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
+	}
+
+	for _, signature := range pillarBlockData.Signatures {
+		signatures = append(signatures, TaraClient.CompactSignature{R: signature.R, Vs: signature.Vs})
+	}
+
+	return
+}
+
 // / hexStringToByteArray converts a hexadecimal string to a byte array of the specified length.
-func hexStringToByteArray(hexStr string, expectedLen int) ([]byte, error) {
+func HexStringToByteArray(hexStr string, expectedLen int) ([]byte, error) {
 	cleanHexStr := strings.TrimPrefix(hexStr, "0x")
 	bytes, err := hex.DecodeString(cleanHexStr)
 	if err != nil {
@@ -27,7 +47,7 @@ func hexStringToByteArray(hexStr string, expectedLen int) ([]byte, error) {
 }
 
 // stringToByteArr converts a slice of hexadecimal strings to a slice of [32]byte arrays.
-func stringToByteArr(hexStrings []string) ([][32]byte, error) {
+func StringToByteArr(hexStrings []string) ([][32]byte, error) {
 	byteArr := make([][32]byte, len(hexStrings))
 	for i, hexStr := range hexStrings {
 		cleanHexStr := strings.TrimPrefix(hexStr, "0x")
@@ -44,7 +64,7 @@ func stringToByteArr(hexStrings []string) ([][32]byte, error) {
 }
 
 // convertToBeaconChainLightClientHeader converts a BeaconBlockHeader to a BeaconChainLightClientHeader.
-func convertToBeaconChainLightClientHeader(log *log.Logger, blockHeader BeaconBlockHeader) BeaconLightClient.BeaconChainLightClientHeader {
+func (blockHeader *BeaconBlockHeader) ConvertToBeaconChainLightClientHeader(log *log.Logger) BeaconLightClient.BeaconChainLightClientHeader {
 	beaconBlockHeader := BeaconLightClient.BeaconChainBeaconBlockHeader{
 		Slot:          uint64(blockHeader.Beacon.Slot),
 		ProposerIndex: uint64(blockHeader.Beacon.ProposerIndex),
@@ -120,7 +140,7 @@ func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate altair.SyncAggr
 }
 
 // ConvertToSyncCommittee converts a NextSyncCommittee to BeaconChainSyncCommittee.
-func ConvertToSyncCommittee(log *log.Logger, sc NextSyncCommittee) BeaconLightClient.BeaconChainSyncCommittee {
+func (sc *NextSyncCommittee) ConvertToSyncCommittee(log *log.Logger) BeaconLightClient.BeaconChainSyncCommittee {
 	var pubkeys [512][]byte
 
 	for i, pubkey := range sc.Pubkeys {

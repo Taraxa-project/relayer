@@ -2,10 +2,10 @@ package to_eth
 
 import (
 	"context"
-	"math/big"
 	"time"
 
 	"relayer/bindings/TaraClient"
+	"relayer/internal/types"
 
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
@@ -13,23 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
-
-func transformPillarBlockData(pillarBlockData *PillarBlockData) (block TaraClient.PillarBlockWithChanges, signatures []TaraClient.CompactSignature) {
-	block.Block.Period = big.NewInt(int64(pillarBlockData.PillarBlock.PbftPeriod))
-	block.Block.BridgeRoot = pillarBlockData.PillarBlock.BridgeRoot
-	block.Block.StateRoot = pillarBlockData.PillarBlock.StateRoot
-	block.Block.PrevHash = pillarBlockData.PillarBlock.PreviousBlockHash
-	block.Block.Epoch = big.NewInt(int64(pillarBlockData.PillarBlock.Epoch))
-	for _, votesCountChange := range pillarBlockData.PillarBlock.VoteCountsChanges {
-		block.ValidatorChanges = append(block.ValidatorChanges, TaraClient.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
-	}
-
-	for _, signature := range pillarBlockData.Signatures {
-		signatures = append(signatures, TaraClient.CompactSignature{R: signature.R, Vs: signature.Vs})
-	}
-
-	return
-}
 
 func (r *Relayer) processPillarBlocks() {
 	pillarBlocksInterval := uint64(r.taraxaNodeConfig.Hardforks.FicusHf.PillarBlocksInterval)
@@ -70,7 +53,7 @@ func (r *Relayer) processPillarBlocks() {
 			r.log.WithError(err).Error("GetPillarBlockData")
 		} else {
 			// TODO: might be empty because nodes don't have it ????
-			block, signatures := transformPillarBlockData(tmpPillarBlockData)
+			block, signatures := tmpPillarBlockData.TransformPillarBlockData()
 
 			if pendingBridgeRoot != block.Block.BridgeRoot {
 				pendingBridgeRoot = block.Block.BridgeRoot
@@ -121,7 +104,7 @@ func (r *Relayer) processPillarBlocks() {
 
 func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
 	// Listen to new pillar block data
-	newPillarBlockData := make(chan *PillarBlockData)
+	newPillarBlockData := make(chan *types.PillarBlockData)
 	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", "includeSignatures")
 	if err != nil {
 		r.log.WithError(err).Fatal("Failed to subscribe to new pillar block data")
