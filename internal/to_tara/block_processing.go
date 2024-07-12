@@ -8,6 +8,7 @@ import (
 
 	"relayer/bindings/BeaconLightClient"
 	"relayer/internal/common"
+	"relayer/internal/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/herumi/bls-eth-go-binary/bls"
@@ -37,11 +38,11 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	// Fetch data from a Beacon Node API (you need to implement this based on your data source)
 	// This is a placeholder for the actual implementation
 	return &BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
-		AttestedHeader:         convertToBeaconChainLightClientHeader(r.log, finalityUpdate.Data.AttestedHeader),
-		SignatureSyncCommittee: ConvertToSyncCommittee(r.log, syncUpdate.Data.NextSyncCommittee),
-		FinalizedHeader:        convertToBeaconChainLightClientHeader(r.log, finalityUpdate.Data.FinalizedHeader),
+		AttestedHeader:         finalityUpdate.Data.AttestedHeader.ConvertToBeaconChainLightClientHeader(r.log),
+		SignatureSyncCommittee: syncUpdate.Data.NextSyncCommittee.ConvertToSyncCommittee(r.log),
+		FinalizedHeader:        finalityUpdate.Data.FinalizedHeader.ConvertToBeaconChainLightClientHeader(r.log),
 		FinalityBranch:         finalityUpdate.Data.FinalityBranch,
-		SyncAggregate:          ConvertSyncAggregateToBeaconLightClientUpdate(finalityUpdate.Data.SyncAggregate),
+		SyncAggregate:          types.ConvertSyncAggregateToBeaconLightClientUpdate(finalityUpdate.Data.SyncAggregate),
 		ForkVersion:            forkVersion,
 		SignatureSlot:          finalityUpdate.Data.SignatureSlot,
 	}, nil
@@ -103,7 +104,7 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 			return
 		}
 
-		finalityBranch, err := stringToByteArr(syncUpdate.Data.FinalityBranch)
+		finalityBranch, err := types.StringToByteArr(syncUpdate.Data.FinalityBranch)
 		if err != nil {
 			r.log.WithError(err).Error("Failed to convert fork version to bytes")
 			return
@@ -117,11 +118,11 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 
 		// Fetch beacon block data for the given slot
 		updateData := BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
-			AttestedHeader:         convertToBeaconChainLightClientHeader(r.log, syncUpdate.Data.AttestedHeader),
-			SignatureSyncCommittee: ConvertToSyncCommittee(r.log, oldsyncUpdate.Data.NextSyncCommittee),
-			FinalizedHeader:        convertToBeaconChainLightClientHeader(r.log, syncUpdate.Data.FinalizedHeader),
+			AttestedHeader:         syncUpdate.Data.AttestedHeader.ConvertToBeaconChainLightClientHeader(r.log),
+			SignatureSyncCommittee: oldsyncUpdate.Data.NextSyncCommittee.ConvertToSyncCommittee(r.log),
+			FinalizedHeader:        syncUpdate.Data.FinalizedHeader.ConvertToBeaconChainLightClientHeader(r.log),
 			FinalityBranch:         finalityBranch,
-			SyncAggregate:          ConvertSyncAggregateToBeaconLightClientUpdate(syncUpdate.Data.SyncAggregate),
+			SyncAggregate:          types.ConvertSyncAggregateToBeaconLightClientUpdate(syncUpdate.Data.SyncAggregate),
 			ForkVersion:            forkVersion,
 			SignatureSlot:          signatureSlot,
 		}
@@ -129,8 +130,8 @@ func (r *Relayer) updateSyncCommittee(period int64) {
 		// print(updateData)
 
 		syncCommitteeData := BeaconLightClient.BeaconLightClientUpdateSyncCommitteePeriodUpdate{
-			NextSyncCommittee:       ConvertToSyncCommittee(r.log, syncUpdate.Data.NextSyncCommittee),
-			NextSyncCommitteeBranch: ConvertNextSyncCommitteeBranch(r.log, syncUpdate.Data.NextSyncCommitteeBranch),
+			NextSyncCommittee:       syncUpdate.Data.NextSyncCommittee.ConvertToSyncCommittee(r.log),
+			NextSyncCommitteeBranch: types.ConvertNextSyncCommitteeBranch(r.log, syncUpdate.Data.NextSyncCommitteeBranch),
 		}
 
 		tx, err := r.beaconLightClient.ImportNextSyncCommittee(r.taraAuth, updateData, syncCommitteeData)

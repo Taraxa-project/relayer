@@ -5,18 +5,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"relayer/internal/types"
 )
 
 func (r *Relayer) GetForkVersion(state string) ([4]byte, error) {
 	url := fmt.Sprintf("%s/eth/v1/beacon/states/%s/fork", r.beaconNodeEndpoint, state)
-	var forkVersion *ForkVersion
-	forkVersion, err := FetchAndParseData[ForkVersion](url)
+	var forkVersion *types.ForkVersion
+	forkVersion, err := FetchAndParseData[types.ForkVersion](url)
 	if err != nil {
 		r.log.Fatalf("Error fetching and parsing fork version: %v", err)
 	}
 
 	var forkVersionBytes [4]byte
-	forkBytes, err := hexStringToByteArray(forkVersion.Data.CurrentVersion, len(forkVersionBytes))
+	forkBytes, err := types.HexStringToByteArray(forkVersion.Data.CurrentVersion, len(forkVersionBytes))
 	if err != nil {
 		panic(err)
 	}
@@ -25,10 +27,10 @@ func (r *Relayer) GetForkVersion(state string) ([4]byte, error) {
 	return forkVersionBytes, nil
 }
 
-func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, error) {
+func (r *Relayer) GetLightClientFinalityUpdate() (*types.LightClientFinalityUpdate, error) {
 	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/finality_update", r.beaconNodeEndpoint)
-	var finalityUpdate *LightClientFinalityUpdate
-	finalityUpdate, err := FetchAndParseData[LightClientFinalityUpdate](url)
+	var finalityUpdate *types.LightClientFinalityUpdate
+	finalityUpdate, err := FetchAndParseData[types.LightClientFinalityUpdate](url)
 	if err != nil {
 		r.log.Fatalf("Error fetching and parsing finality header: %v", err)
 	}
@@ -36,10 +38,10 @@ func (r *Relayer) GetLightClientFinalityUpdate() (*LightClientFinalityUpdate, er
 	return finalityUpdate, nil
 }
 
-func (r *Relayer) GetSyncCommitteeUpdate(startPeriod, count int64) (*SyncCommitteeUpdate, error) {
+func (r *Relayer) GetSyncCommitteeUpdate(startPeriod, count int64) (*types.SyncCommitteeUpdate, error) {
 	url := fmt.Sprintf("%s/eth/v1/beacon/light_client/updates?start_period=%d&count=%d", r.beaconNodeEndpoint, startPeriod, count)
-	var syncUpdates *[]SyncCommitteeUpdate
-	syncUpdates, err := FetchAndParseData[[]SyncCommitteeUpdate](url)
+	var syncUpdates *[]types.SyncCommitteeUpdate
+	syncUpdates, err := FetchAndParseData[[]types.SyncCommitteeUpdate](url)
 	if err != nil {
 		r.log.Fatalf("Error fetching and parsing sync committee updates: %v", err)
 	}

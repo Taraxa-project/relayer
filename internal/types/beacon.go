@@ -1,4 +1,4 @@
-package to_tara
+package types
 
 import (
 	"encoding/hex"
@@ -97,7 +97,7 @@ func (d *Data) UnmarshalJSON(data []byte) error {
 	}
 
 	// Decode FinalityBranch
-	d.FinalityBranch, err = stringToByteArr(raw.FinalityBranch)
+	d.FinalityBranch, err = StringToByteArr(raw.FinalityBranch)
 	if err != nil {
 		return fmt.Errorf("decoding FinalityBranch: %v", err)
 	}
@@ -159,5 +159,3 @@ func (b *BeaconBlockHeader) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
-
-

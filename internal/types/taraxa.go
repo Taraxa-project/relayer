@@ -1,4 +1,4 @@
-package to_eth
+package types
 
 import (
 	"github.com/ethereum/go-ethereum/common"
