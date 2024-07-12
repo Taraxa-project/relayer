@@ -25,7 +25,7 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	if err != nil {
 		return nil, err
 	}
-	syncUpdate, err := r.GetSyncCommitteeUpdate(common.GetPeriodFromEpoch(epoch)-1, 1)
+	syncCommitte, err := r.getSyncCommittee(common.GetPeriodFromEpoch(epoch) - 1)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +39,30 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	// This is a placeholder for the actual implementation
 	return &BeaconLightClient.BeaconLightClientUpdateFinalizedHeaderUpdate{
 		AttestedHeader:         finalityUpdate.Data.AttestedHeader.ConvertToBeaconChainLightClientHeader(r.log),
-		SignatureSyncCommittee: syncUpdate.Data.NextSyncCommittee.ConvertToSyncCommittee(r.log),
+		SignatureSyncCommittee: *syncCommitte,
 		FinalizedHeader:        finalityUpdate.Data.FinalizedHeader.ConvertToBeaconChainLightClientHeader(r.log),
 		FinalityBranch:         finalityUpdate.Data.FinalityBranch,
 		SyncAggregate:          types.ConvertSyncAggregateToBeaconLightClientUpdate(finalityUpdate.Data.SyncAggregate),
 		ForkVersion:            forkVersion,
 		SignatureSlot:          finalityUpdate.Data.SignatureSlot,
 	}, nil
+}
+
+func (r *Relayer) getSyncCommittee(period int64) (*BeaconLightClient.BeaconChainSyncCommittee, error) {
+	if r.currentCommittee != nil && r.currentCommitteePeriod == period {
+		return r.currentCommittee, nil
+	}
+
+	syncCommitte, err := r.GetSyncCommitteeUpdate(period, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	tmpSyncCommitte := syncCommitte.Data.NextSyncCommittee.ConvertToSyncCommittee(r.log)
+	r.currentCommittee = &tmpSyncCommitte
+	r.currentCommitteePeriod = period
+
+	return r.currentCommittee, nil
 }
 
 func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, error) {
