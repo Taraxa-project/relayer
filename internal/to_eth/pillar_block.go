@@ -98,7 +98,7 @@ func (r *Relayer) processPillarBlocks() {
 		r.processPillarBlocks()
 	}
 
-	r.log.Info("All pillar blocks processed, syncing bridge state")
+	r.log.Debug("All pillar blocks processed, syncing bridge state")
 	r.bridgeState()
 }
 

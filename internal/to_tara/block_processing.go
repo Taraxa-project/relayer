@@ -84,7 +84,7 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, 
 
 func (r *Relayer) updateSyncCommittee(period int64) {
 	go func() {
-		r.log.WithField("period", period+1).Info("Updating next sync committee")
+		r.log.WithField("period", period+1).Debug("Updating next sync committee")
 
 		syncUpdate, err := r.GetSyncCommitteeUpdate(period, 1)
 		if err != nil {

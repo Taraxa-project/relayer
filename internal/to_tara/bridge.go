@@ -27,7 +27,7 @@ func (r *Relayer) finalize() {
 		r.log.WithField("trx", trx).WithError(err).Debug("Failed to call finalize")
 		return
 	}
-	r.log.WithField("hash", trx.Hash()).Info("FinalizeEpoch trx sent")
+	r.log.WithField("hash", trx.Hash()).Debug("FinalizeEpoch trx sent")
 
 	receipt, err := bind.WaitMined(context.Background(), r.ethClient, trx)
 	if err != nil {
@@ -48,7 +48,7 @@ func (r *Relayer) getDecodedProofs(epoch, block *big.Int) (accountProof [][]byte
 	}
 	strKey := "0x" + hex.EncodeToString(key[:])
 
-	r.log.WithFields(logrus.Fields{"epoch": epoch, "block": block}).Info("Getting proof")
+	r.log.WithFields(logrus.Fields{"epoch": epoch, "block": block}).Debug("Getting proof")
 
 	client := gethclient.New(r.ethClient.Client())
 
@@ -56,7 +56,7 @@ func (r *Relayer) getDecodedProofs(epoch, block *big.Int) (accountProof [][]byte
 	if err != nil {
 		r.log.WithError(err).Fatal("Failed to get proof")
 	}
-	r.log.WithField("root", root).Info("Got proof")
+	r.log.WithField("root", root).Debug("Got proof")
 	if len(root.StorageProof) != 1 {
 		r.log.WithField("len", len(root.StorageProof)).Fatal("Invalid storage proof length")
 	}
@@ -87,7 +87,7 @@ func (r *Relayer) processBridgeRoots() {
 		r.log.WithError(err).Fatal("Failed to get finalized epoch")
 	}
 	if lastClientEpoch.Cmp(ethFinalizedEpoch) == 0 {
-		r.log.WithFields(logrus.Fields{"lastClientEpoch": lastClientEpoch, "ethFinalizedEpoch": ethFinalizedEpoch}).Info("No new bridge roots to process")
+		r.log.WithFields(logrus.Fields{"lastClientEpoch": lastClientEpoch, "ethFinalizedEpoch": ethFinalizedEpoch}).Debug("No new bridge roots to process")
 		return
 	}
 	finalizedBlock, err := r.beaconLightClient.BlockNumber(nil)
@@ -142,7 +142,7 @@ func (r *Relayer) applyStates() {
 	}
 
 	if lastAppliedEpoch.Cmp(lastClientEpoch) == 0 {
-		r.log.WithFields(logrus.Fields{"lastAppliedEpoch": lastAppliedEpoch, "lastClientEpoch": lastClientEpoch}).Info("No new states to process")
+		r.log.WithFields(logrus.Fields{"lastAppliedEpoch": lastAppliedEpoch, "lastClientEpoch": lastClientEpoch}).Debug("No new states to process")
 		return
 	}
 	epoch := big.NewInt(0).Add(lastAppliedEpoch, big.NewInt(1))

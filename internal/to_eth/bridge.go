@@ -37,7 +37,7 @@ func (r *Relayer) bridgeState() {
 		r.log.WithError(err).Fatal("lastAppliedEpoch")
 	}
 	if lastFinalizedEpoch.Cmp(r.latestAppliedEpoch) == 0 {
-		r.log.WithFields(log.Fields{"lastFinalizedEpoch": lastFinalizedEpoch, "latestAppliedEpoch": r.latestAppliedEpoch}).Info("No new state to pass")
+		r.log.WithFields(log.Fields{"lastFinalizedEpoch": lastFinalizedEpoch, "latestAppliedEpoch": r.latestAppliedEpoch}).Debug("No new state to pass")
 		return
 	}
 	if r.latestAppliedEpoch.Cmp(r.latestClientEpoch) == 0 {
@@ -58,7 +58,7 @@ func (r *Relayer) bridgeState() {
 		if err != nil {
 			r.log.WithError(err).Fatal("ApplyState")
 		}
-		r.log.WithFields(log.Fields{"tx_hash": applyStateTx.Hash()}).Info("Apply state tx sent to eth bridge contract")
+		r.log.WithFields(log.Fields{"hash": applyStateTx.Hash()}).Debug("Apply state tx sent to eth bridge contract")
 
 		r.log.WithField("hash", applyStateTx.Hash()).Debug("Waiting for apply state tx to be mined")
 		applyStateTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, applyStateTx)

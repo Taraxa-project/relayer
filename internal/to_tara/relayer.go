@@ -123,15 +123,15 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
-			r.log.WithField("epoch", epoch).Info("Processing new block for epoch")
+			r.log.WithField("epoch", epoch).Debug("Processing new block for epoch")
 			if r.currentSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
 			if finalizedBlockNumber != 0 {
-				r.log.WithFields(log.Fields{"epoch": epoch, "block": finalizedBlockNumber}).Println("Updating Beacon Light Client")
+				r.log.WithFields(log.Fields{"epoch": epoch, "block": finalizedBlockNumber}).Debug("Updating Beacon Light Client")
 				_, err := r.updateLightClient(epoch, finalizedBlockNumber)
 				if err != nil {
-					r.log.WithError(err).Error("Did not to update light client")
+					r.log.WithError(err).Info("Did not to update light client")
 				} else {
 					r.processBridgeRoots()
 					r.applyStates()
