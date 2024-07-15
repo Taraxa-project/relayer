@@ -5,7 +5,7 @@ go 1.21.6
 toolchain go1.21.10
 
 require (
-	github.com/attestantio/go-eth2-client v0.21.6
+	github.com/attestantio/go-eth2-client v0.21.7
 	github.com/ethereum/go-ethereum v1.14.5
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.3
