@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"math/rand"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -13,6 +15,8 @@ import (
 
 const SLOTS_PER_EPOCH = 32
 const EPOCHS_PER_SYNC_COMMITTEE_PERIOD = 256
+
+var localRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // GetSlotFromEpoch calculates the first slot number of a given epoch.
 func GetSlotFromEpoch(epoch int64) int64 {
@@ -47,6 +51,12 @@ func ConnectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*et
 	}
 
 	return client, auth, nil
+}
+
+func RandomSleep() {
+	sleepDuration := localRand.Intn(30) + 1
+	sleepTime := time.Duration(sleepDuration) * time.Second
+	time.Sleep(sleepTime)
 }
 
 type Clients struct {

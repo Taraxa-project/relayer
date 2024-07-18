@@ -126,6 +126,8 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
+			// Random sleep to avoid spamming the network
+			common.RandomSleep()
 			r.log.WithField("epoch", epoch).Debug("Processing new block for epoch")
 			if r.currentContractSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))

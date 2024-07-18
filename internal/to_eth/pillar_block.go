@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"relayer/bindings/TaraClient"
+	"relayer/internal/common"
 	"relayer/internal/types"
 
 	"github.com/sirupsen/logrus"
@@ -115,6 +116,8 @@ func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
 		case err := <-sub.Err():
 			r.log.WithError(err).Fatal("Subscription error")
 		case <-newPillarBlockData:
+			// Random sleep to avoid spamming the network
+			common.RandomSleep()
 			r.processPillarBlocks()
 		}
 	}
