@@ -118,7 +118,7 @@ func (r *Relayer) processBridgeRoots() {
 	}
 }
 
-func (r *Relayer) BlockByNumber(ctx context.Context, blockNum *big.Int) (*big.Int, error) {
+func (r *Relayer) LatestBlockNumber() (*big.Int, error) {
 	return r.beaconLightClient.BlockNumber(nil)
 }
 

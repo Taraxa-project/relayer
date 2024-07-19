@@ -11,9 +11,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (r *Relayer) BlockByNumber(ctx context.Context, blockNum *big.Int) (*big.Int, error) {
-	block, err := r.taraxaClient.BlockByNumber(ctx, blockNum)
-	if err != nil {
+func (r *Relayer) LatestBlockNumber() (*big.Int, error) {
+	block, err := r.taraxaClient.BlockByNumber(context.Background(), nil)
+	if err == nil {
 		return block.Number(), nil
 	}
 	return nil, err
