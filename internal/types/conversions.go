@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"relayer/bindings/BeaconLightClient"
 	"relayer/bindings/TaraClient"
+	"sort"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -25,6 +26,11 @@ func (pillarBlockData *PillarBlockData) TransformPillarBlockData() (block TaraCl
 	for _, votesCountChange := range pillarBlockData.PillarBlock.VoteCountsChanges {
 		block.ValidatorChanges = append(block.ValidatorChanges, TaraClient.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
 	}
+
+	// sort signatures by R value in descending order
+	sort.Slice(pillarBlockData.Signatures, func(i, j int) bool {
+		return pillarBlockData.Signatures[i].R.Cmp(pillarBlockData.Signatures[j].R) > 0
+	})
 
 	for _, signature := range pillarBlockData.Signatures {
 		signatures = append(signatures, TaraClient.CompactSignature{R: signature.R, Vs: signature.Vs})

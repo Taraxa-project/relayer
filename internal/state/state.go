@@ -1,8 +1,6 @@
 package state
 
 import (
-	"context"
-
 	"math/big"
 	"relayer/bindings/BridgeBase"
 
@@ -13,7 +11,7 @@ import (
 
 // BlockchainClient defines the interface for blockchain operations required by getStateWithProof.
 type BlockchainClient interface {
-	BlockByNumber(ctx context.Context, blockNum *big.Int) (*big.Int, error)                // Returns the block number
+	LatestBlockNumber() (*big.Int, error)                                                  // Returns the block number
 	GetStateWithProof(opts *bind.CallOpts) (BridgeBase.SharedStructsStateWithProof, error) // Gets the state with proof
 	FinalizationInterval() *big.Int                                                        // Gets the finalization interval
 }
@@ -21,7 +19,7 @@ type BlockchainClient interface {
 // getStateWithProof fetches the state with proof for a given epoch and block number using the provided client.
 func GetStateWithProof(client BlockchainClient, logger *log.Logger, epoch *big.Int, block_num *big.Int) (*BridgeBase.SharedStructsStateWithProof, error) {
 	if block_num == nil {
-		block, err := client.BlockByNumber(context.Background(), nil)
+		block, err := client.LatestBlockNumber()
 		if err != nil || block == nil {
 			logger.WithField("block", block).WithError(err).Fatal("BlockByNumber")
 			return nil, err
