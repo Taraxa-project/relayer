@@ -20,6 +20,13 @@ app:
   taraClientOnEthAddress: ""
   ethBridgeAddress: ""
 
+persistence:
+  enabled: false
+  accessMode: ReadWriteOnce
+  size: 30Gi
+  storageClass: fast
+  annotations: {}
+
 secrets:
   enabled: true
   privateKey: ""
