@@ -8,8 +8,8 @@ github.com/Taraxa-project/go-ethereum v0.0.0-20240626152346-706ab9763913 h1:72Hd
 github.com/Taraxa-project/go-ethereum v0.0.0-20240626152346-706ab9763913/go.mod h1:hglUZo/5pVIYXNyYjWzsAUDpT/zI+WbWo/Nih7ot+G0=
 github.com/VictoriaMetrics/fastcache v1.12.2 h1:N0y9ASrJ0F6h0QaC3o6uJb3NIZ9VKLjCM7NQbSmF7WI=
 github.com/VictoriaMetrics/fastcache v1.12.2/go.mod h1:AmC+Nzz1+3G2eCPapF6UcsnkThDcMsQicp4xDukwJYI=
-github.com/attestantio/go-eth2-client v0.21.6 h1:eLhQ/OFHPhWrT7LYERL1Z6EPOoec6fJeDHsjjn73KBg=
-github.com/attestantio/go-eth2-client v0.21.6/go.mod h1:d7ZPNrMX8jLfIgML5u7QZxFo2AukLM+5m08iMaLdqb8=
+github.com/attestantio/go-eth2-client v0.21.7 h1:tdTJWiOJUCDmYSDt5C8D8+N5Hxfos0yLp+iVT7tKWMk=
+github.com/attestantio/go-eth2-client v0.21.7/go.mod h1:d7ZPNrMX8jLfIgML5u7QZxFo2AukLM+5m08iMaLdqb8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bits-and-blooms/bitset v1.10.0 h1:ePXTeiPEazB5+opbv5fr8umg2R/1NlzgDsyepwsSr88=
