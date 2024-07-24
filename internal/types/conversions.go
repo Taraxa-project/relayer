@@ -193,3 +193,21 @@ func ConvertNextSyncCommitteeBranch(log *log.Logger, input []string) [][32]byte 
 
 	return result
 }
+
+func (cs *CompactSignature) ToCanonical() []byte {
+	rInt := new(big.Int).SetBytes(cs.R[:])
+
+	// Mask to obtain the lowest 255 bits for s
+	sMask := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 255), big.NewInt(1))
+	s := new(big.Int).And(cs.Vs.Big(), sMask)
+
+	// Shift right to obtain yParity (the 256th bit)
+	yParity := new(big.Int).Rsh(cs.Vs.Big(), 255).Bytes()
+
+	if len(yParity) == 0 {
+		yParity = []byte{0}
+	}
+
+	yParity[0] += 27
+	return append(rInt.Bytes(), append(s.Bytes(), yParity[0])...)
+}

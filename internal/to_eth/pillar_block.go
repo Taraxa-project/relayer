@@ -43,7 +43,10 @@ func (r *Relayer) processPillarBlocks() {
 	pendingEpoch := r.latestClientEpoch
 	period := latestFinalizedPillarBlockPeriod + pillarBlocksInterval
 	for ; period <= expectedLatestPillarBlockPeriod; period += pillarBlocksInterval {
+
 		tmpPillarBlockData, err := r.taraxaClient.GetPillarBlockData(period)
+		r.StakeState.UpdateState(&tmpPillarBlockData.PillarBlock)
+
 		r.log.WithFields(log.Fields{"block": tmpPillarBlockData, "period": period}).Debug("GetPillarBlockData")
 		if err == ethereum.NotFound {
 			r.log.WithField("period", period).Debug("Pillar block not found, probably not finalized yet")
@@ -53,6 +56,11 @@ func (r *Relayer) processPillarBlocks() {
 			r.log.WithError(err).Error("GetPillarBlockData")
 		} else {
 			// TODO: might be empty because nodes don't have it ????
+			reducetSignatures, err := r.StakeState.ReduceSignatures(tmpPillarBlockData)
+			if err == nil {
+				tmpPillarBlockData.Signatures = reducetSignatures
+			}
+
 			block, signatures := tmpPillarBlockData.TransformPillarBlockData()
 
 			if pendingBridgeRoot != block.Block.BridgeRoot {
