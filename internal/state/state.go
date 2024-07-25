@@ -54,15 +54,16 @@ func (s *State) ReduceSignatures(block *types.PillarBlockData) ([]types.CompactS
 
 		addr := common.BytesToAddress(common.BytesToHash(pubKey[1:]).Bytes()[12:])
 		accounts = append(accounts, AccountWithSignature{Address: &addr, Signature: &signature})
-	}
-
-	for _, acc := range accounts {
-		totalStake += s.stakes[*acc.Address]
+		totalStake += s.stakes[addr]
 	}
 
 	threshold := s.totalStake/2 + 1
 
-	if totalStake <= threshold {
+	if totalStake < threshold {
+		panic("Not enough stake to reduce signatures")
+	}
+
+	if totalStake == threshold {
 		return block.Signatures, nil
 	}
 
