@@ -56,9 +56,9 @@ func (r *Relayer) processPillarBlocks() {
 			r.log.WithError(err).Error("GetPillarBlockData")
 		} else {
 			// TODO: might be empty because nodes don't have it ????
-			reducetSignatures, err := r.StakeState.ReduceSignatures(tmpPillarBlockData)
+			reducedSignatures, err := r.StakeState.ReduceSignatures(tmpPillarBlockData)
 			if err == nil {
-				tmpPillarBlockData.Signatures = reducetSignatures
+				tmpPillarBlockData.Signatures = reducedSignatures
 			}
 
 			block, signatures := tmpPillarBlockData.TransformPillarBlockData()

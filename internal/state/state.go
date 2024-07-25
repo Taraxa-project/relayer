@@ -10,7 +10,7 @@ import (
 
 type State struct {
 	stakes      map[common.Address]int32
-	latestEpoch uint64
+	latestPbftBlock uint64
 	totalStake  int32
 	stakeGetter func(common.Address) int32
 }
@@ -23,10 +23,10 @@ func NewState(getter func(common.Address) int32) *State {
 }
 
 func (s *State) UpdateState(block *types.PillarBlock) {
-	if s.latestEpoch > uint64(block.Epoch) {
+	if s.latestPbftBlock > uint64(block.PbftPeriod) {
 		return
 	}
-	s.latestEpoch = uint64(block.Epoch)
+	s.latestPbftBlock = uint64(block.PbftPeriod)
 	for _, change := range block.VoteCountsChanges {
 		if _, ok := s.stakes[change.Address]; !ok {
 			stake := s.stakeGetter(change.Address)
@@ -60,7 +60,7 @@ func (s *State) ReduceSignatures(block *types.PillarBlockData) ([]types.CompactS
 		totalStake += s.stakes[*acc.Address]
 	}
 
-	threshold := s.totalStake*2/3 + 1
+	threshold := s.totalStake/2 + 1
 
 	if totalStake <= threshold {
 		return block.Signatures, nil
