@@ -1,7 +1,9 @@
 package state
 
 import (
+	relayer_common "relayer/internal/common"
 	"relayer/internal/types"
+
 	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -9,10 +11,10 @@ import (
 )
 
 type State struct {
-	stakes      map[common.Address]int32
+	stakes          map[common.Address]int32
 	latestPbftBlock uint64
-	totalStake  int32
-	stakeGetter func(common.Address) int32
+	totalStake      int32
+	stakeGetter     func(common.Address) int32
 }
 
 func NewState(getter func(common.Address) int32) *State {
@@ -51,8 +53,7 @@ func (s *State) ReduceSignatures(block *types.PillarBlockData) ([]types.CompactS
 		if err != nil {
 			return nil, err
 		}
-
-		addr := common.BytesToAddress(common.BytesToHash(pubKey[1:]).Bytes()[12:])
+		addr := relayer_common.PubkeyToAddress(pubKey)
 		accounts = append(accounts, AccountWithSignature{Address: &addr, Signature: &signature})
 		totalStake += s.stakes[addr]
 	}

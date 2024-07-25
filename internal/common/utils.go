@@ -8,6 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -25,6 +27,10 @@ func GetPeriodFromSlot(slot int64) int64 {
 
 func GetPeriodFromEpoch(epoch int64) int64 {
 	return epoch / EPOCHS_PER_SYNC_COMMITTEE_PERIOD
+}
+
+func PubkeyToAddress(pubBytes []byte) common.Address {
+	return common.BytesToAddress(crypto.Keccak256(pubBytes[1:])[12:])
 }
 
 func ConnectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*ethclient.Client, *bind.TransactOpts, error) {
