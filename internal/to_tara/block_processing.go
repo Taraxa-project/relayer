@@ -70,7 +70,7 @@ func (r *Relayer) updateLightClient(epoch int64, blockNumber uint64) (*big.Int, 
 
 	// Fetch beacon block data for the given slot
 	updateData, err := r.GetBeaconBlockData(epoch)
-	if blockNumber > updateData.FinalizedHeader.Execution.BlockNumber {
+	if blockNumber > updateData.AttestedHeader.Execution.BlockNumber {
 		return nil, fmt.Errorf("block number %d is greater than the block number in the finalized header %d", blockNumber, updateData.FinalizedHeader.Execution.BlockNumber)
 	}
 	// print(*updateData)
