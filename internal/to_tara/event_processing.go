@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"relayer/internal/common"
 	"strconv"
 	"strings"
 )
@@ -15,7 +16,7 @@ func (r *Relayer) startEventProcessing(ctx context.Context) {
 	client := &http.Client{}
 
 	// Construct the request to the Ethereum 2.0 node's event stream
-	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/eth/v1/events?topics=finalized_checkpoint", r.beaconNodeEndpoint), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/eth/v1/events?topics=head", r.beaconNodeEndpoint), nil)
 	if err != nil {
 		r.log.Fatalf("Failed to create request: %v", err)
 	}
@@ -51,20 +52,27 @@ func (r *Relayer) processSSEStream(stream io.ReadCloser) {
 				continue
 			}
 
-			switch epoch := subscriptionData["epoch"].(type) {
-			case float64:
-				// JSON numbers are decoded into float64 by default
-				r.onFinalizedEpoch <- int64(epoch)
-			case int:
-				// Handle int if by any chance it's parsed as such
-				r.onFinalizedEpoch <- int64(epoch)
-			case string:
-				// If "epoch" is provided as a string, parse it to an integer
-				if epochVal, err := strconv.ParseUint(epoch, 10, 64); err == nil {
-					r.onFinalizedEpoch <- int64(epochVal)
-					r.log.WithField("epoch", epochVal).Debug("Epoch value")
-				} else {
-					r.log.WithError(err).Error("Error converting epoch from string to uint64")
+			switch epoch_transition := subscriptionData["epoch_transition"].(type) {
+			case bool:
+				if epoch_transition {
+					switch slot := subscriptionData["slot"].(type) {
+					case float64:
+						// JSON numbers are decoded into float64 by default
+						r.onFinalizedEpoch <- common.GetEpochFromSlot(int64(slot))
+					case int:
+						// Handle int if by any chance it's parsed as such
+						r.onFinalizedEpoch <- common.GetEpochFromSlot(int64(slot))
+					case string:
+						// If "epoch" is provided as a string, parse it to an integer
+						if slotVal, err := strconv.ParseUint(slot, 10, 64); err == nil {
+							r.onFinalizedEpoch <- common.GetEpochFromSlot(int64(slotVal))
+							r.log.WithField("slot", slotVal).Debug("Slot value")
+						} else {
+							r.log.WithError(err).Error("Error converting epoch from string to uint64")
+						}
+					default:
+						r.log.WithField("data", subscriptionData).Warn("Epoch value is of an unrecognized type")
+					}
 				}
 			default:
 				r.log.WithField("data", subscriptionData).Warn("Epoch value is of an unrecognized type")

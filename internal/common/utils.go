@@ -27,6 +27,10 @@ func GetPeriodFromEpoch(epoch int64) int64 {
 	return epoch / EPOCHS_PER_SYNC_COMMITTEE_PERIOD
 }
 
+func GetEpochFromSlot(slot int64) int64 {
+	return slot / SLOTS_PER_EPOCH
+}
+
 func ConnectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*ethclient.Client, *bind.TransactOpts, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
