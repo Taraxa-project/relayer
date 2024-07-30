@@ -73,7 +73,11 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}
 
-	state := state.NewState(func(a eth_common.Address) int32 {
+	totalWeight, err := taraClientOnEth.TotalWeight(nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get total stake: %v", err)
+	}
+	state := state.NewState(int32(totalWeight.Int64()), func(a eth_common.Address) int32 {
 		votes, err := taraClientOnEth.ValidatorVoteCounts(nil, a)
 		if err != nil {
 			return 0

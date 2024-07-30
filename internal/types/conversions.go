@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"relayer/bindings/BeaconLightClient"
 	"relayer/bindings/TaraClient"
-	"sort"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -17,7 +16,7 @@ import (
 	"github.com/herumi/bls-eth-go-binary/bls"
 )
 
-func (pillarBlockData *PillarBlockData) TransformPillarBlockData() (block TaraClient.PillarBlockWithChanges, signatures []TaraClient.CompactSignature) {
+func (pillarBlockData *PillarBlockData) TransformPillarBlockData() (block TaraClient.PillarBlockWithChanges) {
 	block.Block.Period = big.NewInt(int64(pillarBlockData.PillarBlock.PbftPeriod))
 	block.Block.BridgeRoot = pillarBlockData.PillarBlock.BridgeRoot
 	block.Block.StateRoot = pillarBlockData.PillarBlock.StateRoot
@@ -25,15 +24,6 @@ func (pillarBlockData *PillarBlockData) TransformPillarBlockData() (block TaraCl
 	block.Block.Epoch = big.NewInt(int64(pillarBlockData.PillarBlock.Epoch))
 	for _, votesCountChange := range pillarBlockData.PillarBlock.VoteCountsChanges {
 		block.ValidatorChanges = append(block.ValidatorChanges, TaraClient.PillarBlockVoteCountChange{Validator: votesCountChange.Address, Change: votesCountChange.Value})
-	}
-
-	// sort signatures by R value in descending order
-	sort.Slice(pillarBlockData.Signatures, func(i, j int) bool {
-		return pillarBlockData.Signatures[i].R.Cmp(pillarBlockData.Signatures[j].R) > 0
-	})
-
-	for _, signature := range pillarBlockData.Signatures {
-		signatures = append(signatures, TaraClient.CompactSignature{R: signature.R, Vs: signature.Vs})
 	}
 
 	return
@@ -195,19 +185,21 @@ func ConvertNextSyncCommitteeBranch(log *log.Logger, input []string) [][32]byte 
 }
 
 func (cs *CompactSignature) ToCanonical() []byte {
-	rInt := new(big.Int).SetBytes(cs.R[:])
+	r := cs.R.Bytes()
 
 	// Mask to obtain the lowest 255 bits for s
-	sMask := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 255), big.NewInt(1))
-	s := new(big.Int).And(cs.Vs.Big(), sMask)
+	sMask := big.NewInt(0).Sub(big.NewInt(0).Lsh(big.NewInt(1), 255), big.NewInt(1))
+	sInt := big.NewInt(0).And(cs.Vs.Big(), sMask)
+
+	s := sInt.FillBytes(make([]byte, 32))
 
 	// Shift right to obtain yParity (the 256th bit)
-	yParity := new(big.Int).Rsh(cs.Vs.Big(), 255).Bytes()
+	yParity := big.NewInt(0).Rsh(cs.Vs.Big(), 255).Bytes()
 
 	if len(yParity) == 0 {
 		yParity = []byte{0}
 	}
 
-	yParity[0] += 27
-	return append(rInt.Bytes(), append(s.Bytes(), yParity[0])...)
+	// yParity[0] += 27
+	return append(r, append(s, yParity[0])...)
 }
