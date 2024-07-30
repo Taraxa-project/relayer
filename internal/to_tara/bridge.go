@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math/big"
 	"relayer/bindings/BridgeBase"
-	"relayer/internal/state"
+	"relayer/internal/proof"
 	"runtime/debug"
 	"strings"
 
@@ -147,7 +147,7 @@ func (r *Relayer) applyStates() {
 	}
 	epoch := big.NewInt(0).Add(lastAppliedEpoch, big.NewInt(1))
 	for ; epoch.Cmp(lastClientEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
-		state, err := state.GetStateWithProof(r, r.log, epoch, nil)
+		state, err := proof.GetStateWithProof(r, r.log, epoch, nil)
 		if err != nil {
 			r.log.WithError(err).Fatal("Failed to get state with proof")
 		}

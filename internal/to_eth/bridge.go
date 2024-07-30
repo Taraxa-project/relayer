@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"relayer/bindings/BridgeBase"
 
-	"relayer/internal/state"
+	"relayer/internal/proof"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	log "github.com/sirupsen/logrus"
@@ -50,7 +50,7 @@ func (r *Relayer) bridgeState() {
 
 	for ; epoch.Cmp(lastFinalizedEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
 		r.log.WithField("epoch", epoch).Info("Applying state")
-		taraStateWithProof, err := state.GetStateWithProof(r, r.log, epoch, nil)
+		taraStateWithProof, err := proof.GetStateWithProof(r, r.log, epoch, nil)
 		if err != nil {
 			r.log.WithError(err).WithField("epoch", epoch).Fatal("getStateWithProof")
 		}

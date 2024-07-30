@@ -9,6 +9,7 @@ import (
 	"relayer/bindings/TaraClient"
 	"relayer/internal/common"
 	"relayer/internal/logging"
+	"relayer/internal/state"
 	"relayer/internal/types"
 
 	log "github.com/sirupsen/logrus"
@@ -44,6 +45,7 @@ type Relayer struct {
 	latestAppliedEpoch  *big.Int
 	log                 *log.Logger
 	pillarBlocksInBatch int
+	StakeState          *state.State
 }
 
 // NewRelayer creates a new Relayer instance
@@ -71,6 +73,18 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		return nil, fmt.Errorf("failed to instantiate the EthBridge contract: %v", err)
 	}
 
+	totalWeight, err := taraClientOnEth.TotalWeight(nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get total stake: %v", err)
+	}
+	state := state.NewState(int32(totalWeight.Int64()), func(a eth_common.Address) int32 {
+		votes, err := taraClientOnEth.ValidatorVoteCounts(nil, a)
+		if err != nil {
+			return 0
+		}
+		return int32(votes.Int64())
+	})
+
 	return &Relayer{
 		taraxaClient:        taraxaClient,
 		taraxaNodeConfig:    taraConfig,
@@ -82,6 +96,7 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 		bridgeContractAddr:  cfg.EthBridgeAddr,
 		log:                 relayerLogger,
 		pillarBlocksInBatch: cfg.PillarBlocksInBatch,
+		StakeState:          state,
 	}, nil
 }
 

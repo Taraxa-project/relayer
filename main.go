@@ -127,8 +127,8 @@ func main() {
 		os.Exit(0)
 	}()
 
-	taraRelayer.Start(ctx)
-	ethRelayer.Start(ctx)
+	go taraRelayer.Start(ctx)
+	go ethRelayer.Start(ctx)
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
 }

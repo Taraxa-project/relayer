@@ -1,50 +1,108 @@
 package state
 
 import (
-	"math/big"
-	"relayer/bindings/BridgeBase"
+	"relayer/bindings/TaraClient"
+	relayer_common "relayer/internal/common"
+	"relayer/internal/types"
 
-	log "github.com/sirupsen/logrus"
+	"sort"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
-// BlockchainClient defines the interface for blockchain operations required by getStateWithProof.
-type BlockchainClient interface {
-	LatestBlockNumber() (*big.Int, error)                                                  // Returns the block number
-	GetStateWithProof(opts *bind.CallOpts) (BridgeBase.SharedStructsStateWithProof, error) // Gets the state with proof
-	FinalizationInterval() *big.Int                                                        // Gets the finalization interval
+type State struct {
+	stakes          map[common.Address]int32
+	latestPbftBlock uint64
+	totalWeight     int32
+	stakeGetter     func(common.Address) int32
 }
 
-// getStateWithProof fetches the state with proof for a given epoch and block number using the provided client.
-func GetStateWithProof(client BlockchainClient, logger *log.Logger, epoch *big.Int, block_num *big.Int) (*BridgeBase.SharedStructsStateWithProof, error) {
-	if block_num == nil {
-		block, err := client.LatestBlockNumber()
-		if err != nil || block == nil {
-			logger.WithField("block", block).WithError(err).Fatal("BlockByNumber")
+func NewState(totalWeight int32, getter func(common.Address) int32) *State {
+	return &State{
+		stakes:      make(map[common.Address]int32),
+		totalWeight: totalWeight,
+		stakeGetter: getter,
+	}
+}
+
+func (s *State) initAddressStake(address common.Address) {
+	if _, ok := s.stakes[address]; !ok {
+		s.stakes[address] = s.stakeGetter(address)
+	}
+}
+
+func (s *State) GetStake(address common.Address) int32 {
+	s.initAddressStake(address)
+	return s.stakes[address]
+}
+
+func (s *State) UpdateStake(address common.Address, stake int32) {
+	s.initAddressStake(address)
+	s.stakes[address] += stake
+	s.totalWeight += stake
+}
+
+func (s *State) UpdateState(block *types.PillarBlock) {
+	if s.latestPbftBlock > uint64(block.PbftPeriod) {
+		return
+	}
+	s.latestPbftBlock = uint64(block.PbftPeriod)
+	for _, change := range block.VoteCountsChanges {
+		s.UpdateStake(change.Address, change.Value)
+	}
+}
+
+type AccountWithSignature struct {
+	Address   *common.Address
+	Signature types.CompactSignature
+}
+
+func ConvertToSortedSignatures(signatures []types.CompactSignature) []TaraClient.CompactSignature {
+	sort.Slice(signatures, func(i, j int) bool { return signatures[i].R.Cmp(signatures[j].R) > 0 })
+
+	tcSignatures := make([]TaraClient.CompactSignature, len(signatures))
+	for i, signature := range signatures {
+		tcSignatures[i] = TaraClient.CompactSignature{R: signature.R, Vs: signature.Vs}
+	}
+	return tcSignatures
+}
+
+func (s *State) ReduceSignatures(block *types.PillarBlockData) ([]TaraClient.CompactSignature, error) {
+	var sigsStake int32
+	accounts := make([]AccountWithSignature, 0, len(block.Signatures))
+	pvh := block.GetVoteHash()
+	for _, signature := range block.Signatures {
+		pubKey, err := crypto.Ecrecover(pvh[:], signature.ToCanonical())
+		if err != nil {
 			return nil, err
 		}
-		block_num = block
-		logger.WithField("block", block_num).Info("BlockByNumber")
-	}
-	opts := bind.CallOpts{BlockNumber: block_num}
+		addr := relayer_common.PubkeyToAddress(pubKey)
 
-	stateWithProof, err := client.GetStateWithProof(&opts)
-	logger.WithFields(log.Fields{"state": stateWithProof, "epoch": epoch, "opts": opts}).Info("GetStateWithProof")
-	if err != nil {
-		logger.WithError(err).Error("GetStateWithProof")
-		return nil, err
+		accounts = append(accounts, AccountWithSignature{Address: &addr, Signature: signature})
+		sigsStake += s.GetStake(addr)
 	}
 
-	// TODO: implement some binary search?
-	interval := client.FinalizationInterval()
-	if epoch == nil || epoch.Cmp(stateWithProof.State.Epoch) == 0 {
-		return &stateWithProof, nil
+	threshold := s.totalWeight/2 + 1
+
+	if sigsStake < threshold {
+		panic("Not enough stake to reduce signatures")
 	}
 
-	if stateWithProof.State.Epoch.Cmp(epoch) > 0 {
-		return GetStateWithProof(client, logger, epoch, block_num.Sub(block_num, interval))
+	if sigsStake == threshold {
+		return ConvertToSortedSignatures(block.Signatures), nil
 	}
 
-	return GetStateWithProof(client, logger, epoch, block_num.Add(block_num, interval))
+	sort.Slice(accounts, func(i, j int) bool { return s.stakes[*accounts[i].Address] > s.stakes[*accounts[j].Address] })
+
+	var reducedSignatures []types.CompactSignature
+	for _, acc := range accounts {
+		threshold -= s.stakes[*acc.Address]
+		reducedSignatures = append(reducedSignatures, acc.Signature)
+		if threshold <= 0 {
+			break
+		}
+	}
+
+	return ConvertToSortedSignatures(reducedSignatures), nil
 }
