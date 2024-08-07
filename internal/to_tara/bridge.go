@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/ethclient/gethclient"
 	"github.com/sirupsen/logrus"
 )
 
@@ -50,9 +49,7 @@ func (r *Relayer) getDecodedProofs(epoch, block *big.Int) (accountProof [][]byte
 
 	r.log.WithFields(logrus.Fields{"epoch": epoch, "block": block}).Debug("Getting proof")
 
-	client := gethclient.New(r.ethClient.Client())
-
-	root, err := client.GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, block)
+	root, err := r.ethClient.GetGethClient().GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, block)
 	if err != nil {
 		r.log.WithError(err).Fatal("Failed to get proof")
 	}

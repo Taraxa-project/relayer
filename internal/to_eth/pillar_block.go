@@ -80,16 +80,16 @@ func (r *Relayer) processPillarBlocks() {
 	}
 	finalizeBlocksTx, err := r.taraClientOnEth.FinalizeBlocks(r.ethAuth, blocks, reducedSignatures)
 	if err != nil {
-		r.log.Fatal("FinalizeBlocks tx failed: ", err)
+		r.log.Fatal("TaraClient.FinalizeBlocks tx failed: ", err)
 	}
 	r.log.WithFields(logrus.Fields{"hash": finalizeBlocksTx.Hash(), "blocks_count": len(blocks), "period": period}).Info("Waiting for finalize blocks tx to be mined")
 	finalizeBlocksTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, finalizeBlocksTx)
 	if err != nil {
-		r.log.Fatal("WaitMined finalize blocks tx failed. Err: ", err)
+		r.log.Fatal("WaitMined TaraClient.FinalizeBlocks tx failed. Err: ", err)
 	}
 	// Tx failed -> status == 0
 	if finalizeBlocksTxReceipt.Status == 0 {
-		r.log.Fatal("Finalize blocks tx failed execution. Tx hash: ", finalizeBlocksTx.Hash())
+		r.log.Fatal("TaraClient.FinalizeBlocks tx failed execution. Tx hash: ", finalizeBlocksTx.Hash())
 	}
 	time.Sleep(30 * time.Second)
 	r.latestBridgeRoot = pendingBridgeRoot

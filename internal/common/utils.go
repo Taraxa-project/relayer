@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"math/big"
 
 	log "github.com/sirupsen/logrus"
 
@@ -58,11 +59,11 @@ func ConnectToChain(ctx context.Context, url string, key *ecdsa.PrivateKey) (*et
 type Clients struct {
 	TaraxaClient *ethclient.Client
 	TaraxaAuth   *bind.TransactOpts
-	EthClient    *ethclient.Client
+	EthClient    *GasLimitClient
 	EthAuth      *bind.TransactOpts
 }
 
-func CreateClients(ctx context.Context, taraUrl, ethUrl string, key *ecdsa.PrivateKey) (*Clients, error) {
+func CreateClients(ctx context.Context, taraUrl, ethUrl string, ethGasLimit *big.Int, key *ecdsa.PrivateKey) (*Clients, error) {
 	taraxaClient, taraAuth, err := ConnectToChain(ctx, taraUrl, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Taraxa network: %v", err)
@@ -75,7 +76,7 @@ func CreateClients(ctx context.Context, taraUrl, ethUrl string, key *ecdsa.Priva
 	return &Clients{
 		TaraxaClient: taraxaClient,
 		TaraxaAuth:   taraAuth,
-		EthClient:    ethClient,
+		EthClient:    NewLimitClient(ethClient, ethGasLimit),
 		EthAuth:      ethAuth,
 	}, nil
 }

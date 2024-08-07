@@ -33,7 +33,7 @@ type Relayer struct {
 	beaconNodeEndpoint        string
 	taraxaClient              *ethclient.Client
 	taraAuth                  *bind.TransactOpts
-	ethClient                 *ethclient.Client
+	ethClient                 *common.GasLimitClient
 	ethAuth                   *bind.TransactOpts
 	beaconLightClient         *BeaconLightClient.BeaconLightClient
 	ethClientContract         *EthClient.EthClient
