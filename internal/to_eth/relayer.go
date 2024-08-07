@@ -16,7 +16,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	eth_common "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type Config struct {
@@ -33,7 +32,7 @@ type Config struct {
 type Relayer struct {
 	taraxaClient        *TaraxaClientWrapper
 	taraxaNodeConfig    *types.TaraConfig
-	ethClient           *ethclient.Client
+	ethClient           *common.GasLimitClient
 	ethAuth             *bind.TransactOpts
 	ethBridge           *BridgeBase.BridgeBase
 	taraBridge          *BridgeBase.BridgeBase

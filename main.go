@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -32,6 +33,8 @@ type Config struct {
 	PrivateKey         string
 	BeaconNodeEndpoint string
 
+	EthGasPriceLimit *big.Int
+
 	PillarBlocksInBatch int
 }
 
@@ -44,6 +47,7 @@ func main() {
 	}
 
 	var log_level string
+	var ethGasPriceLimit string
 	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", os.Getenv("ETHEREUM_API_ENDPOINT"), "Ethereum API endpoint")
 	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", os.Getenv("BEACON_LIGHT_CLIENT_ADDRESS"), "Address of the BeaconLightClient contract on Taraxa chain")
 	pflag.StringVar(&config.EthClientOnTaraAddress, "eth_client_on_tara_address", os.Getenv("ETH_CLIENT_ON_TARA_ADDRESS"), "Address of the EthClient contract on Taraxa chain")
@@ -60,10 +64,23 @@ func main() {
 		log_level_env = "info"
 	}
 	pflag.StringVar(&log_level, "log_level", log_level_env, "log level. could be only [trace, debug, info, warn, error, fatal]")
+
+	ethGasPriceLimitEnv := os.Getenv("ETH_GAS_PRICE_LIMIT")
+	if ethGasPriceLimitEnv == "" {
+		// 15 Gwei
+		ethGasPriceLimitEnv = "15000000000"
+	}
+	pflag.StringVar(&ethGasPriceLimit, "eth_gas_price_limit", ethGasPriceLimitEnv, "Eth gas price limit")
+
 	pflag.Parse()
 
 	data_dir := "./"
 	log := logging.MakeLogger("main", filepath.Join(data_dir, "logs", "main.log"), log_level)
+	var success bool
+	config.EthGasPriceLimit, success = new(big.Int).SetString(ethGasPriceLimit, 0)
+	if !success {
+		log.WithField("eth_gas_price_limit", ethGasPriceLimit).Warn("Failed to convert eth gas price limit to big int")
+	}
 
 	log.WithField("config", config).Info("Starting relayer with config")
 
@@ -74,7 +91,7 @@ func main() {
 		log.Fatalf("Failed to convert private key: %v", err)
 	}
 
-	clients, err := common.CreateClients(ctx, config.TaraxaNodeURL, config.EthereumAPIEndpoint, privateKey)
+	clients, err := common.CreateClients(ctx, config.TaraxaNodeURL, config.EthereumAPIEndpoint, config.EthGasPriceLimit, privateKey)
 	if err != nil {
 		log.Fatalf("Failed to create clients: %v", err)
 	}
