@@ -13,3 +13,4 @@ data:
   TARA_BRIDGE_ADDRESS: {{ .Values.app.taraBridgeAddress | quote }}
   TARA_CLIENT_ON_ETH_ADDRESS: {{ .Values.app.taraClientOnEthAddress | quote }}
   ETH_BRIDGE_ADDRESS: {{ .Values.app.ethBridgeAddress | quote }}
+  ETH_GAS_PRICE_LIMIT: {{ .Values.app.ethGasPriceLimit | quote }}
