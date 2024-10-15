@@ -19,6 +19,7 @@ app:
   taraBridgeAddress: ""
   taraClientOnEthAddress: ""
   ethBridgeAddress: ""
+  ethGasPriceLimit: 0
 
 persistence:
   enabled: false
