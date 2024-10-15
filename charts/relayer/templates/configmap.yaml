@@ -14,3 +14,4 @@ data:
   TARA_CLIENT_ON_ETH_ADDRESS: {{ .Values.app.taraClientOnEthAddress | quote }}
   ETH_BRIDGE_ADDRESS: {{ .Values.app.ethBridgeAddress | quote }}
   ETH_GAS_PRICE_LIMIT: {{ .Values.app.ethGasPriceLimit | quote }}
+  PILLAR_BLOCKS_IN_BATCH: {{ .Values.app.pillarBlocksInBatch | quote }}

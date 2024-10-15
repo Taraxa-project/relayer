@@ -20,6 +20,7 @@ app:
   taraClientOnEthAddress: ""
   ethBridgeAddress: ""
   ethGasPriceLimit: 0
+  pillarBlocksInBatch: 20
 
 persistence:
   enabled: false
