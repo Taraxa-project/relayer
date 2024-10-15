@@ -11,6 +11,7 @@ import (
 	"relayer/internal/logging"
 	"relayer/internal/to_eth"
 	"relayer/internal/to_tara"
+	"strconv"
 	"syscall"
 
 	eth_common "github.com/ethereum/go-ethereum/common"
@@ -33,8 +34,7 @@ type Config struct {
 	PrivateKey         string
 	BeaconNodeEndpoint string
 
-	EthGasPriceLimit *big.Int
-
+	EthGasPriceLimit    *big.Int
 	PillarBlocksInBatch int
 }
 
@@ -48,6 +48,7 @@ func main() {
 
 	var log_level string
 	var ethGasPriceLimit string
+
 	pflag.StringVar(&config.EthereumAPIEndpoint, "ethereum_api_endpoint", os.Getenv("ETHEREUM_API_ENDPOINT"), "Ethereum API endpoint")
 	pflag.StringVar(&config.BeaconLightClientAddress, "beacon_light_client_address", os.Getenv("BEACON_LIGHT_CLIENT_ADDRESS"), "Address of the BeaconLightClient contract on Taraxa chain")
 	pflag.StringVar(&config.EthClientOnTaraAddress, "eth_client_on_tara_address", os.Getenv("ETH_CLIENT_ON_TARA_ADDRESS"), "Address of the EthClient contract on Taraxa chain")
@@ -57,13 +58,15 @@ func main() {
 	pflag.StringVar(&config.TaraxaNodeURL, "taraxa_node_url", os.Getenv("TARAXA_NODE_URL"), "Taraxa node URL")
 	pflag.StringVar(&config.PrivateKey, "private_key", os.Getenv("PRIVATE_KEY"), "Private key")
 	pflag.StringVar(&config.BeaconNodeEndpoint, "beacon_node_endpoint", os.Getenv("BEACON_NODE_ENDPOINT"), "Beacon node endpoint")
-	pflag.IntVar(&config.PillarBlocksInBatch, "pillar_blocks_in_batch", 20, "Number of pillar blocks to include in a batch")
 
 	log_level_env := os.Getenv("LOG_LEVEL")
 	if log_level_env == "" {
 		log_level_env = "info"
 	}
 	pflag.StringVar(&log_level, "log_level", log_level_env, "log level. could be only [trace, debug, info, warn, error, fatal]")
+
+	data_dir := "./"
+	log := logging.MakeLogger("main", filepath.Join(data_dir, "logs", "main.log"), log_level)
 
 	ethGasPriceLimitEnv := os.Getenv("ETH_GAS_PRICE_LIMIT")
 	if ethGasPriceLimitEnv == "" {
@@ -72,10 +75,19 @@ func main() {
 	}
 	pflag.StringVar(&ethGasPriceLimit, "eth_gas_price_limit", ethGasPriceLimitEnv, "Eth gas price limit")
 
+	pillarBlocksInBatchEnv := os.Getenv("PILLAR_BLOCKS_IN_BATCH")
+	if pillarBlocksInBatchEnv == "" {
+		pillarBlocksInBatchEnv = "20"
+	}
+
+	pillarBlocksInBatchDefault, err := strconv.Atoi(pillarBlocksInBatchEnv)
+	if err != nil {
+		log.WithField("pillar_blocks_in_batch", pillarBlocksInBatchEnv).Warn("Failed to convert pillar blocks in batch to int")
+	}
+	pflag.IntVar(&config.PillarBlocksInBatch, "pillar_blocks_in_batch", pillarBlocksInBatchDefault, "Number of pillar blocks to include in a batch")
+
 	pflag.Parse()
 
-	data_dir := "./"
-	log := logging.MakeLogger("main", filepath.Join(data_dir, "logs", "main.log"), log_level)
 	var success bool
 	config.EthGasPriceLimit, success = new(big.Int).SetString(ethGasPriceLimit, 0)
 	if !success {
