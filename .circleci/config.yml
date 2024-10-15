@@ -29,7 +29,6 @@ jobs:
             echo ${GCLOUD_SERVICE_KEY} | docker login -u _json_key --password-stdin https://gcr.io
 
       - setup_remote_docker:
-          version: 20.10.14
           docker_layer_caching: true
 
       - run:
