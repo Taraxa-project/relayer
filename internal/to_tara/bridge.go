@@ -18,7 +18,7 @@ import (
 func (r *Relayer) finalize() {
 	shouldFinalize, err := r.ethBridge.ShouldFinalizeEpoch(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to call ShouldFinalizeEpoch")
+		r.log.WithError(err).Panic("Failed to call ShouldFinalizeEpoch")
 	}
 	r.log.WithField("shouldFinalize", shouldFinalize).Debug("ShouldFinalizeEpoch")
 	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
@@ -34,7 +34,7 @@ func (r *Relayer) finalize() {
 		return
 	}
 	if receipt.Status != 1 {
-		r.log.WithField("status", receipt.Status).Fatal("Finalize failed")
+		r.log.WithField("status", receipt.Status).Panic("Finalize failed")
 		return
 	}
 	r.log.WithField("block", receipt.BlockNumber.Uint64()).Info("Finalized bridge on block")
@@ -43,7 +43,7 @@ func (r *Relayer) finalize() {
 func (r *Relayer) getDecodedProofs(epoch, block *big.Int) (accountProof [][]byte, rootProof [][]byte, err error) {
 	key, err := r.ethClientContract.BridgeRootKeyByEpoch(nil, epoch)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to get bridge root key")
+		r.log.WithError(err).Panic("Failed to get bridge root key")
 	}
 	strKey := "0x" + hex.EncodeToString(key[:])
 
@@ -51,11 +51,11 @@ func (r *Relayer) getDecodedProofs(epoch, block *big.Int) (accountProof [][]byte
 
 	root, err := r.ethClient.GetGethClient().GetProof(context.Background(), r.bridgeContractAddr, []string{strKey}, block)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to get proof")
+		r.log.WithError(err).Panic("Failed to get proof")
 	}
 	r.log.WithField("root", root).Debug("Got proof")
 	if len(root.StorageProof) != 1 {
-		r.log.WithField("len", len(root.StorageProof)).Fatal("Invalid storage proof length")
+		r.log.WithField("len", len(root.StorageProof)).Panic("Invalid storage proof length")
 	}
 	if root.StorageProof[0].Value.Cmp(big.NewInt(0)) == 0 {
 		err = errors.New("no value for epoch")
@@ -64,12 +64,12 @@ func (r *Relayer) getDecodedProofs(epoch, block *big.Int) (accountProof [][]byte
 
 	accountProof, err = decodeProofs(root.AccountProof)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to decode account proof")
+		r.log.WithError(err).Panic("Failed to decode account proof")
 	}
 
 	rootProof, err = decodeProofs(root.StorageProof[0].Proof)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to decode storage proof")
+		r.log.WithError(err).Panic("Failed to decode storage proof")
 	}
 	return
 }
@@ -77,11 +77,11 @@ func (r *Relayer) getDecodedProofs(epoch, block *big.Int) (accountProof [][]byte
 func (r *Relayer) processBridgeRoots() {
 	lastClientEpoch, err := r.ethClientContract.LastEpoch(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to get last epoch")
+		r.log.WithError(err).Panic("Failed to get last epoch")
 	}
 	ethFinalizedEpoch, err := r.ethBridge.FinalizedEpoch(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to get finalized epoch")
+		r.log.WithError(err).Panic("Failed to get finalized epoch")
 	}
 	if lastClientEpoch.Cmp(ethFinalizedEpoch) == 0 {
 		r.log.WithFields(logrus.Fields{"lastClientEpoch": lastClientEpoch, "ethFinalizedEpoch": ethFinalizedEpoch}).Debug("No new bridge roots to process")
@@ -89,7 +89,7 @@ func (r *Relayer) processBridgeRoots() {
 	}
 	finalizedBlock, err := r.beaconLightClient.BlockNumber(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to get finalized block")
+		r.log.WithError(err).Panic("Failed to get finalized block")
 	}
 	epoch := big.NewInt(0).Add(lastClientEpoch, big.NewInt(1))
 	for ; epoch.Cmp(ethFinalizedEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
@@ -101,14 +101,14 @@ func (r *Relayer) processBridgeRoots() {
 
 		trx, err := r.ethClientContract.ProcessBridgeRoot(r.taraAuth, accountProof, rootProof)
 		if err != nil {
-			r.log.WithError(err).Fatal("Failed to call ProcessBridgeRoot")
+			r.log.WithError(err).Panic("Failed to call ProcessBridgeRoot")
 		}
 
 		r.log.WithField("hash", trx.Hash()).Debug("ProcessBridgeRoot trx sent")
 
 		_, err = bind.WaitMined(context.Background(), r.taraxaClient, trx)
 		if err != nil {
-			r.log.Fatalf("Failed to wait for ProcessBridgeRoot: %v", err)
+			r.log.WithError(err).Panic("Failed to wait for ProcessBridgeRoot")
 		}
 
 		r.log.WithField("hash", trx.Hash()).Info("ProcessBridgeRoot trx mined")
@@ -131,11 +131,11 @@ func (r *Relayer) FinalizationInterval() *big.Int {
 func (r *Relayer) applyStates() {
 	lastClientEpoch, err := r.ethClientContract.LastEpoch(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to get finalized epoch")
+		r.log.WithError(err).Panic("Failed to get finalized epoch")
 	}
 	lastAppliedEpoch, err := r.taraBridge.AppliedEpoch(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to get last applied epoch")
+		r.log.WithError(err).Panic("Failed to get last applied epoch")
 	}
 
 	if lastAppliedEpoch.Cmp(lastClientEpoch) == 0 {
@@ -146,19 +146,19 @@ func (r *Relayer) applyStates() {
 	for ; epoch.Cmp(lastClientEpoch) <= 0; epoch.Add(epoch, big.NewInt(1)) {
 		state, err := proof.GetStateWithProof(r, r.log, epoch, nil)
 		if err != nil {
-			r.log.WithError(err).Fatal("Failed to get state with proof")
+			r.log.WithError(err).Panic("Failed to get state with proof")
 		}
 
 		trx, err := r.taraBridge.ApplyState(r.taraAuth, *state)
 		if err != nil {
 			debug.PrintStack()
-			r.log.WithError(err).Fatal("Failed to apply state")
+			r.log.WithError(err).Panic("Failed to apply state")
 		}
 		r.log.WithField("hash", trx.Hash()).Debug("Apply state trx sent")
 
 		_, err = bind.WaitMined(context.Background(), r.taraxaClient, trx)
 		if err != nil {
-			r.log.WithError(err).Fatal("Failed to wait for apply state trx")
+			r.log.WithError(err).Panic("Failed to wait for apply state trx")
 		}
 
 		r.log.WithField("hash", trx.Hash()).Info("Apply state trx mined")

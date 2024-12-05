@@ -11,6 +11,7 @@ import (
 	"relayer/internal/logging"
 	"relayer/internal/to_eth"
 	"relayer/internal/to_tara"
+	"relayer/internal/types"
 	"strconv"
 	"syscall"
 
@@ -100,12 +101,12 @@ func main() {
 
 	privateKey, err := crypto.HexToECDSA(config.PrivateKey)
 	if err != nil {
-		log.Fatalf("Failed to convert private key: %v", err)
+		log.WithError(err).Panic("Failed to convert private key")
 	}
 
 	clients, err := common.CreateClients(ctx, config.TaraxaNodeURL, config.EthereumAPIEndpoint, config.EthGasPriceLimit, privateKey)
 	if err != nil {
-		log.Fatalf("Failed to create clients: %v", err)
+		log.WithError(err).Panic("Failed to create clients")
 	}
 
 	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
@@ -141,23 +142,38 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
-	go func() {
-		<-signals
-		fmt.Println("\nReceived an interrupt, closing connection...")
-
-		// Perform cleanup
-		taraRelayer.Close()
-		ethRelayer.Close()
-
+	shutdown := func() {
 		// Additional cleanup can be done here
 		cancel() // Cancel the context to stop any ongoing operations
 
+		taraRelayer.Shutdown()
+		ethRelayer.Shutdown()
+
 		fmt.Println("Shutdown complete.")
 		os.Exit(0)
+	}
+
+	go func() {
+		<-signals
+		fmt.Println("\nReceived an interrupt")
+
+		shutdown()
 	}()
 
-	go taraRelayer.Start(ctx)
-	go ethRelayer.Start(ctx)
+	startWithRecover := func(relayer types.Relayer) {
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					shutdown()
+				}
+			}()
+			relayer.Start(ctx)
+		}()
+	}
+
+	startWithRecover(taraRelayer)
+	startWithRecover(ethRelayer)
+
 	// Keep the main goroutine running until an interrupt is received
 	<-ctx.Done()
 }

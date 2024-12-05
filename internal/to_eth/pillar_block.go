@@ -19,13 +19,13 @@ func (r *Relayer) processPillarBlocks() {
 	ficusHfBlockNum := uint64(r.taraxaNodeConfig.Hardforks.FicusHf.BlockNum)
 	currentBlockNumber, err := r.taraxaClient.BlockNumber(context.Background())
 	if err != nil {
-		r.log.WithError(err).Fatal("BlockNumber")
+		r.log.WithError(err).Panic("BlockNumber")
 	}
 	expectedLatestPillarBlockPeriod := currentBlockNumber - currentBlockNumber%pillarBlocksInterval
 
 	latestFinalizedPillarBlock, err := r.taraClientOnEth.GetFinalized(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("GetFinalizedPillarBlock")
+		r.log.WithError(err).Panic("GetFinalizedPillarBlock")
 	}
 	latestFinalizedPillarBlockPeriod := latestFinalizedPillarBlock.Block.Period.Uint64()
 
@@ -76,20 +76,20 @@ func (r *Relayer) processPillarBlocks() {
 
 	reducedSignatures, err := r.StakeState.ReduceSignatures(lastProcessedPillarBlock)
 	if err != nil {
-		r.log.WithError(err).Fatal("ReduceSignatures")
+		r.log.WithError(err).Panic("ReduceSignatures")
 	}
 	finalizeBlocksTx, err := r.taraClientOnEth.FinalizeBlocks(r.ethAuth, blocks, reducedSignatures)
 	if err != nil {
-		r.log.Fatal("TaraClient.FinalizeBlocks tx failed: ", err)
+		r.log.Panic("TaraClient.FinalizeBlocks tx failed: ", err)
 	}
 	r.log.WithFields(logrus.Fields{"hash": finalizeBlocksTx.Hash(), "blocks_count": len(blocks), "period": period}).Info("Waiting for finalize blocks tx to be mined")
 	finalizeBlocksTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, finalizeBlocksTx)
 	if err != nil {
-		r.log.Fatal("WaitMined TaraClient.FinalizeBlocks tx failed. Err: ", err)
+		r.log.Panic("WaitMined TaraClient.FinalizeBlocks tx failed. Err: ", err)
 	}
 	// Tx failed -> status == 0
 	if finalizeBlocksTxReceipt.Status == 0 {
-		r.log.Fatal("TaraClient.FinalizeBlocks tx failed execution. Tx hash: ", finalizeBlocksTx.Hash())
+		r.log.Panic("TaraClient.FinalizeBlocks tx failed execution. Tx hash: ", finalizeBlocksTx.Hash())
 	}
 	time.Sleep(30 * time.Second)
 	r.latestBridgeRoot = pendingBridgeRoot
@@ -110,13 +110,13 @@ func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
 	newPillarBlockData := make(chan *types.PillarBlockData)
 	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", "includeSignatures")
 	if err != nil {
-		r.log.WithError(err).Fatal("Failed to subscribe to new pillar block data")
+		r.log.WithError(err).Panic("Failed to subscribe to new pillar block data")
 	}
 
 	for {
 		select {
 		case err := <-sub.Err():
-			r.log.WithError(err).Fatal("Subscription error")
+			r.log.WithError(err).Panic("Subscription error")
 		case <-newPillarBlockData:
 			r.processPillarBlocks()
 		}

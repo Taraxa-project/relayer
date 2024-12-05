@@ -14,7 +14,7 @@ func (r *Relayer) GetForkVersion(state string) ([4]byte, error) {
 	var forkVersion *types.ForkVersion
 	forkVersion, err := FetchAndParseData[types.ForkVersion](url)
 	if err != nil {
-		r.log.Fatalf("Error fetching and parsing fork version: %v", err)
+		r.log.WithError(err).Panic("Error fetching and parsing fork version")
 	}
 
 	var forkVersionBytes [4]byte
@@ -32,7 +32,7 @@ func (r *Relayer) GetLightClientFinalityUpdate() (*types.LightClientFinalityUpda
 	var finalityUpdate *types.LightClientFinalityUpdate
 	finalityUpdate, err := FetchAndParseData[types.LightClientFinalityUpdate](url)
 	if err != nil {
-		r.log.Fatalf("Error fetching and parsing finality header: %v", err)
+		r.log.WithError(err).Panic("Error fetching and parsing finality header")
 	}
 
 	return finalityUpdate, nil
@@ -43,7 +43,7 @@ func (r *Relayer) GetSyncCommitteeUpdate(startPeriod, count int64) (*types.SyncC
 	var syncUpdates *[]types.SyncCommitteeUpdate
 	syncUpdates, err := FetchAndParseData[[]types.SyncCommitteeUpdate](url)
 	if err != nil {
-		r.log.Fatalf("Error fetching and parsing sync committee updates: %v", err)
+		r.log.WithError(err).Panic("Error fetching and parsing sync committee updates")
 	}
 
 	return &(*syncUpdates)[0], nil

@@ -17,19 +17,19 @@ func (r *Relayer) startEventProcessing(ctx context.Context) {
 	// Construct the request to the Ethereum 2.0 node's event stream
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/eth/v1/events?topics=finalized_checkpoint", r.beaconNodeEndpoint), nil)
 	if err != nil {
-		r.log.Fatalf("Failed to create request: %v", err)
+		r.log.WithError(err).Panic("Failed to create request")
 	}
 	req.Header.Add("accept", "text/event-stream")
 
 	// Make the request and receive the response
 	resp, err := client.Do(req)
 	if err != nil {
-		r.log.Fatalf("Failed to connect to event stream: %v", err)
+		r.log.WithError(err).Panic("Failed to connect to event stream")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		r.log.Fatalf("Failed to subscribe to events, status code: %d", resp.StatusCode)
+		r.log.WithField("statusCode", resp.StatusCode).Panic("Failed to subscribe to events")
 	}
 
 	// Assuming the use of a generic SSE client to parse the stream.

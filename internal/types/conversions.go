@@ -49,7 +49,7 @@ func StringToByteArr(hexStrings []string) ([][32]byte, error) {
 		cleanHexStr := strings.TrimPrefix(hexStr, "0x")
 		bytes, err := hex.DecodeString(cleanHexStr)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode 'FinalityBranch[%d]': %v", i, err)
+			return nil, fmt.Errorf("failed to decode 'FinalityBranch[%d]'", err)
 		}
 		if len(bytes) != 32 {
 			return nil, fmt.Errorf("decoded byte slice for 'FinalityBranch[%d]' is not 32 bytes long", i)
@@ -93,7 +93,7 @@ func (blockHeader *BeaconBlockHeader) ConvertToBeaconChainLightClientHeader(log 
 		data := ExtraData{ExtraData: blockHeader.Execution.ExtraData}
 		extraData, err := data.HashTreeRoot()
 		if err != nil {
-			log.Fatalf("Failed to hash extra data: %v", err)
+			log.WithError(err).Panic("Failed to hash extra data")
 		}
 		executionPayloadHeader.ExtraData = extraData
 	}
@@ -102,7 +102,7 @@ func (blockHeader *BeaconBlockHeader) ConvertToBeaconChainLightClientHeader(log 
 		data := LogsBloom{LogsBloom: blockHeader.Execution.LogsBloom}
 		logBloom, err := data.HashTreeRoot()
 		if err != nil {
-			log.Fatalf("Failed to hash logs bloom: %v", err)
+			log.WithError(err).Panic("Failed to hash logs bloom")
 		}
 		executionPayloadHeader.LogsBloom = logBloom
 	}
@@ -126,7 +126,7 @@ func ConvertSyncAggregateToBeaconLightClientUpdate(syncAggregate altair.SyncAggr
 	copy(bytes, syncAggregate.SyncCommitteeSignature[:])
 
 	if err := signature.Deserialize(bytes); err != nil {
-		log.Fatalf("Failed to deserialize signature: %v", err)
+		log.WithError(err).Panic("Failed to deserialize signature")
 	}
 
 	return BeaconLightClient.BeaconLightClientUpdateSyncAggregate{
@@ -142,7 +142,7 @@ func (sc *NextSyncCommittee) ConvertToSyncCommittee(log *log.Logger) BeaconLight
 	for i, pubkey := range sc.Pubkeys {
 		var key bls.PublicKey
 		if err := key.DeserializeHexStr(pubkey[2:]); err != nil {
-			log.Fatalf("Failed to deserialize pubkey: %v", err)
+			log.WithError(err).Panic("Failed to deserialize pubkey")
 		}
 		var p *bls.G1 = bls.CastFromPublicKey(&key)
 		pubkeys[i] = p.SerializeUncompressed()
@@ -152,7 +152,7 @@ func (sc *NextSyncCommittee) ConvertToSyncCommittee(log *log.Logger) BeaconLight
 
 	var key bls.PublicKey
 	if err := key.DeserializeHexStr(sc.AggregatePubkey[2:]); err != nil {
-		log.Fatalf("Failed to deserialize aggregate pubkey: %v", err)
+		log.WithError(err).Panic("Failed to deserialize aggregate pubkey")
 	}
 
 	return BeaconLightClient.BeaconChainSyncCommittee{
@@ -172,7 +172,7 @@ func ConvertNextSyncCommitteeBranch(log *log.Logger, input []string) [][32]byte 
 
 		bytes, err := hex.DecodeString(hexStr)
 		if err != nil {
-			log.Fatalf("Failed to decode hex string: %v", err)
+			log.WithError(err).Panic("Failed to decode hex string")
 		}
 
 		var byteArray [32]byte
