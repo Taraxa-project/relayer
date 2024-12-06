@@ -41,7 +41,7 @@ func (r *Relayer) bridgeState() {
 		return
 	}
 	if r.latestAppliedEpoch.Cmp(r.latestClientEpoch) == 0 {
-		r.log.WithFields(log.Fields{"r.latestAppliedEpoch": r.latestAppliedEpoch, "r.latestClientEpoch": r.latestClientEpoch}).Info("We don't have a pillar block with this epoch in the client")
+		r.log.WithFields(log.Fields{"r.latestAppliedEpoch": r.latestAppliedEpoch, "r.latestClientEpoch": r.latestClientEpoch}).Info("No pillar block with this epoch in the client")
 		return
 	}
 
@@ -58,9 +58,8 @@ func (r *Relayer) bridgeState() {
 		if err != nil {
 			r.log.WithError(err).Panic("ApplyState")
 		}
-		r.log.WithFields(log.Fields{"hash": applyStateTx.Hash()}).Debug("Apply state tx sent to eth bridge contract")
 
-		r.log.WithField("hash", applyStateTx.Hash()).Debug("Waiting for apply state tx to be mined")
+		r.log.WithFields(log.Fields{"hash": applyStateTx.Hash()}).Trace("Apply state tx sent to eth bridge contract")
 		applyStateTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, applyStateTx)
 
 		if err != nil {

@@ -62,7 +62,7 @@ func (r *Relayer) processSSEStream(stream io.ReadCloser) {
 				// If "epoch" is provided as a string, parse it to an integer
 				if epochVal, err := strconv.ParseUint(epoch, 10, 64); err == nil {
 					r.onFinalizedEpoch <- int64(epochVal)
-					r.log.WithField("epoch", epochVal).Debug("Epoch value")
+					r.log.WithField("epoch", epochVal).Trace("Epoch value")
 				} else {
 					r.log.WithError(err).Error("Error converting epoch from string to uint64")
 				}

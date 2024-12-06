@@ -44,7 +44,7 @@ func (r *Relayer) processPillarBlocks() {
 		lastProcessedPillarBlock, err = r.taraxaClient.GetPillarBlockData(period)
 		r.StakeState.UpdateState(&lastProcessedPillarBlock.PillarBlock)
 
-		r.log.WithFields(log.Fields{"block": lastProcessedPillarBlock, "period": period}).Debug("GetPillarBlockData")
+		r.log.WithFields(log.Fields{"block": lastProcessedPillarBlock, "period": period}).Trace("GetPillarBlockData")
 		if err == ethereum.NotFound {
 			r.log.WithField("period", period).Debug("Pillar block not found, probably not finalized yet")
 			break
@@ -101,7 +101,7 @@ func (r *Relayer) processPillarBlocks() {
 		r.processPillarBlocks()
 	}
 
-	r.log.Debug("All pillar blocks processed, syncing bridge state")
+	r.log.Trace("All pillar blocks processed, syncing bridge state")
 	r.bridgeState()
 }
 

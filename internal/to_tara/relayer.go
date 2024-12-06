@@ -129,7 +129,7 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
-			r.log.WithField("epoch", epoch).Debug("Processing new block for epoch")
+			r.log.WithField("epoch", epoch).Trace("Processing new block for epoch")
 			if r.currentContractSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				go r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
 			}
@@ -182,7 +182,7 @@ func (r *Relayer) checkAndFinalize() {
 		return
 	}
 
-	r.log.WithFields(log.Fields{"finalized": finalizedEpoch, "applied": appliedEpoch}).Debug("Checking if we need to finalize")
+	r.log.WithFields(log.Fields{"finalized": finalizedEpoch, "applied": appliedEpoch}).Trace("Checking if need to finalize")
 	if finalizedEpoch.Cmp(appliedEpoch) > 0 {
 		r.log.WithFields(log.Fields{"finalized": finalizedEpoch, "applied": appliedEpoch}).Debug("Finalizing ETH epoch in TARA contract")
 
