@@ -59,7 +59,7 @@ func (p *PillarBlockData) GetVoteHash() []byte {
 	}
 	packed, err := args.Pack(&vote)
 	if err != nil {
-		log.WithError(err).Fatal("failed to pack vote hash")
+		log.WithError(err).Panic("failed to pack vote hash")
 	}
 
 	vote_hash := crypto.Keccak256(packed)

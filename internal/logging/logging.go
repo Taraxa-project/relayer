@@ -71,7 +71,7 @@ func levelFromString(l string) log.Level {
 	case "fatal":
 		return log.FatalLevel
 	default:
-		log.WithField("level", l).Fatal("Incorrect log level passed. Could be: [trace, debug, info, warn, error, fatal]")
+		log.WithField("level", l).Panic("Incorrect log level passed. Could be: [trace, debug, info, warn, error, fatal]")
 	}
 	return log.InfoLevel
 }

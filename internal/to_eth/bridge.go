@@ -30,18 +30,18 @@ func (r *Relayer) FinalizationInterval() *big.Int {
 func (r *Relayer) bridgeState() {
 	lastFinalizedEpoch, err := r.taraBridge.FinalizedEpoch(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("lastFinalizedEpoch")
+		r.log.WithError(err).Panic("lastFinalizedEpoch")
 	}
 	r.latestAppliedEpoch, err = r.ethBridge.AppliedEpoch(nil)
 	if err != nil {
-		r.log.WithError(err).Fatal("lastAppliedEpoch")
+		r.log.WithError(err).Panic("lastAppliedEpoch")
 	}
 	if lastFinalizedEpoch.Cmp(r.latestAppliedEpoch) == 0 {
 		r.log.WithFields(log.Fields{"lastFinalizedEpoch": lastFinalizedEpoch, "latestAppliedEpoch": r.latestAppliedEpoch}).Debug("No new state to pass")
 		return
 	}
 	if r.latestAppliedEpoch.Cmp(r.latestClientEpoch) == 0 {
-		r.log.WithFields(log.Fields{"r.latestAppliedEpoch": r.latestAppliedEpoch, "r.latestClientEpoch": r.latestClientEpoch}).Info("We don't have a pillar block with this epoch in the client")
+		r.log.WithFields(log.Fields{"r.latestAppliedEpoch": r.latestAppliedEpoch, "r.latestClientEpoch": r.latestClientEpoch}).Info("No pillar block with this epoch in the client")
 		return
 	}
 
@@ -52,23 +52,22 @@ func (r *Relayer) bridgeState() {
 		r.log.WithField("epoch", epoch).Info("Applying state")
 		taraStateWithProof, err := proof.GetStateWithProof(r, r.log, epoch, nil)
 		if err != nil {
-			r.log.WithError(err).WithField("epoch", epoch).Fatal("getStateWithProof")
+			r.log.WithError(err).WithField("epoch", epoch).Panic("getStateWithProof")
 		}
 		applyStateTx, err := r.ethBridge.ApplyState(r.ethAuth, *taraStateWithProof)
 		if err != nil {
-			r.log.WithError(err).Fatal("ApplyState")
+			r.log.WithError(err).Panic("ApplyState")
 		}
-		r.log.WithFields(log.Fields{"hash": applyStateTx.Hash()}).Debug("Apply state tx sent to eth bridge contract")
 
-		r.log.WithField("hash", applyStateTx.Hash()).Debug("Waiting for apply state tx to be mined")
+		r.log.WithFields(log.Fields{"hash": applyStateTx.Hash()}).Trace("Apply state tx sent to eth bridge contract")
 		applyStateTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, applyStateTx)
 
 		if err != nil {
-			r.log.WithError(err).WithField("hash", applyStateTx.Hash()).Fatal("WaitMined apply state tx failed")
+			r.log.WithError(err).WithField("hash", applyStateTx.Hash()).Panic("WaitMined apply state tx failed")
 		}
 		// Tx failed -> status == 0
 		if applyStateTxReceipt.Status == 0 {
-			r.log.WithField("hash", applyStateTx.Hash()).Fatal("Apply state tx failed execution")
+			r.log.WithField("hash", applyStateTx.Hash()).Panic("Apply state tx failed execution")
 		}
 		r.log.WithField("hash", applyStateTx.Hash()).Info("Apply state tx mined")
 	}
