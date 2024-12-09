@@ -21,6 +21,9 @@ func (r *Relayer) finalize() {
 		r.log.WithError(err).Panic("Failed to call ShouldFinalizeEpoch")
 	}
 	r.log.WithField("shouldFinalize", shouldFinalize).Debug("ShouldFinalizeEpoch")
+	if !shouldFinalize {
+		return
+	}
 	trx, err := r.ethBridge.FinalizeEpoch(r.ethAuth)
 	if err != nil {
 		r.log.WithField("trx", trx).WithError(err).Info("Failed to call finalize")
