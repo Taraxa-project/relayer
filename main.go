@@ -144,10 +144,10 @@ func main() {
 
 	shutdown := func() {
 		// Additional cleanup can be done here
-		cancel() // Cancel the context to stop any ongoing operations
-
 		taraRelayer.Shutdown()
 		ethRelayer.Shutdown()
+
+		cancel() // Cancel the context to stop any ongoing operations
 
 		fmt.Println("Shutdown complete.")
 		os.Exit(0)
@@ -155,8 +155,8 @@ func main() {
 
 	go func() {
 		<-signals
-		fmt.Println("\nReceived an interrupt")
-
+		taraRelayer.SetReadyToShutdown()
+		ethRelayer.SetReadyToShutdown()
 		shutdown()
 	}()
 
@@ -164,6 +164,7 @@ func main() {
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
+					relayer.SetReadyToShutdown()
 					shutdown()
 				}
 			}()
