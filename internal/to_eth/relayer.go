@@ -11,6 +11,7 @@ import (
 	"relayer/internal/logging"
 	"relayer/internal/state"
 	"relayer/internal/types"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -45,6 +46,7 @@ type Relayer struct {
 	log                 *log.Logger
 	pillarBlocksInBatch int
 	StakeState          *state.State
+	ready_to_shutdown   bool
 }
 
 // NewRelayer creates a new Relayer instance
@@ -118,8 +120,18 @@ func (r *Relayer) Start(ctx context.Context) {
 	// check it in case we missed a state bridging and don't have a new pillar blocks to bridge
 	r.bridgeState()
 
+	r.ready_to_shutdown = true
+
 	go r.ListenForPillarBlockUpdates(ctx)
+	r.log.Info("Relayer started")
 }
 
 func (r *Relayer) Shutdown() {
+	for !r.ready_to_shutdown {
+		time.Sleep(100 * time.Millisecond)
+	}
+}
+
+func (r *Relayer) SetReadyToShutdown() {
+	r.ready_to_shutdown = true
 }

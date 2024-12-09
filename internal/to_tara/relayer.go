@@ -47,7 +47,7 @@ type Relayer struct {
 	currentCommitteePeriod    int64
 	bridgeContractAddr        eth_common.Address
 	log                       *log.Logger
-	started                   bool
+	ready_to_shutdown         bool
 }
 
 // NewRelayer creates a new Relayer instance
@@ -106,19 +106,24 @@ func (r *Relayer) Start(ctx context.Context) {
 	r.processBridgeRoots()
 	r.applyStates()
 
+	go r.startEventProcessing(ctx)
+	go r.processNewBlocks(ctx)
+
 	r.checkAndFinalize()
 	r.checkAndUpdateNextSyncCommittee(r.currentContractSyncPeriod)
 
-	r.started = true
-
-	go r.startEventProcessing(ctx)
-	go r.processNewBlocks(ctx)
+	r.ready_to_shutdown = true
+	r.log.Info("Relayer started")
 }
 
 func (r *Relayer) Shutdown() {
-	for !r.started {
+	for !r.ready_to_shutdown {
 		time.Sleep(100 * time.Millisecond)
 	}
+}
+
+func (r *Relayer) SetReadyToShutdown() {
+	r.ready_to_shutdown = true
 }
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
