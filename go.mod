@@ -42,7 +42,7 @@ require (
 	github.com/goccy/go-yaml v1.9.2 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/herumi/bls-eth-go-binary v1.35.0
+	github.com/herumi/bls-eth-go-binary v1.36.4
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
