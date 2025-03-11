@@ -128,12 +128,22 @@ func (r *Relayer) SetReadyToShutdown() {
 
 func (r *Relayer) processNewBlocks(ctx context.Context) {
 	var finalizedBlockNumber uint64
-	ticker := time.NewTicker(2 * time.Minute)
-	defer ticker.Stop()
+	mainTicker := time.NewTicker(2 * time.Minute)
+	defer mainTicker.Stop()
+
+	// Separate ticker for epoch timeout
+	epochTimeoutTicker := time.NewTicker(15 * time.Minute)
+	defer epochTimeoutTicker.Stop()
+
+	resetEpochTicker := func() {
+		epochTimeoutTicker.Stop()
+		epochTimeoutTicker = time.NewTicker(15 * time.Minute)
+	}
 
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
+			resetEpochTicker() // Reset epoch timeout ticker
 			r.log.WithField("epoch", epoch).Trace("Processing new block for epoch")
 			if r.currentContractSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				go r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
@@ -156,11 +166,14 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 				continue
 			}
 			finalizedBlockNumber = blockNumber
-		case <-ticker.C:
+		case <-mainTicker.C:
 			if finalizedBlockNumber == 0 {
 				r.log.Debug("Checking if we need to finalize")
 				go r.checkAndFinalize()
 			}
+		case <-epochTimeoutTicker.C:
+			// If this ticker fires, it means no epoch was received for 15 minutes
+			r.log.Fatal("No finalized epoch received in 15 minutes! Exiting...")
 		case period := <-r.onSyncCommitteeUpdate:
 			if period == 0 {
 				continue
