@@ -17,7 +17,11 @@ var (
 	})
 
 	args = abi.Arguments{
-		{Type: voteHash},
+		abi.Argument{
+			Name:    "",
+			Type:    voteHash,
+			Indexed: false,
+		},
 	}
 )
 
