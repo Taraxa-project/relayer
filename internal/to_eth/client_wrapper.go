@@ -5,7 +5,7 @@ import (
 
 	"relayer/internal/types"
 
-	"github.com/ethereum/go-ethereum"
+	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -14,10 +14,7 @@ type TaraxaClientWrapper struct {
 }
 
 func NewClient(sharedClient *ethclient.Client) *TaraxaClientWrapper {
-	taraxaClientWrapper := new(TaraxaClientWrapper)
-	taraxaClientWrapper.Client = sharedClient
-
-	return taraxaClientWrapper
+	return &TaraxaClientWrapper{Client: sharedClient}
 }
 
 func (t *TaraxaClientWrapper) GetPillarBlockData(period uint64) (*types.PillarBlockData, error) {

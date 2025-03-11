@@ -10,14 +10,14 @@ import (
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/ethereum/go-ethereum"
+	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 func (r *Relayer) processPillarBlocks() {
 	pillarBlocksInterval := uint64(r.taraxaNodeConfig.Hardforks.FicusHf.PillarBlocksInterval)
 	ficusHfBlockNum := uint64(r.taraxaNodeConfig.Hardforks.FicusHf.BlockNum)
-	currentBlockNumber, err := r.taraxaClient.BlockNumber(context.Background())
+	currentBlockNumber, err := r.taraxaClient.BlockNumber(context.Background()) //nolint
 	if err != nil {
 		r.log.WithError(err).Panic("BlockNumber")
 	}
