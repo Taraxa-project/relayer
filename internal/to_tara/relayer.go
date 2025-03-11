@@ -131,19 +131,15 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 	mainTicker := time.NewTicker(2 * time.Minute)
 	defer mainTicker.Stop()
 
+	const finalizationTimeout = 15 * time.Minute
 	// Separate ticker for epoch timeout
-	epochTimeoutTicker := time.NewTicker(15 * time.Minute)
+	epochTimeoutTicker := time.NewTicker(finalizationTimeout)
 	defer epochTimeoutTicker.Stop()
-
-	resetEpochTicker := func() {
-		epochTimeoutTicker.Stop()
-		epochTimeoutTicker = time.NewTicker(15 * time.Minute)
-	}
 
 	for {
 		select {
 		case epoch := <-r.onFinalizedEpoch:
-			resetEpochTicker() // Reset epoch timeout ticker
+			epochTimeoutTicker.Reset(finalizationTimeout) // Reset epoch timeout ticker
 			r.log.WithField("epoch", epoch).Trace("Processing new block for epoch")
 			if r.currentContractSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
 				go r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
