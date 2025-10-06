@@ -21,6 +21,7 @@ app:
   ethBridgeAddress: ""
   ethGasPriceLimit: 0
   pillarBlocksInBatch: 20
+  logLevel: ""
 
 persistence:
   enabled: false
