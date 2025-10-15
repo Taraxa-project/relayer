@@ -21,11 +21,11 @@ func GetStateWithProof(client BlockchainClient, logger *log.Logger, epoch *big.I
 	if block_num == nil {
 		block, err := client.LatestBlockNumber()
 		if err != nil || block == nil {
-			logger.WithField("block", block).WithError(err).Panic("BlockByNumber")
+			logger.WithField("block", block).WithError(err).Panic("LatestBlockNumber")
 			return nil, err
 		}
 		block_num = block
-		logger.WithField("block", block_num).Info("BlockByNumber")
+		logger.WithField("block", block_num).Info("LatestBlockNumber")
 	}
 	opts := bind.CallOpts{BlockNumber: block_num}
 

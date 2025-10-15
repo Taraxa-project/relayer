@@ -12,9 +12,9 @@ import (
 )
 
 func (r *Relayer) LatestBlockNumber() (*big.Int, error) {
-	block, err := r.taraxaClient.BlockByNumber(context.Background(), nil) //nolint
+	block, err := r.taraxaClient.BlockNumber(context.Background()) //nolint
 	if err == nil {
-		return block.Number(), nil
+		return big.NewInt(0).SetUint64(block), nil
 	}
 	return nil, err
 }
