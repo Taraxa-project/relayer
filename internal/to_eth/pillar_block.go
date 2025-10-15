@@ -108,7 +108,7 @@ func (r *Relayer) processPillarBlocks() {
 func (r *Relayer) ListenForPillarBlockUpdates(ctx context.Context) {
 	// Listen to new pillar block data
 	newPillarBlockData := make(chan *types.PillarBlockData)
-	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", "includeSignatures")
+	sub, err := r.taraxaClient.Client.Client().EthSubscribe(ctx, newPillarBlockData, "newPillarBlockData", true)
 	if err != nil {
 		r.log.WithError(err).Panic("Failed to subscribe to new pillar block data")
 	}
