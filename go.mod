@@ -1,9 +1,9 @@
 module relayer
 
-go 1.24.0
+go 1.25
 
 require (
-	github.com/attestantio/go-eth2-client v0.25.0
+	github.com/attestantio/go-eth2-client v0.27.2
 	github.com/ethereum/go-ethereum v1.15.5
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.3
