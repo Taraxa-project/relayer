@@ -7,23 +7,23 @@ import (
 	"relayer/bindings/BeaconLightClient"
 	"relayer/bindings/BridgeBase"
 	"relayer/bindings/EthClient"
-	"relayer/internal/common"
 	"relayer/internal/logging"
+	"relayer/internal/utils"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	eth_common "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
 	BeaconNodeEndpoint    string
-	BeaconLightClientAddr eth_common.Address
-	EthClientOnTaraAddr   eth_common.Address
-	TaraxaBridgeAddr      eth_common.Address
-	EthBridgeAddr         eth_common.Address
-	Clients               *common.Clients
+	BeaconLightClientAddr common.Address
+	EthClientOnTaraAddr   common.Address
+	TaraxaBridgeAddr      common.Address
+	EthBridgeAddr         common.Address
+	Clients               *utils.Clients
 	DataDir               string
 	LogLevel              string
 }
@@ -33,7 +33,7 @@ type Relayer struct {
 	beaconNodeEndpoint        string
 	taraxaClient              *ethclient.Client
 	taraAuth                  *bind.TransactOpts
-	ethClient                 *common.GasLimitClient
+	ethClient                 *utils.GasLimitClient
 	ethAuth                   *bind.TransactOpts
 	beaconLightClient         *BeaconLightClient.BeaconLightClient
 	ethClientContract         *EthClient.EthClient
@@ -45,7 +45,7 @@ type Relayer struct {
 	currentContractSyncPeriod int64
 	currentCommittee          *BeaconLightClient.BeaconChainSyncCommittee // This is only used for caching latest sync committee as it lasts ~27h
 	currentCommitteePeriod    int64
-	bridgeContractAddr        eth_common.Address
+	bridgeContractAddr        common.Address
 	log                       *log.Logger
 	ready_to_shutdown         bool
 }
@@ -100,7 +100,7 @@ func (r *Relayer) Start(ctx context.Context) {
 		r.log.WithError(err).Panic("Failed to get current slot from contract")
 	}
 
-	r.currentContractSyncPeriod = common.GetPeriodFromSlot(int64(slot))
+	r.currentContractSyncPeriod = utils.GetPeriodFromSlot(int64(slot))
 	r.log.WithField("BeaconPeriod", r.currentContractSyncPeriod).Info("Starting relayer")
 
 	r.processBridgeRoots()
@@ -141,8 +141,8 @@ func (r *Relayer) processNewBlocks(ctx context.Context) {
 		case epoch := <-r.onFinalizedEpoch:
 			epochTimeoutTicker.Reset(finalizationTimeout) // Reset epoch timeout ticker
 			r.log.WithField("epoch", epoch).Trace("Processing new block for epoch")
-			if r.currentContractSyncPeriod < common.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
-				go r.checkAndUpdateNextSyncCommittee(common.GetPeriodFromEpoch(epoch))
+			if r.currentContractSyncPeriod < utils.GetPeriodFromEpoch(epoch-3) { // -3 so we have new period finalized :)
+				go r.checkAndUpdateNextSyncCommittee(utils.GetPeriodFromEpoch(epoch))
 			}
 			if finalizedBlockNumber != 0 {
 				r.log.WithFields(log.Fields{"epoch": epoch, "block": finalizedBlockNumber}).Debug("Updating Beacon Light Client")

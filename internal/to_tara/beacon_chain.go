@@ -56,7 +56,7 @@ func FetchAndParseData[T any](url string) (*T, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch data: %v", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API returned non-200 status code: %d", resp.StatusCode)

@@ -7,23 +7,23 @@ import (
 	"path/filepath"
 	"relayer/bindings/BridgeBase"
 	"relayer/bindings/TaraClient"
-	"relayer/internal/common"
 	"relayer/internal/logging"
 	"relayer/internal/state"
 	"relayer/internal/types"
+	"relayer/internal/utils"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	eth_common "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Config struct {
-	TaraxaClientOnEthAddr eth_common.Address
-	TaraxaBridgeAddr      eth_common.Address
-	EthBridgeAddr         eth_common.Address
-	Clients               *common.Clients
+	TaraxaClientOnEthAddr common.Address
+	TaraxaBridgeAddr      common.Address
+	EthBridgeAddr         common.Address
+	Clients               *utils.Clients
 	DataDir               string
 	LogLevel              string
 	PillarBlocksInBatch   int
@@ -33,14 +33,14 @@ type Config struct {
 type Relayer struct {
 	taraxaClient        *TaraxaClientWrapper
 	taraxaNodeConfig    *types.TaraConfig
-	ethClient           *common.GasLimitClient
+	ethClient           *utils.GasLimitClient
 	ethAuth             *bind.TransactOpts
 	ethBridge           *BridgeBase.BridgeBase
 	taraBridge          *BridgeBase.BridgeBase
 	taraClientOnEth     *TaraClient.TaraClient
 	onFinalizedEpoch    chan int64
-	bridgeContractAddr  eth_common.Address
-	latestBridgeRoot    eth_common.Hash
+	bridgeContractAddr  common.Address
+	latestBridgeRoot    common.Hash
 	latestClientEpoch   *big.Int
 	latestAppliedEpoch  *big.Int
 	log                 *log.Logger
@@ -78,7 +78,7 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get total stake: %v", err)
 	}
-	state := state.NewState(int32(totalWeight.Int64()), func(a eth_common.Address) int32 {
+	state := state.NewState(relayerLogger, int32(totalWeight.Int64()), func(a common.Address) int32 {
 		votes, err := taraClientOnEth.ValidatorVoteCounts(nil, a)
 		if err != nil {
 			return 0

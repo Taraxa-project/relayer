@@ -7,7 +7,6 @@ import (
 	"relayer/bindings/TaraClient"
 	"relayer/internal/types"
 
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 
 	ethereum "github.com/ethereum/go-ethereum"
@@ -82,7 +81,7 @@ func (r *Relayer) processPillarBlocks() {
 	if err != nil {
 		r.log.Panic("TaraClient.FinalizeBlocks tx failed: ", err)
 	}
-	r.log.WithFields(logrus.Fields{"hash": finalizeBlocksTx.Hash(), "blocks_count": len(blocks), "period": period}).Info("Waiting for finalize blocks tx to be mined")
+	r.log.WithFields(log.Fields{"hash": finalizeBlocksTx.Hash(), "blocks_count": len(blocks), "period": period}).Info("Waiting for finalize blocks tx to be mined")
 	finalizeBlocksTxReceipt, err := bind.WaitMined(context.Background(), r.ethClient, finalizeBlocksTx)
 	if err != nil {
 		r.log.Panic("WaitMined TaraClient.FinalizeBlocks tx failed. Err: ", err)
@@ -97,7 +96,7 @@ func (r *Relayer) processPillarBlocks() {
 
 	// This means that we have more blocks to process
 	if period != expectedLatestPillarBlockPeriod {
-		r.log.WithFields(logrus.Fields{"period": period, "expectedLatest": expectedLatestPillarBlockPeriod}).Debug("Processing next batch")
+		r.log.WithFields(log.Fields{"period": period, "expectedLatest": expectedLatestPillarBlockPeriod}).Debug("Processing next batch")
 		r.processPillarBlocks()
 	}
 

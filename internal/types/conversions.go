@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"relayer/bindings/BeaconLightClient"
 	"relayer/bindings/TaraClient"
+	"relayer/internal/utils"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -144,7 +145,7 @@ func (sc *NextSyncCommittee) ConvertToSyncCommittee(log *log.Logger) BeaconLight
 		if err := key.DeserializeHexStr(pubkey[2:]); err != nil {
 			log.WithError(err).Panic("Failed to deserialize pubkey")
 		}
-		var p *bls.G1 = bls.CastFromPublicKey(&key)
+		p := bls.CastFromPublicKey(&key)
 		pubkeys[i] = p.SerializeUncompressed()
 	}
 
@@ -185,21 +186,20 @@ func ConvertNextSyncCommitteeBranch(log *log.Logger, input []string) [][32]byte 
 }
 
 func (cs *CompactSignature) ToCanonical() []byte {
-	r := cs.R.Bytes()
-
+	r := utils.BigIntToBytes32(cs.R)
 	// Mask to obtain the lowest 255 bits for s
 	sMask := big.NewInt(0).Sub(big.NewInt(0).Lsh(big.NewInt(1), 255), big.NewInt(1))
-	sInt := big.NewInt(0).And(cs.Vs.Big(), sMask)
+	sInt := big.NewInt(0).And(cs.Vs, sMask)
 
 	s := sInt.FillBytes(make([]byte, 32))
 
 	// Shift right to obtain yParity (the 256th bit)
-	yParity := big.NewInt(0).Rsh(cs.Vs.Big(), 255).Bytes()
+	yParity := big.NewInt(0).Rsh(cs.Vs, 255).Bytes()
 
 	if len(yParity) == 0 {
 		yParity = []byte{0}
 	}
 
 	// yParity[0] += 27
-	return append(r, append(s, yParity[0])...)
+	return append(r[:], append(s, yParity[0])...)
 }

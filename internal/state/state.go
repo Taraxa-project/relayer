@@ -1,9 +1,12 @@
 package state
 
 import (
+	"fmt"
 	"relayer/bindings/TaraClient"
-	relayer_common "relayer/internal/common"
 	"relayer/internal/types"
+	"relayer/internal/utils"
+
+	log "github.com/sirupsen/logrus"
 
 	"sort"
 
@@ -16,10 +19,12 @@ type State struct {
 	latestPbftBlock uint64
 	totalWeight     int32
 	stakeGetter     func(common.Address) int32
+	log             *log.Logger
 }
 
-func NewState(totalWeight int32, getter func(common.Address) int32) *State {
+func NewState(log *log.Logger, totalWeight int32, getter func(common.Address) int32) *State {
 	return &State{
+		log:         log,
 		stakes:      make(map[common.Address]int32),
 		totalWeight: totalWeight,
 		stakeGetter: getter,
@@ -63,7 +68,7 @@ func ConvertToSortedSignatures(signatures []types.CompactSignature) []TaraClient
 
 	tcSignatures := make([]TaraClient.CompactSignature, len(signatures))
 	for i, signature := range signatures {
-		tcSignatures[i] = TaraClient.CompactSignature{R: signature.R, Vs: signature.Vs}
+		tcSignatures[i] = TaraClient.CompactSignature{R: utils.BigIntToBytes32(signature.R), Vs: utils.BigIntToBytes32(signature.Vs)}
 	}
 	return tcSignatures
 }
@@ -73,20 +78,24 @@ func (s *State) ReduceSignatures(block *types.PillarBlockData) ([]TaraClient.Com
 	accounts := make([]AccountWithSignature, 0, len(block.Signatures))
 	pvh := block.GetVoteHash()
 	for _, signature := range block.Signatures {
+		fmt.Println("signature", common.Bytes2Hex(signature.ToCanonical()))
 		pubKey, err := crypto.Ecrecover(pvh[:], signature.ToCanonical())
 		if err != nil {
 			return nil, err
 		}
-		addr := relayer_common.PubkeyToAddress(pubKey)
+		addr := utils.PubkeyToAddress(pubKey)
 
 		accounts = append(accounts, AccountWithSignature{Address: &addr, Signature: signature})
-		sigsStake += s.GetStake(addr)
+		stake := s.GetStake(addr)
+		sigsStake += stake
+		s.log.WithFields(log.Fields{"addr": addr, "stake": stake, "signature": common.Bytes2Hex(signature.ToCanonical())}).Debug("Adding sig")
 	}
 
 	threshold := s.totalWeight/2 + 1
+	s.log.WithFields(log.Fields{"sigsStake": sigsStake, "threshold": threshold}).Debug("Checking if enough stake to reduce signatures")
 
 	if sigsStake < threshold {
-		panic("Not enough stake to reduce signatures")
+		s.log.Panic("Not enough stake to reduce signatures")
 	}
 
 	if sigsStake == threshold {
@@ -96,13 +105,18 @@ func (s *State) ReduceSignatures(block *types.PillarBlockData) ([]TaraClient.Com
 	sort.Slice(accounts, func(i, j int) bool { return s.stakes[*accounts[i].Address] > s.stakes[*accounts[j].Address] })
 
 	var reducedSignatures []types.CompactSignature
+	resWeight := int32(0)
 	for _, acc := range accounts {
 		threshold -= s.stakes[*acc.Address]
 		reducedSignatures = append(reducedSignatures, acc.Signature)
+		resWeight += s.stakes[*acc.Address]
 		if threshold <= 0 {
 			break
 		}
 	}
-
+	s.log.WithFields(log.Fields{"weight": sigsStake, "threshold": threshold, "resWeight": resWeight}).Debug("Reduced signatures")
+	for _, signature := range reducedSignatures {
+		fmt.Println("signature", common.Bytes2Hex(signature.ToCanonical()))
+	}
 	return ConvertToSortedSignatures(reducedSignatures), nil
 }

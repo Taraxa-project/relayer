@@ -26,7 +26,7 @@ func (r *Relayer) startEventProcessing(ctx context.Context) {
 	if err != nil {
 		r.log.WithError(err).Panic("Failed to connect to event stream")
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusOK {
 		r.log.WithField("statusCode", resp.StatusCode).Panic("Failed to subscribe to events")

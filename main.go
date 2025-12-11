@@ -7,15 +7,15 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"relayer/internal/common"
 	"relayer/internal/logging"
 	"relayer/internal/to_eth"
 	"relayer/internal/to_tara"
 	"relayer/internal/types"
+	"relayer/internal/utils"
 	"strconv"
 	"syscall"
 
-	eth_common "github.com/ethereum/go-ethereum/common"
+	common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
@@ -104,17 +104,17 @@ func main() {
 		log.WithError(err).Panic("Failed to convert private key")
 	}
 
-	clients, err := common.CreateClients(ctx, config.TaraxaNodeURL, config.EthereumAPIEndpoint, config.EthGasPriceLimit, privateKey)
+	clients, err := utils.CreateClients(ctx, config.TaraxaNodeURL, config.EthereumAPIEndpoint, config.EthGasPriceLimit, privateKey)
 	if err != nil {
 		log.WithError(err).Panic("Failed to create clients")
 	}
 
 	taraRelayer, err := to_tara.NewRelayer(&to_tara.Config{
 		BeaconNodeEndpoint:    config.BeaconNodeEndpoint,
-		BeaconLightClientAddr: eth_common.HexToAddress(config.BeaconLightClientAddress),
-		EthBridgeAddr:         eth_common.HexToAddress(config.EthBridgeAddress),
-		TaraxaBridgeAddr:      eth_common.HexToAddress(config.TaraBridgeAddress),
-		EthClientOnTaraAddr:   eth_common.HexToAddress(config.EthClientOnTaraAddress),
+		BeaconLightClientAddr: common.HexToAddress(config.BeaconLightClientAddress),
+		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
+		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
+		EthClientOnTaraAddr:   common.HexToAddress(config.EthClientOnTaraAddress),
 		Clients:               clients,
 		DataDir:               data_dir,
 		LogLevel:              log_level,
@@ -125,9 +125,9 @@ func main() {
 	}
 
 	ethRelayer, err := to_eth.NewRelayer(&to_eth.Config{
-		TaraxaClientOnEthAddr: eth_common.HexToAddress(config.TaraClientOnEthAddress),
-		TaraxaBridgeAddr:      eth_common.HexToAddress(config.TaraBridgeAddress),
-		EthBridgeAddr:         eth_common.HexToAddress(config.EthBridgeAddress),
+		TaraxaClientOnEthAddr: common.HexToAddress(config.TaraClientOnEthAddress),
+		TaraxaBridgeAddr:      common.HexToAddress(config.TaraBridgeAddress),
+		EthBridgeAddr:         common.HexToAddress(config.EthBridgeAddress),
 		Clients:               clients,
 		DataDir:               data_dir,
 		LogLevel:              log_level,
@@ -164,6 +164,7 @@ func main() {
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
+					log.WithField("r", r).Error("Recovered from panic")
 					relayer.SetReadyToShutdown()
 					shutdown()
 				}

@@ -1,7 +1,9 @@
 package types
 
 import (
+	"encoding/json"
 	"math/big"
+	"relayer/internal/utils"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,8 +33,21 @@ type VoteCountChange struct {
 }
 
 type CompactSignature struct {
-	R  common.Hash `json:"r"`
-	Vs common.Hash `json:"vs"`
+	R  *big.Int `json:"r"`
+	Vs *big.Int `json:"vs"`
+}
+
+func (cs *CompactSignature) UnmarshalJSON(data []byte) error {
+	var res map[string]string
+
+	if err := json.Unmarshal(data, &res); err != nil {
+		return err
+	}
+
+	cs.R = utils.ParseStringToBigInt(res["r"])
+	cs.Vs = utils.ParseStringToBigInt(res["vs"])
+
+	return nil
 }
 
 // PillarBlock represents a pillar block in the taraxa blockchain.

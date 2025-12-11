@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"relayer/bindings/BeaconLightClient"
-	"relayer/internal/common"
 	"relayer/internal/types"
+	"relayer/internal/utils"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/herumi/bls-eth-go-binary/bls"
@@ -25,7 +25,7 @@ func (r *Relayer) GetBeaconBlockData(epoch int64) (*BeaconLightClient.BeaconLigh
 	if err != nil {
 		return nil, err
 	}
-	syncCommitte, err := r.getSyncCommittee(common.GetPeriodFromEpoch(epoch) - 1)
+	syncCommitte, err := r.getSyncCommittee(utils.GetPeriodFromEpoch(epoch) - 1)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package common
+package utils
 
 import (
 	"context"
@@ -79,4 +79,16 @@ func CreateClients(ctx context.Context, taraUrl, ethUrl string, ethGasLimit *big
 		EthClient:    NewLimitClient(ethClient, ethGasLimit),
 		EthAuth:      ethAuth,
 	}, nil
+}
+
+func ParseStringToBigInt(v string) *big.Int {
+	a := big.NewInt(0)
+	a.SetString(v, 0)
+	return a
+}
+
+func BigIntToBytes32(v *big.Int) [32]byte {
+	var b [32]byte
+	v.FillBytes(b[:])
+	return b
 }
