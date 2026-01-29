@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type Config struct {
+type PublicConfig struct {
 	EthereumAPIEndpoint string
 
 	BeaconLightClientAddress string
@@ -32,11 +32,15 @@ type Config struct {
 	EthBridgeAddress       string
 
 	TaraxaNodeURL      string
-	PrivateKey         string
 	BeaconNodeEndpoint string
 
 	EthGasPriceLimit    *big.Int
 	PillarBlocksInBatch int
+}
+
+type Config struct {
+	PublicConfig
+	PrivateKey string
 }
 
 func main() {
@@ -95,7 +99,7 @@ func main() {
 		log.WithField("eth_gas_price_limit", ethGasPriceLimit).Warn("Failed to convert eth gas price limit to big int")
 	}
 
-	log.WithField("config", config).Info("Starting relayer with config")
+	log.WithField("config", config.PublicConfig).Info("Starting relayer with config")
 
 	ctx, cancel := context.WithCancel(context.Background())
 
