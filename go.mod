@@ -34,7 +34,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/ferranbt/fastssz v0.1.4
+	github.com/ferranbt/fastssz v1.0.0
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/goccy/go-yaml v1.9.2 // indirect
