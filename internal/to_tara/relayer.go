@@ -90,6 +90,21 @@ func NewRelayer(cfg *Config) (*Relayer, error) {
 	}, nil
 }
 
+func (r *Relayer) syncCommittee() {
+	update, err := r.GetLightClientFinalityUpdate()
+	if err != nil {
+		r.log.WithError(err).Error("Failed to get light client finality update")
+		return
+	}
+
+	finSlot := uint64(update.Data.FinalizedHeader.Beacon.Slot)
+	finPeriod := utils.GetPeriodFromSlot(int64(finSlot))
+	for finPeriod >= r.currentCommitteePeriod {
+		r.log.WithFields(log.Fields{"fin_period": finPeriod, "contractPeriod": r.currentContractSyncPeriod}).Fatal("Syncing committee")
+		r.updateSyncCommittee(r.currentCommitteePeriod)
+	}
+}
+
 func (r *Relayer) Start(ctx context.Context) {
 	r.onFinalizedEpoch = make(chan int64)
 	r.onFinalizedBlockNumber = make(chan uint64)
@@ -102,6 +117,7 @@ func (r *Relayer) Start(ctx context.Context) {
 
 	r.currentContractSyncPeriod = utils.GetPeriodFromSlot(int64(slot))
 	r.log.WithField("BeaconPeriod", r.currentContractSyncPeriod).Info("Starting relayer")
+	r.syncCommittee()
 
 	r.processBridgeRoots()
 	r.applyStates()
