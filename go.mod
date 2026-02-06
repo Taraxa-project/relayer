@@ -6,7 +6,7 @@ require (
 	github.com/attestantio/go-eth2-client v0.25.0
 	github.com/ethereum/go-ethereum v1.15.5
 	github.com/joho/godotenv v1.5.1
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/pflag v1.0.6
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
